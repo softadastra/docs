@@ -1,2 +1,4 @@
-cmd.md
+node_modules/
+.vitepress/cache/
+.vitepress/dist/
 cmd.md
