@@ -1,214 +1,561 @@
-<p align="center">
-  <img 
-    src="https://res.cloudinary.com/dwjbed2xb/image/upload/v1762624310/logo-softadastra_ksv72b.png" 
-    alt="Softadastra Logo" 
-    width="50%"
-    style="max-width:900px;border-radius:8px;"
-  />
-</p>
+# Softadastra Documentation
 
-<h1 align="center">Softadastra</h1>
+This repository contains the documentation for Softadastra.
 
-<p align="center">
-  🌍 Offline-first · Local-first · Resilient Web Runtime
-</p>
+Softadastra is a local-first and offline-first runtime foundation for building applications that keep working under real-world failure conditions.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/status-foundation%20draft-blue" />
-  <img src="https://img.shields.io/badge/focus-offline--first%20web-success" />
-  <img src="https://img.shields.io/badge/cloud-optional-lightgrey" />
-</p>
+The core idea is:
 
----
+```txt
+write locally
+persist locally
+track operation
+sync when possible
+retry when needed
+converge later
 
-## What is Softadastra?
+Softadastra is designed around one principle:
 
-**Softadastra is a foundational web runtime designed to make the web work everywhere without relying on ideal conditions.**
-It is **offline-first** and **local-first**, built around a robust **synchronization engine** (WAL, outbox, retries, conflict handling), **secure peer-to-peer transport**, and **edge nodes** for caching and store-and-forward.
+The network is an optimization.
+Local correctness comes first.
+What this documentation covers
 
-> **The cloud is optional. It is never required for correctness.**
+The documentation explains Softadastra from several levels:
 
-Softadastra is not a product it is a **foundation** on which resilient systems can be built.
+concepts  -> why Softadastra exists
+CLI       -> how to use Softadastra from the terminal
+SDK C++   -> how to use Softadastra from C++
+SDK JS    -> how to use Softadastra from JavaScript
+engine    -> how Softadastra works internally
+guides    -> how to use Softadastra in practical workflows
+reference -> quick lookup for APIs, commands, config, and errors
+releases  -> changelog and build notes
+Documentation structure
+docs/
+├── index.md
+├── what-is-softadastra.md
+├── installation.md
+├── quick-start.md
+│
+├── concepts/
+│   ├── index.md
+│   ├── offline-first.md
+│   ├── local-first.md
+│   ├── failure-model.md
+│   ├── wal.md
+│   ├── outbox.md
+│   ├── sync-engine.md
+│   └── convergence.md
+│
+├── cli/
+│   ├── index.md
+│   ├── installation.md
+│   ├── commands.md
+│   ├── interactive-mode.md
+│   ├── node.md
+│   ├── store.md
+│   ├── sync.md
+│   ├── peers.md
+│   └── reference.md
+│
+├── sdk-cpp/
+│   ├── index.md
+│   ├── installation.md
+│   ├── first-app.md
+│   ├── client.md
+│   ├── client-options.md
+│   ├── local-store.md
+│   ├── persistent-store.md
+│   ├── sync.md
+│   ├── transport.md
+│   ├── discovery.md
+│   ├── metadata.md
+│   ├── errors.md
+│   └── examples.md
+│
+├── sdk-js/
+│   ├── index.md
+│   ├── installation.md
+│   ├── first-app.md
+│   ├── client.md
+│   ├── client-options.md
+│   ├── local-store.md
+│   ├── persistent-store.md
+│   ├── sync.md
+│   ├── transport.md
+│   ├── discovery.md
+│   ├── metadata.md
+│   ├── errors.md
+│   └── examples.md
+│
+├── engine/
+│   ├── index.md
+│   ├── architecture.md
+│   ├── runtime-flow.md
+│   ├── modules.md
+│   ├── core.md
+│   ├── fs.md
+│   ├── wal.md
+│   ├── store.md
+│   ├── sync.md
+│   ├── transport.md
+│   ├── discovery.md
+│   ├── metadata.md
+│   └── cli.md
+│
+├── guides/
+│   ├── index.md
+│   ├── build-offline-first-app.md
+│   ├── run-local-node.md
+│   ├── persist-data-locally.md
+│   ├── sync-between-nodes.md
+│   ├── use-cpp-sdk-with-engine.md
+│   ├── use-js-sdk-with-engine.md
+│   └── production.md
+│
+├── reference/
+│   ├── index.md
+│   ├── cli.md
+│   ├── cpp-api.md
+│   ├── js-api.md
+│   ├── config.md
+│   └── errors.md
+│
+├── releases/
+│   ├── index.md
+│   ├── changelog.md
+│   └── builds.md
+│
+└── .vitepress/
+    ├── config.mjs
+    └── theme/
+        ├── index.js
+        └── custom.css
+Main sections
+Concepts
 
----
+The concepts section explains the mental model behind Softadastra.
 
-## Why Softadastra exists
+It covers:
 
-The modern web is built on fragile assumptions:
+offline-first
+local-first
+failure model
+WAL
+outbox
+sync engine
+convergence
 
-- permanent connectivity
-- low latency
-- centralized cloud availability
+Start here if you want to understand the principles before using the runtime.
 
-In reality, these assumptions fail not only in developing regions, but everywhere.
+CLI
 
-Softadastra starts from a different premise:
+The CLI section explains how to use Softadastra from the terminal.
 
-- networks are unreliable
-- failures are normal
-- local execution is mandatory
+It covers:
 
-Applications built on Softadastra continue to function **offline**, accept **local writes**, and **converge safely** once connectivity returns.
+softadastra status
+softadastra node info
+softadastra store put
+softadastra store get
+softadastra store remove
+softadastra sync status
+softadastra sync tick
+softadastra peers
+interactive mode
 
----
+Use this section when you want to inspect and test Softadastra locally.
 
-## What Softadastra is and is not
+SDK C++
 
-### Softadastra **is**
+The C++ SDK section explains the public C++ API.
 
-- a **foundational runtime**, not a single app
-- a system centered on **durable state & synchronization**
-- designed for **resilience by construction**
-- applicable to _all_ environments, not a niche
+It covers:
 
-### Softadastra **is not**
+Client
+ClientOptions
+local store
+persistent store
+sync
+transport
+discovery
+metadata
+errors
+examples
 
-- a frontend framework
-- a cloud-first SaaS platform
-- a degraded version of the web
+Use this section when building C++ applications with Softadastra.
 
-See explicit boundaries: [`docs/foundation/non-goals.md`](foundation/non-goals.md)
+SDK JS
 
----
+The JavaScript SDK section explains the public JavaScript API.
 
-## Architecture at a glance
+It covers:
 
-Softadastra is organized around a clear architectural center: **the sync engine**.
+Client
+ClientOptions
+local store
+persistent store
+syncStateInfo
+tick
+transport
+discovery
+metadata
+errors
+examples
 
-Four major layers work together:
+Use this section when building JavaScript or Node.js applications with Softadastra.
 
-1. **Runtime** : local execution environment
-2. **Sync Engine** : WAL, outbox, retries, conflict handling
-3. **Network** : secure P2P transport, routing, relays
-4. **Edge** : caching and store-and-forward nodes
+Engine
 
-<p align="center">
-  <img 
-    src="https://res.cloudinary.com/dwjbed2xb/image/upload/v1767929305/roadmap_lgiljy.png"
-    alt="Softadastra Architecture Overview"
-    width="90%"
-    style="max-width:1000px;border-radius:12px;"
-  />
-</p>
+The engine section explains the internal runtime architecture.
 
-Start here: [`docs/architecture/overview.md`](architecture/overview.md)
+It covers:
 
----
+core
+fs
+wal
+store
+sync
+transport
+discovery
+metadata
+cli
 
-## Ecosystem & stacks
+Use this section when contributing to Softadastra internals or understanding how the runtime is built.
 
-Softadastra is **multi-stack by design**.
+Guides
 
-Current reference stacks include:
+The guides section gives practical workflows.
 
-- **Vix.cpp** : high-performance C++ runtime (HTTP, WebSocket, P2P)
-- **Ivi.php** : optional bridge stack for adoption and integration
+It covers:
 
-Other stacks may exist, as long as they respect the same primitives.
+build an offline-first app
+run a local node
+persist data locally
+sync between nodes
+use the C++ SDK with the engine
+use the JavaScript SDK with the engine
+prepare for production
 
-See: [`docs/ecosystem/stacks.md`](ecosystem/stacks.md)
+Use this section when you want to build something end to end.
 
----
+Reference
 
-## Products
+The reference section gives compact lookup pages.
 
-Products in the Softadastra ecosystem **prove** the foundation they do not define it.
+It covers:
+
+CLI reference
+C++ API reference
+JavaScript API reference
+configuration reference
+errors reference
+
+Use this section when you already understand the model and need exact names quickly.
+
+Releases
+
+The releases section documents version changes and build verification.
+
+It covers:
+
+changelog
+builds
+release checks
+artifact verification
+
+Use this section when preparing or checking a release.
+
+Recommended reading path
+
+For new users:
+
+What is Softadastra?
+Quick Start
+Concepts
+Build an Offline-first App
+Run a Local Node
+Persist Data Locally
+Sync Between Nodes
+
+For SDK users:
+
+SDK C++
+SDK JS
+Configuration Reference
+Errors Reference
+
+For engine contributors:
+
+Engine
+Architecture
+Runtime Flow
+Modules
+
+For release work:
+
+Releases
+Changelog
+Builds
+Install dependencies
+
+From the documentation project root, install dependencies:
+
+npm install
+Run the documentation locally
+
+Start the local documentation server:
+
+npm run dev
+
+Then open the local URL printed by VitePress.
+
+If the project uses the default VitePress command, this usually serves the docs locally with hot reload.
+
+Build the documentation
+
+Build the static documentation site:
+
+npm run build
+
+For VitePress, the generated output should be:
+
+.vitepress/dist
+Preview the production build
+
+After building:
+
+npm run preview
+
+This serves the generated production output locally.
+
+Expected package scripts
+
+A typical package.json can expose:
+
+{
+  "scripts": {
+    "dev": "vitepress dev .",
+    "build": "vitepress build .",
+    "preview": "vitepress preview ."
+  }
+}
+
+If your project uses another layout, adapt the commands to the directory that contains .vitepress/.
+
+Common issue: missing package.json
+
+If you run npm run dev from the wrong directory, you may see:
+
+Could not read package.json
+
+Fix:
+
+cd /path/to/softadastra/docs
+ls package.json
+npm install
+npm run dev
+
+If package.json does not exist yet, create one for the VitePress docs project.
+
+Documentation style
+
+Each documentation page should be clear, practical, and consistent.
+
+Recommended structure:
+
+definition
+core rule
+why it exists
+usage
+examples
+expected output
+common mistakes
+summary
+next step
+
+The writing should stay focused on one idea per section.
+
+Core writing rules
+
+Use clear sentences.
+
+Prefer concrete examples.
+
+Keep local-first behavior visible.
+
+Separate responsibilities clearly:
+
+store      -> current local state
+WAL        -> durable operation history
+sync       -> propagation tracking
+transport  -> peer delivery
+discovery  -> peer finding
+metadata   -> node identity
+CLI        -> terminal interface
+SDK        -> application API
+engine     -> internal runtime modules
+
+Do not present unstable behavior as stable.
+
+If a command, option, API, or output format is experimental, say so or keep it out of the stable reference.
+
+Local-first rule
+
+Every section should preserve this idea:
+
+local work should not depend on network availability
+
+A local store operation should not require:
+
+remote server
+connected peer
+transport
+discovery
+cloud access
+
+Sync can happen later.
+
+Persistence rule
+
+When persistence is enabled:
+
+local write
+  ↓
+WAL append
+  ↓
+store apply
+  ↓
+recover later
+
+A WAL path should be:
+
+non-empty
+inside an existing directory
+writable
+stable across restarts
+unique per node
+Sync rule
+
+Sync is propagation tracking.
+
+Store      -> current local state
+Sync       -> tracks work that should be propagated
+Transport  -> sends messages to peers
+Discovery  -> finds peers
+
+A successful local write does not mean remote delivery completed.
+
+A sync failure does not mean local data disappeared.
+
+Error rule
+
+Softadastra APIs should make errors explicit.
+
+C++:
+
+auto result = client.get("app/name");
+
+if (result.is_err())
+{
+    std::cerr << result.error().message() << "\n";
+    return 1;
+}
+
+std::cout << result.value().to_string() << "\n";
+
+JavaScript:
+
+const result = await client.get("app/name");
+
+if (result.isErr()) {
+  console.error(result.error().message);
+  process.exit(1);
+}
+
+console.log(result.value().toString());
+
+CLI:
+
+error: key not found
+key: app/name
+
+The rule is:
+
+Check the result before using the value.
+Build verification
+
+Before publishing documentation, run:
+
+npm install
+npm run build
+
+Then verify that important sections exist:
+
+/
+what-is-softadastra
+installation
+quick-start
+
+/concepts/
+/cli/
+/sdk-cpp/
+/sdk-js/
+/engine/
+/guides/
+/reference/
+/releases/
+
+Also check that sidebar links match actual file names.
+
+Contributing to docs
+
+When adding a new page:
+
+Create the markdown file.
+Add it to .vitepress/config.mjs.
+Link it from the relevant section index.
+Add a next step link if it belongs to a learning path.
+Run the docs build.
 
 Example:
 
-- **Softadastra Drive** : local-first storage with resilient sync
+npm run build
 
-Products are intentionally constrained and replaceable.
+Fix broken links before publishing.
 
-See: [`docs/ecosystem/products.md`](ecosystem/products.md)
+Repository relationship
 
-## Build
+This documentation is part of the broader Softadastra ecosystem.
 
-Softadastra is an umbrella workspace that mounts its modules as Git submodules.
-You clone once, initialize submodules, then build only the modules you need.
+Related repositories can include:
 
-### Requirements
+softadastra/softadastra      -> engine
+softadastra/sdk-cpp          -> C++ SDK
+softadastra/sdk-js           -> JavaScript SDK
+softadastra/docs             -> documentation
 
-- Git
-- CMake 3.20 or newer
-- A C++20 compiler (GCC, Clang, or MSVC)
+The exact repository names may evolve, but the documentation should keep the same conceptual structure.
 
-### Quick start
+License
 
-```bash
-git clone https://github.com/softadastra/softadastra.git
-cd softadastra
-git submodule update --init --recursive
+Use the same license as the Softadastra documentation repository.
 
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
-```
+If the repository contains a LICENSE file, that file is the source of truth.
 
-### Configure modules
+Summary
 
-Modules are enabled explicitly via CMake options.
+This documentation explains Softadastra from the first concept to production-oriented usage.
 
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
-  -DSA_ENABLE_SYNC=ON \
-  -DSA_ENABLE_NET=ON \
-  -DSA_ENABLE_EDGE=OFF \
-  -DSA_ENABLE_ADAPTER_DESKTOP=OFF \
-  -DSA_ENABLE_ADAPTER_WEB=OFF \
-  -DSA_ENABLE_ADAPTER_BACKEND=OFF
-```
+The core model remains:
 
-### Build examples and tests
+write locally
+persist locally
+track operation
+sync when possible
+retry when needed
+converge later
 
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug \
-  -DSA_BUILD_EXAMPLES=ON \
-  -DSA_BUILD_TESTS=ON
+Softadastra starts with local correctness.
 
-cmake --build build -j
-ctest --test-dir build --output-on-failure
-```
-
-### Common issues
-
-Missing submodules:
-
-```bash
-git submodule update --init --recursive
-```
-
-### Clean rebuild:
-
-```bash
-rm -rf build
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
-```
-
-## Governance & roadmap
-
-Softadastra is a **long-term foundation effort**.
-
-- Roadmap: [`docs/governance/roadmap.md`](governance/roadmap.md)
-- Contributions: [`docs/governance/contribution.md`](governance/contribution.md)
-
-Architectural correctness comes before growth.
-
----
-
-## Community
-
-Softadastra values depth, clarity, and technical rigor.
-
-- Communication: [`docs/community/communication.md`](community/communication.md)
-- Events: [`docs/community/events.md`](community/events.md)
-
----
-
-## License
-
-This repository is licensed under the Apache License 2.0.
-
-```
-
-```
+The network comes later.
