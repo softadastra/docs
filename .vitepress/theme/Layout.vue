@@ -36,16 +36,9 @@ const social = [
     <template #layout-bottom>
       <footer class="sfb" role="contentinfo">
         <div class="sfb-inner">
-          <a class="sfb-brand" href="/" aria-label="Softadastra Documentation">
-            <img
-              class="sfb-logo"
-              src="/logo-softadastra.png"
-              alt="Softadastra"
-              width="28"
-              height="28"
-            />
-            <span class="sfb-name">Softadastra</span>
-          </a>
+        <a class="sfb-brand" href="/" aria-label="Softadastra Documentation">
+  <span class="sfb-name">Softadastra</span>
+</a>
 
           <nav class="sfb-nav" aria-label="Footer navigation">
             <a
@@ -220,6 +213,34 @@ const social = [
     flex-direction: column;
     gap: 8px;
     padding: 10px 20px 14px;
+    text-align: center;
+  }
+}
+@media (max-width: 820px) {
+  .sfb-inner {
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    padding: 16px 20px;
+  }
+
+  .sfb-nav {
+    display: none;
+  }
+
+  .sfb-social {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .sfb-inner {
+    display: none !important;
+  }
+
+  .sfb-copy {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 18px;
     text-align: center;
   }
 }

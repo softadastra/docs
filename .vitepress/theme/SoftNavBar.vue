@@ -537,9 +537,6 @@ onMounted(() => {
     white-space: nowrap;
   }
 }
-@media (max-width: 720px) {
-    .sd-docs-home[data-v-4b2c7573] {
-        padding: 0px 0 56px;
-    }
-}
+
+
 </style>

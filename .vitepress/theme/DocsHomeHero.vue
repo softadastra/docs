@@ -608,4 +608,11 @@ const engineLayers = [
     margin-bottom: 24px;
   }
 }
+@media (max-width: 720px) {
+  .sd-docs-home {
+    padding-top: 0 !important;
+    padding-bottom: 48px !important;
+  }
+}
+
 </style>
