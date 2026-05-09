@@ -1263,3 +1263,53 @@ body,
     margin-top: 0 !important;
   }
 }
+/* ============================================================
+   Native VitePress code blocks, Softadastra style
+   ============================================================ */
+
+.vp-doc div[class*="language-"],
+.vp-doc [class*="language-"] {
+  background: #0f151b !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 14px !important;
+  box-shadow:
+    0 14px 35px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+}
+
+.vp-doc div[class*="language-"] pre,
+.vp-doc [class*="language-"] pre {
+  background: #0f151b !important;
+  color: #d7e2ee !important;
+  padding: 15px 17px !important;
+  line-height: 1.72 !important;
+}
+
+.vp-doc div[class*="language-"] .line-numbers-wrapper,
+.vp-doc [class*="language-"] .line-numbers-wrapper {
+  background: #0f151b !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.075) !important;
+  color: rgba(215, 226, 238, 0.38) !important;
+}
+
+.vp-doc div[class*="language-"] .lang {
+  color: rgba(215, 226, 238, 0.45) !important;
+}
+
+.vp-doc [class*="language-"] > button.copy {
+  background-color: rgba(255, 255, 255, 0.055) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.vp-doc [class*="language-"] > button.copy:hover {
+  background-color: rgba(174, 185, 255, 0.15) !important;
+  border-color: rgba(174, 185, 255, 0.32) !important;
+}
+
+.vp-doc [class*="language-"] > button.copy:hover::before {
+  background-color: #aeb9ff !important;
+}
+
+.vp-doc pre::-webkit-scrollbar-thumb {
+  background: rgba(174, 185, 255, 0.34) !important;
+}
