@@ -220,7 +220,7 @@ const engineLayers = [
   min-height: calc(100vh - 64px);
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
-  padding: 96px 0 80px;
+  padding: 50px 0 80px;
   color: var(--sd-text);
   background: var(--sd-bg);
 }
