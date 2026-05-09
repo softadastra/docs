@@ -10,25 +10,27 @@ The core rule is:
 Write locally.
 Persist locally.
 Recover later.
+```
 
 Persistence is what turns a simple memory-only local store into a safer local-first runtime.
 
-What you will do
+## What you will do
 
 You will learn how to:
 
-enable WAL-backed persistence
-choose a WAL path
-create a data directory
-write local data
-read local data
-restart the runtime
-recover local state
-inspect sync state
-avoid common persistence mistakes
+- enable WAL-backed persistence
+- choose a WAL path
+- create a data directory
+- write local data
+- read local data
+- restart the runtime
+- recover local state
+- inspect sync state
+- avoid common persistence mistakes
 
 The basic flow is:
 
+```txt
 create data directory
   ↓
 enable WAL
@@ -42,35 +44,40 @@ close client
 open client again
   ↓
 recover value
-Why persistence matters
+```
+
+## Why persistence matters
 
 The first offline-first app used memory-only state.
 
 Memory-only state is useful for tests and demos, but it does not guarantee recovery after restart.
 
+```txt
 memory-only write
   ↓
 process exits
   ↓
 state may be lost
+```
 
 For real local-first applications, accepted work often needs to survive:
 
-process restart
-application crash
-machine restart
-network interruption
-sync interruption
-temporary power loss
+- process restart
+- application crash
+- machine restart
+- network interruption
+- sync interruption
+- temporary power loss
 
 This is why Softadastra uses WAL-backed persistence.
 
-What WAL means here
+## What WAL means here
 
 WAL means Write-Ahead Log.
 
 The idea is simple:
 
+```txt
 operation
   ↓
 write operation to local log
@@ -78,14 +85,18 @@ write operation to local log
 apply operation to local store
   ↓
 recover from log later
+```
 
 The WAL is the durable operation history.
 
 The store is the current local state.
 
+```txt
 WAL   -> what happened
 Store -> current value
-Persistence is still local-first
+```
+
+## Persistence is still local-first
 
 Persistence does not require a server.
 
@@ -97,6 +108,7 @@ It does not require discovery.
 
 A persistent local write is still local work:
 
+```txt
 local write
   ↓
 WAL append
@@ -104,39 +116,51 @@ WAL append
 store apply
   ↓
 sync tracking, if enabled
+```
 
 The network can come later.
 
-Create the data directory
+## Create the data directory
 
-Before using a WAL path under data/, create the directory:
+Before using a WAL path under `data/`, create the directory:
 
+```bash
 mkdir -p data
+```
 
 This matters because a missing directory can make the runtime fail to open or fail to persist data.
 
 A good WAL path is:
 
+```txt
 data/<node-id>.wal
+```
 
 Examples:
 
+```txt
 data/node-a.wal
 data/node-persistent.wal
 data/sdk-persistent-store.wal
 data/softadastra.wal
-Option A: C++ persistent app
+```
+
+## Option A: C++ persistent app
 
 Use this version if you want to persist data with the C++ SDK.
 
-Create the app
+### Create the app
+
+```bash
 mkdir softadastra-cpp-persistent-app
 cd softadastra-cpp-persistent-app
 mkdir -p data
 nano main.cpp
+```
 
 Paste this code:
 
+```cpp
 #include <iostream>
 
 #include <softadastra/sdk.hpp>
@@ -209,24 +233,34 @@ int main()
 
     return 0;
 }
-What this configuration means
+```
+
+### What this configuration means
+
+```cpp
 ClientOptions options =
     ClientOptions::persistent(
         "node-persistent",
         "data/node-persistent.wal");
+```
 
 This creates a persistent local node.
 
 The node id is:
 
+```txt
 node-persistent
+```
 
 The WAL path is:
 
+```txt
 data/node-persistent.wal
+```
 
 The write flow becomes:
 
+```txt
 client.put()
   ↓
 WAL append
@@ -234,22 +268,29 @@ WAL append
 local store apply
   ↓
 local value readable
-Run the app
+```
+
+### Run the app
 
 Build and run using your normal project setup.
 
 Expected output style:
 
+```txt
 persistent write
   key      : settings/theme
   value    : dark
   wal path : data/node-persistent.wal
   size     : 1
-Option B: JavaScript persistent app
+```
+
+## Option B: JavaScript persistent app
 
 Use this version if you want to persist data with the JavaScript SDK.
 
-Create the app
+### Create the app
+
+```bash
 mkdir softadastra-js-persistent-app
 cd softadastra-js-persistent-app
 
@@ -259,9 +300,11 @@ npm install @softadastra/sdk
 
 mkdir -p data
 nano main.js
+```
 
 Paste this code:
 
+```js
 import { Client, ClientOptions } from "@softadastra/sdk";
 
 const options = ClientOptions.persistent(
@@ -308,30 +351,41 @@ console.log(`  wal path : ${options.walPath}`);
 console.log(`  size     : ${client.size()}`);
 
 await client.close();
-Run the app
+```
+
+### Run the app
+
+```bash
 node main.js
+```
 
 Expected output:
 
+```txt
 persistent write
   key      : settings/theme
   value    : dark
   wal path : data/node-persistent.wal
   size     : 1
-Test recovery manually
+```
+
+## Test recovery manually
 
 A persistence guide should prove recovery.
 
 The next example opens a client, writes a value, closes it, opens a second client with the same WAL path, then reads the value back.
 
-C++ recovery test
+## C++ recovery test
 
 Create:
 
+```bash
 nano recovery.cpp
+```
 
 Paste this code:
 
+```cpp
 #include <iostream>
 
 #include <softadastra/sdk.hpp>
@@ -406,19 +460,26 @@ int main()
 
     return 0;
 }
+```
 
 Expected output style:
 
+```txt
 first run value written
 recovered value: Softadastra
-JavaScript recovery test
+```
+
+## JavaScript recovery test
 
 Create:
 
+```bash
 nano recovery.js
+```
 
 Paste this code:
 
+```js
 import { Client, ClientOptions } from "@softadastra/sdk";
 
 const options = ClientOptions.persistent(
@@ -475,19 +536,26 @@ options.enableDiscovery = false;
 
   await client.close();
 }
+```
 
 Run:
 
+```bash
 node recovery.js
+```
 
 Expected output:
 
+```txt
 first run value written
 recovered value: Softadastra
-What happened during recovery
+```
+
+## What happened during recovery
 
 The recovery flow is:
 
+```txt
 first runtime
   ↓
 open client
@@ -511,15 +579,17 @@ replay valid operations
 restore local store
   ↓
 get app/name
+```
 
 The value comes back because the operation history was persisted.
 
-Persistent store and sync state
+## Persistent store and sync state
 
 A persistent local write can also create sync work.
 
 C++:
 
+```cpp
 client.put("profile/name", "Ada");
 
 auto state = client.sync_state();
@@ -530,9 +600,11 @@ if (state.is_ok())
               << state.value().outbox_size
               << "\n";
 }
+```
 
 JavaScript:
 
+```js
 await client.put("profile/name", "Ada");
 
 const state = await client.syncStateInfo();
@@ -540,70 +612,87 @@ const state = await client.syncStateInfo();
 if (state.isOk()) {
   console.log(`outbox: ${state.value().outboxSize}`);
 }
+```
 
 The relationship is:
 
+```txt
 Persistence -> makes local operation recoverable
 Sync        -> tracks operation for propagation
+```
 
 A persisted operation is not automatically synchronized with a peer. Sync still needs transport, peers, and ticks to move work forward.
 
-Use the CLI to test persistence
+## Use the CLI to test persistence
 
 You can use the CLI to inspect local behavior:
 
+```bash
 softadastra status
 softadastra store put settings/theme dark
 softadastra store get settings/theme
 softadastra sync status
+```
 
 If WAL is enabled in the runtime, status may show:
 
+```txt
 WAL
   enabled  : yes
   path     : data/softadastra.wal
   durable  : yes
+```
 
 The exact output depends on your CLI implementation and runtime configuration.
 
-WAL path rules
+## WAL path rules
 
 Use one WAL path per local node.
 
 Good:
 
+```txt
 data/node-a.wal
 data/node-b.wal
 data/desktop-client.wal
+```
 
 Avoid sharing the same WAL file between unrelated local nodes:
 
+```txt
 data/shared.wal
+```
 
 A WAL path should be:
 
-non-empty
-inside an existing directory
-writable by the process
-stable across restarts
-unique per node
-not manually edited
-Why auto flush matters
+- non-empty
+- inside an existing directory
+- writable by the process
+- stable across restarts
+- unique per node
+- not manually edited
+
+## Why auto flush matters
 
 Auto flush controls how aggressively the runtime flushes WAL writes.
 
 C++:
 
+```cpp
 options.auto_flush = true;
+```
 
 JavaScript:
 
+```js
 options.autoFlush = true;
+```
 
-For normal persistent examples, use true.
+For normal persistent examples, use `true`.
 
 The safer model is:
 
+```txt
 operation accepted
   ↓
 WAL write
@@ -611,20 +700,24 @@ WAL write
 flush when configured
   ↓
 local state can be recovered
+```
 
 If flushing is relaxed, performance may improve, but durability guarantees can become weaker depending on the implementation and operating system.
 
-Persistence does not mean synchronization
+## Persistence does not mean synchronization
 
 Persistence and synchronization solve different problems.
 
+```txt
 Persistence -> can I recover local work after restart?
 Sync        -> can I propagate local work to another node?
+```
 
 A write can be persistent but not synchronized yet.
 
 Example:
 
+```txt
 local write persisted
   ↓
 peer unavailable
@@ -632,10 +725,11 @@ peer unavailable
 sync work remains pending
   ↓
 retry later
+```
 
 This is normal.
 
-Persistence does not mean conflict-free
+## Persistence does not mean conflict-free
 
 Persistence protects local operation history.
 
@@ -643,14 +737,16 @@ It does not remove the possibility of conflicts.
 
 For example:
 
+```txt
 node A writes doc/1 = local
 node B writes doc/1 = remote
 both nodes were offline
 both nodes reconnect
+```
 
 The WAL can preserve each node's local history, but the sync layer still needs deterministic conflict rules.
 
-Persistence does not replace backups
+## Persistence does not replace backups
 
 WAL-backed persistence helps local recovery.
 
@@ -658,52 +754,70 @@ It does not replace backups for important production data.
 
 For production, think about:
 
-data directory backups
-WAL file integrity
-disk monitoring
-permissions
-retention
-snapshots
-restore procedures
+- data directory backups
+- WAL file integrity
+- disk monitoring
+- permissions
+- retention
+- snapshots
+- restore procedures
 
 The production guide covers this later.
 
-Common mistakes
-Missing data directory
+## Common mistakes
+
+### Missing data directory
 
 This is a common mistake:
 
+```txt
 wal path : data/node-a.wal
 data/ directory does not exist
+```
 
 Fix:
 
+```bash
 mkdir -p data
-Empty WAL path
+```
+
+### Empty WAL path
 
 Avoid:
 
+```cpp
 options.wal_path = "";
+```
 
 Avoid:
 
+```js
 options.walPath = "";
+```
 
 Use:
 
+```txt
 data/node-a.wal
-Reusing the same WAL path for multiple nodes
+```
+
+### Reusing the same WAL path for multiple nodes
 
 Avoid:
 
+```txt
 node-a -> data/shared.wal
 node-b -> data/shared.wal
+```
 
 Use:
 
+```txt
 node-a -> data/node-a.wal
 node-b -> data/node-b.wal
-Assuming persistence means peer delivery
+```
+
+### Assuming persistence means peer delivery
 
 A recovered value only proves local recovery.
 
@@ -711,12 +825,13 @@ It does not prove that another peer received the operation.
 
 Use sync and transport guides for that.
 
-Ignoring open errors
+### Ignoring open errors
 
-Always check open().
+Always check `open()`.
 
 C++:
 
+```cpp
 auto opened = client.open();
 
 if (opened.is_err())
@@ -724,31 +839,35 @@ if (opened.is_err())
     std::cerr << opened.error().message() << "\n";
     return 1;
 }
+```
 
 JavaScript:
 
+```js
 const opened = await client.open();
 
 if (opened.isErr()) {
   console.error(opened.error().message);
   process.exit(1);
 }
+```
 
 If opening fails, persistence may not be available.
 
-What this guide proves
+## What this guide proves
 
 This guide proves that Softadastra can:
 
-write local data
-persist operation history
-close the runtime
-open the runtime again
-replay local history
-restore current local state
-keep persistence independent from transport
-keep persistence independent from discovery
-What this guide does not prove
+- write local data
+- persist operation history
+- close the runtime
+- open the runtime again
+- replay local history
+- restore current local state
+- keep persistence independent from transport
+- keep persistence independent from discovery
+
+## What this guide does not prove
 
 This guide does not prove multi-node synchronization.
 
@@ -762,12 +881,13 @@ It does not prove remote delivery.
 
 Those topics are covered in later guides.
 
-Summary
+## Summary
 
 You enabled local persistence with Softadastra.
 
 The core model is:
 
+```txt
 local write
   ↓
 WAL-backed persistence
@@ -775,11 +895,12 @@ WAL-backed persistence
 local store apply
   ↓
 recover after restart
+```
 
 The next step is to synchronize local operations between two nodes.
 
-Next step
+## Next step
 
 Continue with:
 
-Sync Between Nodes
+[Sync Between Nodes](./sync-between-nodes.md)

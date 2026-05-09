@@ -8,141 +8,161 @@ The core rule is:
 
 ```txt
 Production reliability starts with explicit local state, durable history, observable sync, and clear failure behavior.
-What you will learn
+```
+
+## What you will learn
 
 You will learn how to think about:
 
-stable node ids
-data directories
-WAL paths
-runtime configuration
-local store behavior
-sync visibility
-transport ports
-discovery behavior
-error handling
-logs
-backups
-monitoring
-deployment
-failure recovery
+- stable node ids
+- data directories
+- WAL paths
+- runtime configuration
+- local store behavior
+- sync visibility
+- transport ports
+- discovery behavior
+- error handling
+- logs
+- backups
+- monitoring
+- deployment
+- failure recovery
 
 This guide does not replace application-specific production planning. It gives the Softadastra-specific checklist you should follow before using the runtime in serious environments.
 
-Production mindset
+## Production mindset
 
 Softadastra is built for systems where failure is normal.
 
 Production usage should assume:
 
-network can fail
-peer can disappear
-transport can disconnect
-discovery can find no peers
-ACK can be delayed
-sync can be interrupted
-process can restart
-disk can fail
-configuration can be wrong
+- network can fail
+- peer can disappear
+- transport can disconnect
+- discovery can find no peers
+- ACK can be delayed
+- sync can be interrupted
+- process can restart
+- disk can fail
+- configuration can be wrong
 
 The system should not pretend those states do not exist.
 
 The production goal is not to avoid every failure. The goal is to make failures safe, visible, retryable, and recoverable.
 
-Use stable node ids
+## Use stable node ids
 
 Every production node should have a stable node id.
 
 Good examples:
 
+```txt
 edge-store-kampala-01
 warehouse-node-01
 clinic-tablet-17
 drive-client-laptop-01
 sync-agent-prod-01
+```
 
 Avoid random node ids when sync, persistence, diagnostics, or peer identity depend on them.
 
 Bad examples:
 
+```txt
 node-123-random-every-start
 test
 local
 default
+```
 
 A node id is used by:
 
-metadata
-sync operation origin
-transport messages
-discovery announcements
-CLI status
-SDK node info
-logs
-diagnostics
+- metadata
+- sync operation origin
+- transport messages
+- discovery announcements
+- CLI status
+- SDK node info
+- logs
+- diagnostics
 
 The node id should remain stable across restarts.
 
-Use one WAL path per node
+## Use one WAL path per node
 
 Each node should have its own WAL file.
 
 Good:
 
+```txt
 data/node-a.wal
 data/node-b.wal
 data/edge-store-kampala-01.wal
+```
 
 Bad:
 
+```txt
 data/shared.wal
 data/default.wal
 /tmp/softadastra.wal
+```
 
 A WAL belongs to one local runtime.
 
 Do not share one WAL path between unrelated nodes.
 
-Create and protect the data directory
+## Create and protect the data directory
 
 Before running a persistent node, create the data directory:
 
+```bash
 mkdir -p data
+```
 
 For production, prefer an explicit path outside temporary directories.
 
 Examples:
 
+```txt
 /var/lib/softadastra/node-a/
 /var/lib/softadastra/edge-store-kampala-01/
 ./data/
+```
 
 The process must have permission to read and write this directory.
 
 Check permissions:
 
+```bash
 ls -ld data
+```
 
 For a service user, make sure ownership is correct:
 
+```bash
 sudo chown -R softadastra:softadastra /var/lib/softadastra
+```
 
 The exact user depends on your deployment.
 
-Avoid temporary WAL paths
+## Avoid temporary WAL paths
 
 Do not store important WAL files in temporary directories.
 
 Avoid:
 
+```txt
 /tmp/node-a.wal
 /var/tmp/node-a.wal
+```
 
 Temporary directories can be cleaned by the system.
 
 Use a stable application data path.
 
-Enable persistence for important local data
+## Enable persistence for important local data
 
 Memory-only mode is useful for tests, demos, and temporary local tools.
 
@@ -150,24 +170,29 @@ For production local data, enable WAL-backed persistence.
 
 C++:
 
+```cpp
 ClientOptions options =
     ClientOptions::persistent(
         "edge-store-kampala-01",
         "/var/lib/softadastra/edge-store-kampala-01/node.wal");
 
 options.auto_flush = true;
+```
 
 JavaScript:
 
+```js
 const options = ClientOptions.persistent(
   "edge-store-kampala-01",
   "/var/lib/softadastra/edge-store-kampala-01/node.wal",
 );
 
 options.autoFlush = true;
+```
 
 The model is:
 
+```txt
 local write
   ↓
 WAL append
@@ -175,17 +200,23 @@ WAL append
 store apply
   ↓
 recover after restart
-Use auto flush for safer persistence
+```
+
+## Use auto flush for safer persistence
 
 For production-like usage, prefer auto flush enabled.
 
 C++:
 
+```cpp
 options.auto_flush = true;
+```
 
 JavaScript:
 
+```js
 options.autoFlush = true;
+```
 
 This favors safer durability behavior.
 
@@ -193,12 +224,13 @@ Disabling flush can reduce overhead, but it may weaken durability depending on t
 
 Use relaxed flushing only when you understand the tradeoff.
 
-Treat open errors as serious
+## Treat open errors as serious
 
-Always check open().
+Always check `open()`.
 
 C++:
 
+```cpp
 auto opened = client.open();
 
 if (opened.is_err())
@@ -209,39 +241,43 @@ if (opened.is_err())
 
     return 1;
 }
+```
 
 JavaScript:
 
+```js
 const opened = await client.open();
 
 if (opened.isErr()) {
   console.error(`open failed: ${opened.error().message}`);
   process.exit(1);
 }
+```
 
-If open() fails, the runtime may not have initialized persistence, store, sync, transport, discovery, or metadata correctly.
+If `open()` fails, the runtime may not have initialized persistence, store, sync, transport, discovery, or metadata correctly.
 
 Do not continue as if the node is healthy.
 
-Do not ignore write errors
+## Do not ignore write errors
 
 A local write can fail.
 
 Possible causes:
 
-invalid key
-invalid value
-WAL path invalid
-WAL append failed
-disk full
-permission denied
-store unavailable
-runtime not open
+- invalid key
+- invalid value
+- WAL path invalid
+- WAL append failed
+- disk full
+- permission denied
+- store unavailable
+- runtime not open
 
 Always check the result.
 
 C++:
 
+```cpp
 auto written = client.put("app/name", "Softadastra");
 
 if (written.is_err())
@@ -250,9 +286,11 @@ if (written.is_err())
     client.close();
     return 1;
 }
+```
 
 JavaScript:
 
+```js
 const written = await client.put("app/name", "Softadastra");
 
 if (written.isErr()) {
@@ -260,13 +298,15 @@ if (written.isErr()) {
   await client.close();
   process.exit(1);
 }
+```
 
 If WAL append fails, the operation should not be treated as durably accepted.
 
-Separate local success from sync success
+## Separate local success from sync success
 
 A successful local write does not mean remote delivery completed.
 
+```txt
 put succeeds
   ↓
 local state updated
@@ -274,52 +314,65 @@ local state updated
 sync work may be pending
   ↓
 peer may not have received it yet
+```
 
 Always separate these two questions:
 
+```txt
 Did the local write succeed?
 Did synchronization complete?
+```
 
-Use sync state to inspect propagation:
+Use sync state to inspect propagation.
 
 C++:
 
+```cpp
 auto state = client.sync_state();
+```
 
 JavaScript:
 
+```js
 const state = await client.syncStateInfo();
+```
 
 CLI:
 
+```bash
 softadastra sync status
-Monitor sync state
+```
+
+## Monitor sync state
 
 Production systems should make sync state visible.
 
 Important fields:
 
-outbox
-queued
-in flight
-acknowledged
-failed
-total retries
-last submitted version
-last applied remote version
+- outbox
+- queued
+- in flight
+- acknowledged
+- failed
+- total retries
+- last submitted version
+- last applied remote version
 
 A healthy offline-first system can have pending work.
 
 Pending work means:
 
+```txt
 local operations exist
   ↓
 sync has not completed delivery yet
+```
 
 Failed work requires attention.
 
 Example:
 
+```txt
 Sync status
 
   outbox       : 4
@@ -328,115 +381,141 @@ Sync status
   acknowledged : 0
   failed       : 4
   retries      : 12
+```
 
 This means local data may still be valid, but propagation failed according to the current retry policy.
 
-Make failed sync visible to users or operators
+## Make failed sync visible to users or operators
 
 A production application should not hide sync failure.
 
 The UI or logs should be able to show states like:
 
-saved locally
-waiting to sync
-syncing
-synced
-retrying
-sync failed
-conflict detected
+- saved locally
+- waiting to sync
+- syncing
+- synced
+- retrying
+- sync failed
+- conflict detected
 
 This matters because local-first does not mean invisible background magic.
 
 Users and operators should understand whether work is local only or already synchronized.
 
-Use manual ticks intentionally
+## Use manual ticks intentionally
 
 Softadastra exposes manual sync ticks because explicit synchronization is easier to test and debug.
 
 C++:
 
+```cpp
 auto tick = client.tick();
+```
 
 JavaScript:
 
+```js
 const tick = await client.tick();
+```
 
 CLI:
 
+```bash
 softadastra sync tick
+```
 
 In production, decide where ticks happen:
 
-application event loop
-background worker
-scheduled job
-CLI operation
-service loop
-manual operator action
+- application event loop
+- background worker
+- scheduled job
+- CLI operation
+- service loop
+- manual operator action
 
 The important rule is: tick behavior should be intentional, observable, and controlled.
 
-Use pruning carefully
+## Use pruning carefully
 
 Pruning removes completed sync work when it is safe.
 
 C++:
 
+```cpp
 auto tick = client.tick(true);
+```
 
 JavaScript:
 
+```js
 const tick = await client.tick({
   prune: true,
 });
+```
 
 CLI:
 
+```bash
 softadastra sync tick --prune
+```
 
 Pruning must not remove pending, queued, in-flight, or failed work unless the command explicitly supports that behavior and the operator understands the effect.
 
 The safe default is:
 
+```txt
 prune completed work only
-Configure transport ports explicitly
+```
+
+## Configure transport ports explicitly
 
 When transport is enabled, each node needs a clear host and port.
 
 C++:
 
+```cpp
 options.enable_transport = true;
 options.transport_host = "127.0.0.1";
 options.transport_port = 4041;
+```
 
 JavaScript:
 
+```js
 options.enableTransport = true;
 options.transportHost = "127.0.0.1";
 options.transportPort = 4041;
+```
 
 For local testing:
 
+```txt
 node-a -> 127.0.0.1:4041
 node-b -> 127.0.0.1:4042
+```
 
 For production, choose ports that are:
 
-documented
-not already in use
-allowed by firewall rules
-unique per local node
-monitored
+- documented
+- not already in use
+- allowed by firewall rules
+- unique per local node
+- monitored
 
 Check local ports:
 
+```bash
 ss -ltnp | grep 4041
-Treat transport as delivery, not correctness
+```
+
+## Treat transport as delivery, not correctness
 
 Transport failure should not corrupt local state.
 
 Correct behavior:
 
+```txt
 transport connect fails
   ↓
 sync work remains tracked
@@ -444,12 +523,13 @@ sync work remains tracked
 local value remains readable
   ↓
 retry later
+```
 
 Transport is only the delivery layer.
 
 It does not decide whether local data is valid.
 
-Configure discovery intentionally
+## Configure discovery intentionally
 
 Discovery is optional.
 
@@ -457,126 +537,152 @@ Enable discovery only when the runtime should find peers automatically.
 
 C++:
 
+```cpp
 options.enable_discovery = true;
 options.discovery_host = "127.0.0.1";
 options.discovery_port = 5051;
 options.discovery_broadcast_host = "127.0.0.1";
 options.discovery_broadcast_port = 5052;
+```
 
 JavaScript:
 
+```js
 options.enableDiscovery = true;
 options.discoveryHost = "127.0.0.1";
 options.discoveryPort = 5051;
 options.discoveryBroadcastHost = "127.0.0.1";
 options.discoveryBroadcastPort = 5052;
+```
 
 Production discovery needs clear decisions:
 
-which network interfaces are allowed?
-which ports are used?
-is discovery local only?
-is broadcast allowed?
-are peers manually configured instead?
-how are stale peers removed?
+- which network interfaces are allowed?
+- which ports are used?
+- is discovery local only?
+- is broadcast allowed?
+- are peers manually configured instead?
+- how are stale peers removed?
 
 No discovered peer should not break local work.
 
-Monitor peers
+## Monitor peers
 
 Use the CLI:
 
+```bash
 softadastra peers
+```
 
 Expected output style:
 
+```txt
 Peers
 
 Node ID        Host        Port    State
 node-b         127.0.0.1   4042    available
 node-c         127.0.0.1   4043    stale
+```
 
 Important peer states include:
 
-available
-connected
-stale
-expired
-faulted
-unknown
+- available
+- connected
+- stale
+- expired
+- faulted
+- unknown
 
 A faulted peer means delivery may be failing, not that local data is gone.
 
-Use metadata for diagnostics
+## Use metadata for diagnostics
 
 Metadata helps identify the local node.
 
 CLI:
 
+```bash
 softadastra node info
+```
 
 SDK C++:
 
+```cpp
 auto info = client.refresh_node_info();
+```
 
 SDK JS:
 
+```js
 const info = await client.refreshNodeInfo();
+```
 
 Metadata should expose useful fields:
 
-node id
-display name
-hostname
-operating system
-version
-uptime
-capabilities
+- node id
+- display name
+- hostname
+- operating system
+- version
+- uptime
+- capabilities
 
 This is important when debugging multi-node systems.
 
-Build production commands carefully
+## Build production commands carefully
 
 For the engine repository:
 
+```bash
 cd ~/softadastra/softadastra
+```
 
 Build:
 
+```bash
 vix build --preset release
+```
 
 If you need the CLI and node apps:
 
+```bash
 vix build --preset release -- \
   -DSOFTADASTRA_BUILD_APPS=ON \
   -DSOFTADASTRA_BUILD_CLI_APP=ON \
   -DSOFTADASTRA_BUILD_NODE_APP=ON
+```
 
 If your Vix build supports exporting the binary:
 
+```bash
 vix build --bin
+```
 
 Verify:
 
+```bash
 ./softadastra help
 ./softadastra version
 ./softadastra status
-Run as a service
+```
+
+## Run as a service
 
 For Linux deployments, run the node or application under a service manager such as systemd.
 
 A conceptual service should define:
 
-working directory
-binary path
-environment variables
-data directory
-restart policy
-service user
-logs
+- working directory
+- binary path
+- environment variables
+- data directory
+- restart policy
+- service user
+- logs
 
 Example shape:
 
+```ini
 [Unit]
 Description=Softadastra Node
 After=network.target
@@ -591,90 +697,95 @@ RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
+```
 
 Adapt paths, user, and command to your real deployment.
 
-Keep configuration explicit
+## Keep configuration explicit
 
 A production node should not depend on hidden defaults.
 
 Document:
 
-node id
-data directory
-WAL path
-transport host
-transport port
-discovery host
-discovery port
-sync retry policy
-ACK timeout
-log level
-runtime version
+- node id
+- data directory
+- WAL path
+- transport host
+- transport port
+- discovery host
+- discovery port
+- sync retry policy
+- ACK timeout
+- log level
+- runtime version
 
 Use a config file, environment variables, or deployment script depending on your application.
 
 The important point is: operators should know how the node is configured.
 
-Log important runtime events
+## Log important runtime events
 
 Production logs should make these events visible:
 
-runtime started
-runtime stopped
-client open failed
-WAL open failed
-WAL append failed
-store write failed
-sync tick result
-sync failed work
-transport start failed
-peer connection failed
-discovery start failed
-node metadata refreshed
+- runtime started
+- runtime stopped
+- client open failed
+- WAL open failed
+- WAL append failed
+- store write failed
+- sync tick result
+- sync failed work
+- transport start failed
+- peer connection failed
+- discovery start failed
+- node metadata refreshed
 
 Logs should answer:
 
-what happened?
-where did it happen?
-which node was affected?
-is local state still valid?
-can it be retried?
+- what happened?
+- where did it happen?
+- which node was affected?
+- is local state still valid?
+- can it be retried?
 
 Avoid logs that only say:
 
+```txt
 failed
 error
 unknown
-Back up local data
+```
+
+## Back up local data
 
 WAL-backed persistence helps local recovery, but it is not a full backup strategy.
 
 For important production data, plan backups for:
 
-data directory
-WAL files
-snapshots, if supported
-configuration files
-deployment metadata
+- data directory
+- WAL files
+- snapshots, if supported
+- configuration files
+- deployment metadata
 
 A basic backup policy should answer:
 
-what is backed up?
-how often?
-where is it stored?
-how is restore tested?
-how long is it retained?
-who can access it?
+- what is backed up?
+- how often?
+- where is it stored?
+- how is restore tested?
+- how long is it retained?
+- who can access it?
 
 Recovery is only real if restore has been tested.
 
-Test restart recovery
+## Test restart recovery
 
 Before production, test recovery manually.
 
 Flow:
 
+```txt
 start runtime
   ↓
 write data
@@ -684,33 +795,42 @@ stop runtime
 start runtime again
   ↓
 read data
+```
 
 CLI shape:
 
+```bash
 softadastra store put app/name Softadastra
 softadastra store get app/name
 
 # restart runtime or service
 
 softadastra store get app/name
+```
 
 SDK shape:
 
+```txt
 open client
 put value
 close client
 open client with same WAL path
 get value
+```
 
 Expected result:
 
+```txt
 recovered value is readable
-Test peer failure
+```
+
+## Test peer failure
 
 Test what happens when a peer is unavailable.
 
 Expected behavior:
 
+```txt
 peer unavailable
   ↓
 transport connection fails
@@ -718,18 +838,21 @@ transport connection fails
 sync work remains pending
   ↓
 local data remains readable
+```
 
 CLI workflow:
 
+```bash
 softadastra store put draft/1 hello
 softadastra sync status
 softadastra sync tick
 softadastra peers
 softadastra store get draft/1
+```
 
 Local read should still work.
 
-Test network interruption
+## Test network interruption
 
 For production readiness, test interrupted delivery.
 
@@ -737,6 +860,7 @@ The runtime should keep local work tracked and retry later.
 
 Expected behavior:
 
+```txt
 network interruption
   ↓
 transport fails
@@ -746,21 +870,22 @@ ACK may be missing
 operation remains tracked
   ↓
 retry later
+```
 
 The exact test method depends on your deployment.
 
 The important output is visible sync state.
 
-Test disk failure behavior
+## Test disk failure behavior
 
 Disk failure can happen.
 
 Examples:
 
-data directory missing
-permission denied
-disk full
-invalid WAL path
+- data directory missing
+- permission denied
+- disk full
+- invalid WAL path
 
 The runtime should return explicit errors.
 
@@ -768,62 +893,73 @@ It should not claim durability if WAL append failed.
 
 Test at least:
 
-missing data directory
-unwritable data directory
-invalid WAL path
-Use clear exit codes
+- missing data directory
+- unwritable data directory
+- invalid WAL path
+
+## Use clear exit codes
 
 For CLI usage, recommended exit behavior is:
 
+```txt
 0 -> command completed successfully
 1 -> command failed
 2 -> invalid usage or arguments
+```
 
 Scripts should check exit codes.
 
 Example:
 
+```bash
 softadastra status
 
 if [ "$?" -ne 0 ]; then
   echo "Softadastra status failed"
   exit 1
 fi
-Use JSON output only when stable
+```
+
+## Use JSON output only when stable
 
 If the CLI supports JSON output later:
 
+```bash
 softadastra status --json
 softadastra sync status --json
 softadastra peers --json
+```
 
 Do not rely on JSON output as a stable production API until the schema is documented and versioned.
 
 For automation, stable schemas matter.
 
-Production checklist
+## Production checklist
 
 Before production, verify:
 
-node id is stable
-WAL is enabled for important data
-WAL path is unique per node
-data directory exists
-data directory permissions are correct
-auto flush is enabled when durability matters
-open errors are handled
-write errors are handled
-sync state is observable
-failed sync work is visible
-transport ports are configured
-discovery behavior is intentional
-logs show useful runtime events
-restart recovery is tested
-peer failure is tested
-backup and restore are planned
-deployment command is documented
-runtime version is known
-Minimal production-oriented C++ shape
+- node id is stable
+- WAL is enabled for important data
+- WAL path is unique per node
+- data directory exists
+- data directory permissions are correct
+- auto flush is enabled when durability matters
+- open errors are handled
+- write errors are handled
+- sync state is observable
+- failed sync work is visible
+- transport ports are configured
+- discovery behavior is intentional
+- logs show useful runtime events
+- restart recovery is tested
+- peer failure is tested
+- backup and restore are planned
+- deployment command is documented
+- runtime version is known
+
+## Minimal production-oriented C++ shape
+
+```cpp
 #include <iostream>
 
 #include <softadastra/sdk.hpp>
@@ -881,7 +1017,11 @@ int main()
 
     return 0;
 }
-Minimal production-oriented JavaScript shape
+```
+
+## Minimal production-oriented JavaScript shape
+
+```js
 import {
   Client,
   ClientOptions,
@@ -925,54 +1065,59 @@ if (state.isOk() && state.value().hasFailed()) {
 }
 
 await client.close();
-What production should guarantee
+```
+
+## What production should guarantee
 
 A production-ready Softadastra setup should guarantee:
 
-local writes are handled explicitly
-local persistence is configured intentionally
-accepted durable work can be recovered
-sync state can be inspected
-failed sync work is visible
-transport failure does not delete local data
-discovery failure does not block local work
-operators can identify the node
-logs explain important runtime events
-restart recovery has been tested
-What production does not automatically guarantee
+- local writes are handled explicitly
+- local persistence is configured intentionally
+- accepted durable work can be recovered
+- sync state can be inspected
+- failed sync work is visible
+- transport failure does not delete local data
+- discovery failure does not block local work
+- operators can identify the node
+- logs explain important runtime events
+- restart recovery has been tested
+
+## What production does not automatically guarantee
 
 Softadastra does not automatically give you:
 
-backups
-monitoring
-alerting
-access control
-deployment automation
-schema migration strategy
-conflict-free application semantics
-infinite disk space
-perfect network delivery
-instant convergence
+- backups
+- monitoring
+- alerting
+- access control
+- deployment automation
+- schema migration strategy
+- conflict-free application semantics
+- infinite disk space
+- perfect network delivery
+- instant convergence
 
 Those are application and infrastructure responsibilities.
 
 Softadastra gives the runtime model and primitives. Production systems still need operational discipline.
 
-Summary
+## Summary
 
 Production usage should keep the Softadastra model visible:
 
+```txt
 write locally
 persist locally
 track operation
 sync when possible
 retry when needed
 converge later
+```
 
 The production goal is to make every step explicit, observable, and recoverable.
 
-Next step
+## Next step
 
 Continue with the reference section:
 
-Reference
+[Reference](../reference/)

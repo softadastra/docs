@@ -9,12 +9,13 @@ The core rule is:
 ```txt
 Sync decides what should be sent.
 Transport sends it.
+```
 
 Sync is not the network layer.
 
 Sync is the layer that keeps propagation state visible, retryable, and deterministic.
 
-Why sync exists
+## Why sync exists
 
 Softadastra is local-first.
 
@@ -22,7 +23,9 @@ A local write can happen before any peer is available.
 
 Example:
 
+```txt
 put user:1 = Gaspard
+```
 
 That value can be stored locally first.
 
@@ -30,6 +33,7 @@ But later, the operation may need to reach another node.
 
 Sync exists to track that work.
 
+```txt
 local operation
   ↓
 store apply
@@ -43,13 +47,15 @@ queue
 batch
   ↓
 transport later
+```
 
 The sync module makes delayed propagation explicit.
 
-What sync provides
+## What sync provides
 
 The sync module provides:
 
+```txt
 SyncConfig
 SyncContext
 SyncEngine
@@ -64,52 +70,63 @@ ACK tracking
 remote apply
 conflict policy
 tick
+```
 
 It allows the engine to:
 
-submit local operations
-assign sync ids
-track operation versions
-queue operations
-produce batches
-retry expired work
-track acknowledgements
-receive remote operations
-resolve conflicts
-report sync state
-What sync does not do
+- submit local operations
+- assign sync ids
+- track operation versions
+- queue operations
+- produce batches
+- retry expired work
+- track acknowledgements
+- receive remote operations
+- resolve conflicts
+- report sync state
+
+## What sync does not do
 
 sync must not:
 
-open TCP sockets
-send UDP packets
-discover peers
-own transport connections
-own CLI parsing
-format terminal output
-hide failed operations
-delete local state on network failure
+- open TCP sockets
+- send UDP packets
+- discover peers
+- own transport connections
+- own CLI parsing
+- format terminal output
+- hide failed operations
+- delete local state on network failure
 
 The rule is:
 
+```txt
 Store applies local state.
 Sync tracks propagation.
 Transport delivers messages.
 Discovery finds peers.
 Metadata describes nodes.
-Include
+```
+
+## Include
 
 Use the top-level include:
 
+```cpp
 #include <softadastra/sync/Sync.hpp>
-Module location
+```
+
+## Module location
 
 The module lives in:
 
+```txt
 modules/sync/
+```
 
 Typical structure:
 
+```txt
 modules/sync/
 ├── include/
 │   └── softadastra/sync/
@@ -127,14 +144,17 @@ modules/sync/
 ├── README.md
 ├── CMakeLists.txt
 └── CHANGELOG.md
+```
 
 The exact structure can evolve, but the responsibility should stay stable:
 
-track operation propagation and make sync state observable
-Main concepts
+track operation propagation and make sync state observable.
+
+## Main concepts
 
 The sync module is built around these concepts:
 
+```txt
 SyncConfig
 SyncContext
 SyncEngine
@@ -146,9 +166,11 @@ ACK
 Retry
 Conflict
 Tick
+```
 
 The normal flow is:
 
+```txt
 store operation
   ↓
 submit local operation
@@ -162,12 +184,15 @@ operation queued
 next batch
   ↓
 transport can send
-SyncConfig
+```
+
+## SyncConfig
 
 SyncConfig configures sync behavior.
 
 It can define:
 
+```txt
 node id
 durability mode
 auto queue behavior
@@ -177,66 +202,78 @@ retry interval
 maximum retries
 conflict policy
 batch size
+```
 
 Example:
 
+```cpp
 auto config =
     sync::core::SyncConfig::durable("node-a");
+```
 
 The node id matters because sync operations need an origin.
 
-Node id
+### Node id
 
 Every sync operation should know where it came from.
 
 Example:
 
+```txt
 node-a
+```
 
 A local operation submitted by node-a can later be identified as coming from that node.
 
 The node id is used for:
 
-operation origin
-version ownership
-conflict resolution
-diagnostics
-ACK tracking
-transport messages
+- operation origin
+- version ownership
+- conflict resolution
+- diagnostics
+- ACK tracking
+- transport messages
 
 Good node ids:
 
+```txt
 node-a
 node-local
 drive-client
 metadata-node
 desktop-1
+```
 
 Avoid empty node ids.
 
-SyncContext
+## SyncContext
 
 SyncContext wires the sync engine to the local store and configuration.
 
 Example:
 
+```cpp
 sync::core::SyncContext context{store, config};
+```
 
 A valid context needs:
 
-store engine
-sync config
-valid node id
-valid sync settings
+- store engine
+- sync config
+- valid node id
+- valid sync settings
 
 Example validation:
 
+```cpp
 if (!context.is_valid())
 {
     std::cerr << "invalid sync context\n";
     return 1;
 }
-SyncEngine
+```
+
+## SyncEngine
 
 SyncEngine is the main runtime object of the sync module.
 
@@ -244,18 +281,21 @@ It owns sync state.
 
 It can:
 
-submit local operations
-receive remote operations
-queue operations
-produce next batch
-retry expired operations
-track ACKs
-report state
+- submit local operations
+- receive remote operations
+- queue operations
+- produce next batch
+- retry expired operations
+- track ACKs
+- report state
 
 Example:
 
+```cpp
 sync::engine::SyncEngine engine{context};
-SyncOperation
+```
+
+## SyncOperation
 
 SyncOperation is the propagation unit.
 
@@ -263,6 +303,7 @@ It wraps a store operation with sync metadata.
 
 A sync operation can contain:
 
+```txt
 sync id
 origin node id
 version
@@ -270,19 +311,24 @@ store operation
 timestamp
 status
 retry count
+```
 
 The exact fields depend on the current implementation.
 
 The important point is:
 
+```txt
 store operation says what changed
 sync operation says how that change propagates
-Local operation submit flow
+```
 
-A local store operation becomes sync work through submit_local_operation.
+## Local operation submit flow
+
+A local store operation becomes sync work through `submit_local_operation`.
 
 Flow:
 
+```txt
 store Operation
   ↓
 SyncEngine::submit_local_operation
@@ -296,7 +342,11 @@ version assigned
 outbox entry inserted
   ↓
 operation queued, if auto_queue is enabled
-Basic sync example
+```
+
+## Basic sync example
+
+```cpp
 #include <filesystem>
 #include <iostream>
 
@@ -366,32 +416,37 @@ int main()
 
     return 0;
 }
-Outbox
+```
+
+## Outbox
 
 The outbox stores operations that need propagation.
 
 It can contain entries in states such as:
 
+```txt
 queued
 in-flight
 acknowledged
 failed
+```
 
 The outbox answers:
 
-what work is pending?
-what work is ready?
-what work is waiting for ACK?
-what work failed?
+- what work is pending?
+- what work is ready?
+- what work is waiting for ACK?
+- what work failed?
 
 This is why sync state is observable.
 
-Queue
+## Queue
 
 Queued operations are ready to be selected for a batch.
 
 Flow:
 
+```txt
 operation submitted
   ↓
 outbox entry created
@@ -399,10 +454,13 @@ outbox entry created
 queued
   ↓
 next_batch selects it
+```
 
 If auto_queue is disabled, operations can be submitted without being queued immediately.
 
-Manual queue example
+### Manual queue example
+
+```cpp
 #include <filesystem>
 #include <iostream>
 
@@ -467,12 +525,15 @@ int main()
 
     return 0;
 }
-Batch
+```
+
+## Batch
 
 A batch is a group of sync operations ready to send.
 
 Flow:
 
+```txt
 queued operations
   ↓
 next_batch
@@ -480,28 +541,34 @@ next_batch
 batch of envelopes
   ↓
 transport can send
+```
 
 A batch can exist even when transport is disabled.
 
 That matters because sync and transport are separate.
 
+```txt
 Sync produces batches.
 Transport delivers batches.
-SyncScheduler
+```
+
+## SyncScheduler
 
 SyncScheduler runs one sync tick.
 
 A tick can:
 
-retry expired operations
-prune acknowledged operations
-select queued operations
-produce a batch
-return tick information
+- retry expired operations
+- prune acknowledged operations
+- select queued operations
+- produce a batch
+- return tick information
 
 The scheduler is useful when the application wants a deterministic manual sync step.
 
-Scheduler tick example
+### Scheduler tick example
+
+```cpp
 #include <filesystem>
 #include <iostream>
 
@@ -560,10 +627,13 @@ int main()
 
     return 0;
 }
-Tick flow
+```
+
+## Tick flow
 
 A sync tick follows this model:
 
+```txt
 tick
   ↓
 retry expired operations
@@ -575,17 +645,18 @@ select queued operations
 produce batch
   ↓
 return tick result
+```
 
 A tick should expose:
 
-retried count
-pruned count
-batch size
-has work
+- retried count
+- pruned count
+- batch size
+- has work
 
 Manual tick behavior makes sync easier to test.
 
-AckTracker
+## AckTracker
 
 AckTracker tracks operations waiting for acknowledgement.
 
@@ -593,6 +664,7 @@ ACKs are useful when a sender needs to know that a remote node received or appli
 
 Flow:
 
+```txt
 operation sent
   ↓
 track sync id
@@ -604,7 +676,11 @@ ACK received
 mark acknowledged
   ↓
 prune later
-ACK tracker example
+```
+
+### ACK tracker example
+
+```cpp
 #include <iostream>
 
 #include <softadastra/sync/Sync.hpp>
@@ -643,10 +719,13 @@ int main()
 
     return tracker.empty() ? 0 : 1;
 }
-ACK timeout
+```
+
+## ACK timeout
 
 If an operation requires ACK and none arrives before timeout:
 
+```txt
 operation in-flight
   ↓
 ACK timeout reached
@@ -654,15 +733,17 @@ ACK timeout reached
 operation becomes retry candidate
   ↓
 retry policy decides next step
+```
 
 This keeps failed delivery visible.
 
-Retry
+## Retry
 
 Retry moves expired or failed in-flight work back into the queue when allowed.
 
 Flow:
 
+```txt
 operation sent
   ↓
 ACK timeout or delivery failure
@@ -672,20 +753,25 @@ retry count checked
 operation re-queued
   ↓
 next tick can send again
+```
 
 If retry limit is reached:
 
+```txt
 max retries reached
   ↓
 operation marked failed
   ↓
 failed_count increases
+```
 
 Failed sync does not mean local data is lost.
 
 It means propagation failed.
 
-Retry example
+### Retry example
+
+```cpp
 #include <filesystem>
 #include <iostream>
 
@@ -745,37 +831,44 @@ int main()
 
     return 0;
 }
-ConflictResolver
+```
+
+## ConflictResolver
 
 ConflictResolver decides what happens when a remote operation conflicts with local state.
 
 A conflict can happen when:
 
-local node changed a key
-remote node also changed the same key
-operations arrive in different order
-versions differ
-timestamps differ
+- local node changed a key
+- remote node also changed the same key
+- operations arrive in different order
+- versions differ
+- timestamps differ
 
 Conflict resolution must be deterministic.
 
-Conflict policy
+### Conflict policy
 
 A conflict policy defines the decision rule.
 
 Possible policies include:
 
+```txt
 LastWriteWins
 KeepLocal
 ApplyRemote
 Custom, later
+```
 
 The current implementation may support a subset.
 
 The important rule is:
 
-conflict decisions should be explicit and inspectable
-Conflict example
+> conflict decisions should be explicit and inspectable
+
+### Conflict example
+
+```cpp
 #include <iostream>
 
 #include <softadastra/store/Store.hpp>
@@ -818,12 +911,15 @@ int main()
 
     return resolution.is_valid() ? 0 : 1;
 }
-Remote apply
+```
+
+## Remote apply
 
 Remote apply receives an operation from another node and applies it locally when allowed.
 
 Flow:
 
+```txt
 remote sync operation received
   ↓
 validate operation
@@ -835,7 +931,11 @@ apply conflict policy
 apply store operation, if accepted
   ↓
 return apply result
-Remote apply example
+```
+
+### Remote apply example
+
+```cpp
 #include <filesystem>
 #include <iostream>
 
@@ -902,12 +1002,15 @@ int main()
 
     return 0;
 }
-Sync state
+```
+
+## Sync state
 
 The sync engine should expose state.
 
 Useful fields include:
 
+```txt
 outbox_size
 queued_count
 in_flight_count
@@ -916,107 +1019,110 @@ failed_count
 last_submitted_version
 last_applied_remote_version
 total_retries
+```
 
 The exact fields depend on the current implementation.
 
 The important idea is:
 
-sync must be observable
+> sync must be observable
 
 A developer should be able to inspect what is pending, queued, acknowledged, or failed.
 
-Outbox size
+### Outbox size
 
-outbox_size tells how much work is tracked by sync.
+`outbox_size` tells how much work is tracked by sync.
 
-Example:
+Example: `outbox_size = 1`
 
-outbox_size = 1
+This means sync knows about one operation. It does not mean the operation has been delivered.
 
-This means sync knows about one operation.
+### Queued count
 
-It does not mean the operation has been delivered.
+`queued_count` tells how much work is ready for a batch.
 
-Queued count
+Example: `queued_count = 1`
 
-queued_count tells how much work is ready for a batch.
+This means `next_batch()` can likely produce work.
 
-Example:
+### In-flight count
 
-queued_count = 1
-
-This means next_batch() can likely produce work.
-
-In-flight count
-
-in_flight_count tells how many operations are currently sent or waiting for ACK.
+`in_flight_count` tells how many operations are currently sent or waiting for ACK.
 
 This matters when ACK tracking is enabled.
 
-Acknowledged count
+### Acknowledged count
 
-acknowledged_count tells how many operations have been acknowledged.
+`acknowledged_count` tells how many operations have been acknowledged.
 
 Acknowledged operations can be pruned later when safe.
 
-Failed count
+### Failed count
 
-failed_count tells how many operations failed propagation.
+`failed_count` tells how many operations failed propagation.
 
 A failed sync operation does not automatically delete local store data.
 
 It means propagation failed.
 
-Sync and store
+## Sync and store
 
 Store and sync are connected but separate.
 
+```txt
 Store -> current local state
 Sync  -> propagation state
+```
 
 A store operation can become sync work:
 
+```txt
 Operation::Put
   ↓
 SyncOperation
   ↓
 Outbox
+```
 
 The store should not decide retry policy.
 
 The sync module should not own current key-value state.
 
-Sync and WAL
+## Sync and WAL
 
 WAL makes operations durable.
 
 Sync makes operations propagatable.
 
+```txt
 WAL  -> local operation history
 Sync -> propagation tracking
+```
 
 A local operation can be:
 
-durable locally
-pending remotely
+- durable locally
+- pending remotely
 
 This distinction is important.
 
-Sync and transport
+## Sync and transport
 
 Transport delivers sync batches.
 
 Relationship:
 
+```txt
 SyncEngine::next_batch()
   ↓
 TransportEngine::send_sync_batch()
+```
 
 Sync does not open sockets.
 
 Transport does not decide conflict resolution.
 
-Sync and discovery
+## Sync and discovery
 
 Discovery finds peers.
 
@@ -1024,17 +1130,19 @@ Sync does not find peers.
 
 Flow:
 
+```txt
 Discovery finds peer
   ↓
 Transport connects peer
   ↓
 Sync batch sent to peer
+```
 
 No peers means sync work may remain pending.
 
 It does not mean local data is invalid.
 
-Sync and metadata
+## Sync and metadata
 
 Metadata describes nodes.
 
@@ -1042,55 +1150,66 @@ Sync uses node identity.
 
 Example:
 
+```txt
 metadata node id = node-a
 sync operation origin = node-a
+```
 
 Metadata can help make sync diagnostics easier to understand.
 
-Sync and CLI
+## Sync and CLI
 
 CLI can expose sync commands.
 
 Correct direction:
 
+```txt
 CLI command
   ↓
 SyncEngine
+```
 
 Wrong direction:
 
+```txt
 SyncEngine
   ↓
 CLI output
+```
 
 Sync should return structured state.
 
 CLI should format it.
 
-Sync and SDK
+## Sync and SDK
 
 The SDK wraps sync behind simpler methods.
 
 C++ SDK:
 
+```txt
 client.sync_state()
 client.tick()
+```
 
 JavaScript SDK:
 
+```txt
 client.syncStateInfo()
 client.tick()
+```
 
 The SDK should hide lower-level wiring.
 
 The engine keeps sync behavior explicit.
 
-Local-first behavior
+## Local-first behavior
 
 Sync must not block local writes.
 
 Correct behavior:
 
+```txt
 local write
   ↓
 store apply
@@ -1098,55 +1217,61 @@ store apply
 sync track
   ↓
 network can fail later
+```
 
 Wrong behavior:
 
+```txt
 local write
   ↓
 wait for remote peer
   ↓
 only then apply locally
+```
 
 That is not local-first.
 
-Offline behavior
+## Offline behavior
 
 When offline:
 
+```txt
 local write still works
 sync operation enters outbox
 transport is unavailable
 operation remains pending
 retry later
+```
 
 Offline is a normal state.
 
 The sync module should expose it clearly.
 
-Retry behavior
+## Retry behavior
 
 Retry should be controlled by configuration.
 
 Important settings:
 
+```txt
 require_ack
 ack_timeout
 retry_interval
 max_retries
+```
 
 A good retry system should answer:
 
-how many retries happened?
-which operations failed?
-which operations are still queued?
-when will they be retried?
-ACK behavior
+- how many retries happened?
+- which operations failed?
+- which operations are still queued?
+- when will they be retried?
+
+## ACK behavior
 
 ACK behavior should be optional.
 
-Some flows may require ACKs.
-
-Some may only need best-effort delivery.
+Some flows may require ACKs. Some may only need best-effort delivery.
 
 When ACKs are enabled, sync should track waiting operations.
 
@@ -1154,41 +1279,44 @@ When ACKs are disabled, sync may mark work differently after batch selection.
 
 The policy should be explicit.
 
-Conflict behavior
+## Conflict behavior
 
 Conflict behavior should be deterministic.
 
 Good conflict resolution:
 
+```txt
 same local entry
 same remote operation
 same policy
   ↓
 same decision
+```
 
 Avoid hidden random conflict behavior.
 
-Remote operation validation
+## Remote operation validation
 
 Remote operations should be validated before apply.
 
 Reject operations with:
 
-empty sync id
-empty origin node id
-invalid version
-invalid store operation
-invalid key
-invalid payload
+- empty sync id
+- empty origin node id
+- invalid version
+- invalid store operation
+- invalid key
+- invalid payload
 
 Invalid remote operations should not corrupt local state.
 
-Sync errors
+## Sync errors
 
 Sync should return explicit errors.
 
 Possible errors:
 
+```txt
 invalid sync context
 invalid node id
 invalid local operation
@@ -1199,41 +1327,49 @@ retry failed
 conflict resolution failed
 store apply failed
 ACK tracking failed
+```
 
 Do not hide sync failures.
 
-Invalid context
+### Invalid context
 
 A sync context is invalid if required dependencies are missing or configuration is bad.
 
 Example:
 
+```cpp
 if (!context.is_valid())
 {
     std::cerr << "invalid sync context\n";
     return 1;
 }
+```
 
 The error should identify the real problem when possible.
 
-Invalid operation
+### Invalid operation
 
 An invalid operation should not enter the outbox.
 
 Bad:
 
+```txt
 invalid operation
   ↓
 queued anyway
+```
 
 Better:
 
+```txt
 invalid operation
   ↓
 return error
   ↓
 outbox unchanged
-Operation not found
+```
+
+### Operation not found
 
 Manual queue or ACK operations may reference unknown sync ids.
 
@@ -1241,26 +1377,31 @@ The result should be clear.
 
 Example:
 
+```txt
 sync operation not found: node-a-42
-Retry exhausted
+```
+
+### Retry exhausted
 
 When max retries is reached:
 
+```txt
 operation retry count >= max_retries
   ↓
 mark failed
   ↓
 failed count increases
+```
 
 Failed work should remain inspectable.
 
-Conflict failure
+### Conflict failure
 
 If conflict resolution cannot decide safely, the operation should not be applied silently.
 
 Return a clear error or resolution result.
 
-Store apply failure
+### Store apply failure
 
 Remote apply can fail if the underlying store rejects the operation.
 
@@ -1268,11 +1409,15 @@ The sync engine should return the store error with context.
 
 Example:
 
+```txt
 remote apply failed: invalid key
-Examples
+```
+
+## Examples
 
 Current useful examples include:
 
+```txt
 ack_tracker.cpp
 basic_sync.cpp
 conflict_policy.cpp
@@ -1280,102 +1425,123 @@ manual_queue.cpp
 remote_apply.cpp
 retry.cpp
 scheduler_tick.cpp
+```
 
 Recommended order:
 
-1. basic_sync.cpp
-2. manual_queue.cpp
-3. scheduler_tick.cpp
-4. ack_tracker.cpp
-5. retry.cpp
-6. conflict_policy.cpp
-7. remote_apply.cpp
+1. `basic_sync.cpp`
+2. `manual_queue.cpp`
+3. `scheduler_tick.cpp`
+4. `ack_tracker.cpp`
+5. `retry.cpp`
+6. `conflict_policy.cpp`
+7. `remote_apply.cpp`
 
 This order moves from local operation tracking to remote application.
 
-Run examples
+## Run examples
 
 From the engine repository:
 
+```sh
 cd ~/softadastra/softadastra
+```
 
 Build:
 
+```sh
 vix build
+```
 
 Or with CMake:
 
+```sh
 cmake --preset dev-ninja
 cmake --build --preset build-ninja
+```
 
 Find binaries:
 
+```sh
 find build-ninja -type f -executable
+```
 
 Run the relevant sync example binary from the build output.
 
-Testing sync
+## Testing sync
 
 Sync tests should verify:
 
-valid context
-invalid context
-submit local operation
-auto queue enabled
-auto queue disabled
-manual queue
-next batch
-scheduler tick
-ACK track
-ACK receive
-ACK prune
-retry expired
-retry exhausted
-remote apply
-conflict resolution
-invalid remote operation
-state counters
-Good sync test flow
+- valid context
+- invalid context
+- submit local operation
+- auto queue enabled
+- auto queue disabled
+- manual queue
+- next batch
+- scheduler tick
+- ACK track
+- ACK receive
+- ACK prune
+- retry expired
+- retry exhausted
+- remote apply
+- conflict resolution
+- invalid remote operation
+- state counters
+
+### Good sync test flow
 
 Basic submit test:
 
+```txt
 create store
 create sync config
 create sync engine
 submit local operation
 expect outbox size = 1
 expect queued count = 1
+```
 
 Manual queue test:
 
+```txt
 auto_queue = false
 submit operation
 expect queued count = 0
 queue operation manually
 expect queued count = 1
+```
 
 Retry test:
 
+```txt
 require ACK
 submit operation
 create batch
 wait until timeout
 retry expired
 expect retried count > 0
+```
 
 Remote apply test:
 
+```txt
 create remote operation
 receive remote operation
 expect store contains remote value
+```
 
 Conflict test:
 
+```txt
 create local entry
 create remote operation
 resolve conflict
 expect deterministic decision
-Design rules
+```
+
+## Design rules
 
 The sync module should follow these rules:
 
@@ -1389,79 +1555,107 @@ The sync module should follow these rules:
 8. Keep ACK behavior explicit.
 9. Keep conflict resolution deterministic.
 10. Do not hide failed operations.
-Common mistakes
-Making sync open network sockets
+
+## Common mistakes
+
+### Making sync open network sockets
 
 Wrong:
 
+```txt
 SyncEngine opens TCP connection
+```
 
 Better:
 
+```txt
 SyncEngine produces batch
 TransportEngine sends batch
-Treating sync failure as local data loss
+```
+
+### Treating sync failure as local data loss
 
 Wrong:
 
+```txt
 sync failed
   ↓
 delete local value
+```
 
 Better:
 
+```txt
 sync failed
   ↓
 mark propagation failed
   ↓
 local store remains valid
-Hiding failed operations
+```
+
+### Hiding failed operations
 
 Wrong:
 
+```txt
 retry exhausted
   ↓
 drop operation silently
+```
 
 Better:
 
+```txt
 retry exhausted
   ↓
 mark failed
   ↓
 failed_count increases
-Making discovery required
+```
+
+### Making discovery required
 
 Wrong:
 
+```txt
 no peer discovered
   ↓
 cannot write locally
+```
 
 Better:
 
+```txt
 no peer discovered
   ↓
 write locally
   ↓
 sync later
-Making conflict resolution random
+```
+
+### Making conflict resolution random
 
 Wrong:
 
+```txt
 sometimes local wins, sometimes remote wins
+```
 
 Better:
 
+```txt
 policy decides deterministically
-Ignoring ACK timeout
+```
+
+### Ignoring ACK timeout
 
 If ACKs are required, missing ACKs must be visible.
 
-Recommended usage pattern
+## Recommended usage pattern
 
 Create store and sync engine:
 
+```cpp
 store::engine::StoreEngine store{
     store::core::StoreConfig::durable("data/node-a.wal")};
 
@@ -1476,9 +1670,11 @@ if (!context.is_valid())
 }
 
 sync::engine::SyncEngine engine{context};
+```
 
 Submit local operation:
 
+```cpp
 auto operation = store::core::Operation::put(
     store::types::Key{"user:1"},
     store::types::Value::from_string("Gaspard"));
@@ -1489,18 +1685,22 @@ if (submitted.is_err())
 {
     return 1;
 }
+```
 
 Create batch:
 
+```cpp
 auto batch = engine.next_batch();
 
 for (const auto &envelope : batch)
 {
     // transport can send envelope.operation
 }
+```
 
 Run tick:
 
+```cpp
 sync::scheduler::SyncScheduler scheduler{engine};
 
 auto tick = scheduler.tick(false);
@@ -1509,45 +1709,55 @@ if (tick.has_work())
 {
     // send tick.batch through transport
 }
-API reference
+```
+
+## API reference
 
 Main areas:
 
-Area	Purpose
-core	Sync config, context, operation
-engine	SyncEngine
-scheduler	Manual sync tick
-ack	ACK tracking
-conflict	Conflict resolution
-types	Sync types and policies
-outbox	Propagation state
-Main types
-Type	Purpose
-SyncConfig	Configures sync behavior
-SyncContext	Wires sync to store and config
-SyncEngine	Main sync runtime
-SyncOperation	Propagation operation
-SyncScheduler	Runs manual ticks
-AckTracker	Tracks acknowledgements
-ConflictResolver	Resolves local/remote conflicts
-ConflictPolicy	Defines conflict rule
-Common methods
-Method	Purpose
-submit_local_operation(operation)	Track a local operation
-next_batch()	Return queued operations ready to send
-queue_operation(sync_id)	Queue an operation manually
-retry_expired()	Retry expired in-flight work
-receive_remote_operation(operation)	Apply remote sync operation
-state()	Inspect sync state
+| Area | Purpose |
+|------|---------|
+| core | Sync config, context, operation |
+| engine | SyncEngine |
+| scheduler | Manual sync tick |
+| ack | ACK tracking |
+| conflict | Conflict resolution |
+| types | Sync types and policies |
+| outbox | Propagation state |
+
+### Main types
+
+| Type | Purpose |
+|------|---------|
+| SyncConfig | Configures sync behavior |
+| SyncContext | Wires sync to store and config |
+| SyncEngine | Main sync runtime |
+| SyncOperation | Propagation operation |
+| SyncScheduler | Runs manual ticks |
+| AckTracker | Tracks acknowledgements |
+| ConflictResolver | Resolves local/remote conflicts |
+| ConflictPolicy | Defines conflict rule |
+
+### Common methods
+
+| Method | Purpose |
+|--------|---------|
+| submit_local_operation(operation) | Track a local operation |
+| next_batch() | Return queued operations ready to send |
+| queue_operation(sync_id) | Queue an operation manually |
+| retry_expired() | Retry expired in-flight work |
+| receive_remote_operation(operation) | Apply remote sync operation |
+| state() | Inspect sync state |
 
 Only document a method as stable when it exists in the current public API.
 
-Summary
+## Summary
 
 sync is the operation propagation module of Softadastra Engine.
 
 It provides:
 
+```txt
 SyncConfig
 SyncContext
 SyncEngine
@@ -1560,15 +1770,16 @@ queue
 retry
 ACK tracking
 remote apply
+```
 
 The key idea is:
 
-Sync makes local operations visible, queued, retryable, and ready for transport.
+> Sync makes local operations visible, queued, retryable, and ready for transport.
 
 It does not open sockets, discover peers, or own application state.
 
-Next step
+## Next step
 
 Continue with transport:
 
-Go to Transport
+[Go to Transport](transport.md)

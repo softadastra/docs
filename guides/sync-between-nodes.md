@@ -10,26 +10,28 @@ The core rule is:
 Sync decides what should be sent.
 Transport sends it.
 Discovery finds peers.
+```
 
 A local write can happen before any peer receives it. Synchronization is the later propagation step.
 
-What you will do
+## What you will do
 
 You will learn how to:
 
-create two local nodes
-use separate WAL files
-use separate transport ports
-write local data on node A
-inspect sync state
-start transport
-connect node A to node B
-run sync ticks
-inspect pending work
-understand what happens when no peer is available
+- create two local nodes
+- use separate WAL files
+- use separate transport ports
+- write local data on node A
+- inspect sync state
+- start transport
+- connect node A to node B
+- run sync ticks
+- inspect pending work
+- understand what happens when no peer is available
 
 The basic flow is:
 
+```txt
 node A local write
   ↓
 WAL append, if enabled
@@ -43,18 +45,23 @@ transport connection
 node B receives operation
   ↓
 node B applies operation
-Why two-node sync matters
+```
+
+## Why two-node sync matters
 
 Offline-first systems allow work to happen before the network is available.
 
 That means a node can write locally first:
 
+```txt
 node A writes locally
 node B is not connected
 node A keeps working
+```
 
 Later, when a peer becomes reachable, the local operation can be propagated:
 
+```txt
 node A has pending sync work
   ↓
 node A connects to node B
@@ -62,35 +69,41 @@ node A connects to node B
 node A sends sync batch
   ↓
 node B applies operation
+```
 
 This is the difference between local-first storage and distributed synchronization.
 
-Important model
+## Important model
 
 Softadastra separates responsibilities:
 
+```txt
 Store      -> current local state
 WAL        -> durable operation history
 Sync       -> pending propagation work
 Transport  -> peer message delivery
 Discovery  -> peer finding
 Metadata   -> node identity
+```
 
 This guide focuses on sync and transport.
 
 Discovery can be added later.
 
-Node A and Node B
+## Node A and Node B
 
 For local testing, use two nodes:
 
+```txt
 node-a
 node-b
+```
 
 Each node should have its own runtime identity, WAL path, and transport port.
 
 Recommended local setup:
 
+```txt
 node-a
   wal       : data/node-a.wal
   transport : 127.0.0.1:4041
@@ -98,24 +111,32 @@ node-a
 node-b
   wal       : data/node-b.wal
   transport : 127.0.0.1:4042
+```
 
 Do not use the same WAL file for both nodes.
 
-Create the data directory
+## Create the data directory
 
 Before running persistent examples:
 
+```bash
 mkdir -p data
+```
 
 Each node should have a separate WAL path:
 
+```txt
 data/node-a.wal
 data/node-b.wal
-Option A: C++ two-node sync shape
+```
+
+## Option A: C++ two-node sync shape
 
 Use this section if you want to understand the C++ SDK flow.
 
-Node A configuration
+### Node A configuration
+
+```cpp
 ClientOptions node_a_options =
     ClientOptions::persistent(
         "node-a",
@@ -128,7 +149,11 @@ node_a_options.transport_host = "127.0.0.1";
 node_a_options.transport_port = 4041;
 
 node_a_options.enable_discovery = false;
-Node B configuration
+```
+
+### Node B configuration
+
+```cpp
 ClientOptions node_b_options =
     ClientOptions::persistent(
         "node-b",
@@ -141,12 +166,18 @@ node_b_options.transport_host = "127.0.0.1";
 node_b_options.transport_port = 4042;
 
 node_b_options.enable_discovery = false;
-Create both clients
+```
+
+### Create both clients
+
+```cpp
 Client node_a{node_a_options};
 Client node_b{node_b_options};
+```
 
 Open both:
 
+```cpp
 auto open_a = node_a.open();
 auto open_b = node_b.open();
 
@@ -162,14 +193,18 @@ if (open_b.is_err())
     node_a.close();
     return 1;
 }
+```
 
 Start transport:
 
+```cpp
 auto transport_a = node_a.start_transport();
 auto transport_b = node_b.start_transport();
+```
 
 Connect node A to node B:
 
+```cpp
 Peer peer_b{
     "node-b",
     "127.0.0.1",
@@ -183,9 +218,11 @@ if (connected.is_err())
               << connected.error().message()
               << "\n";
 }
+```
 
 Write on node A:
 
+```cpp
 auto written =
     node_a.put("message/1", "hello from node-a");
 
@@ -193,9 +230,11 @@ if (written.is_err())
 {
     std::cerr << written.error().message() << "\n";
 }
+```
 
 Run one tick:
 
+```cpp
 auto tick = node_a.tick();
 
 if (tick.is_ok())
@@ -204,9 +243,11 @@ if (tick.is_ok())
               << tick.value().batch_size
               << "\n";
 }
+```
 
 Inspect sync state:
 
+```cpp
 auto state = node_a.sync_state();
 
 if (state.is_ok())
@@ -223,15 +264,20 @@ if (state.is_ok())
               << state.value().failed_count
               << "\n";
 }
+```
 
 Close both nodes:
 
+```cpp
 node_a.close();
 node_b.close();
-C++ complete example shape
+```
+
+## C++ complete example shape
 
 This example shows the expected structure. Depending on the current transport implementation, remote apply may already work or may still be represented as a pending transport/sync batch.
 
+```cpp
 #include <iostream>
 
 #include <softadastra/sdk.hpp>
@@ -393,9 +439,11 @@ int main()
 
     return 0;
 }
+```
 
 Expected output style:
 
+```txt
 connected to node-b
 
 before tick
@@ -412,14 +460,17 @@ after tick
   outbox : 1
   queued : 1
   failed : 0
+```
 
 The exact output can differ depending on ACK handling, pruning, and the current transport implementation.
 
-Option B: JavaScript two-node sync shape
+## Option B: JavaScript two-node sync shape
 
 Use this section if you want to understand the JavaScript SDK flow.
 
-Node A configuration
+### Node A configuration
+
+```js
 const nodeAOptions = ClientOptions.persistent(
   "node-a",
   "data/node-a.wal",
@@ -432,7 +483,11 @@ nodeAOptions.transportHost = "127.0.0.1";
 nodeAOptions.transportPort = 4041;
 
 nodeAOptions.enableDiscovery = false;
-Node B configuration
+```
+
+### Node B configuration
+
+```js
 const nodeBOptions = ClientOptions.persistent(
   "node-b",
   "data/node-b.wal",
@@ -445,12 +500,18 @@ nodeBOptions.transportHost = "127.0.0.1";
 nodeBOptions.transportPort = 4042;
 
 nodeBOptions.enableDiscovery = false;
-Create both clients
+```
+
+### Create both clients
+
+```js
 const nodeA = new Client(nodeAOptions);
 const nodeB = new Client(nodeBOptions);
+```
 
 Open both:
 
+```js
 const openA = await nodeA.open();
 const openB = await nodeB.open();
 
@@ -464,14 +525,18 @@ if (openB.isErr()) {
   await nodeA.close();
   process.exit(1);
 }
+```
 
 Start transport:
 
+```js
 await nodeA.startTransport();
 await nodeB.startTransport();
+```
 
 Connect node A to node B:
 
+```js
 const peerB = new Peer("node-b", "127.0.0.1", 4042);
 
 const connected = await nodeA.connect(peerB);
@@ -479,9 +544,11 @@ const connected = await nodeA.connect(peerB);
 if (connected.isErr()) {
   console.log(`connection failed: ${connected.error().message}`);
 }
+```
 
 Write on node A:
 
+```js
 const written = await nodeA.put(
   "message/1",
   "hello from node-a",
@@ -490,17 +557,21 @@ const written = await nodeA.put(
 if (written.isErr()) {
   console.error(written.error().message);
 }
+```
 
 Run one tick:
 
+```js
 const tick = await nodeA.tick();
 
 if (tick.isOk()) {
   console.log(`batch: ${tick.value().batchSize}`);
 }
+```
 
 Inspect sync state:
 
+```js
 const state = await nodeA.syncStateInfo();
 
 if (state.isOk()) {
@@ -508,20 +579,27 @@ if (state.isOk()) {
   console.log(`queued: ${state.value().queuedCount}`);
   console.log(`failed: ${state.value().failedCount}`);
 }
+```
 
 Close both nodes:
 
+```js
 await nodeA.close();
 await nodeB.close();
-JavaScript complete example shape
+```
+
+## JavaScript complete example shape
 
 Create:
 
+```bash
 mkdir -p data
 nano two-node-sync.js
+```
 
 Paste this code:
 
+```js
 import {
   Client,
   ClientOptions,
@@ -633,13 +711,17 @@ if (after.isOk()) {
 
 await nodeA.close();
 await nodeB.close();
+```
 
 Run:
 
+```bash
 node two-node-sync.js
+```
 
 Expected output style:
 
+```txt
 connected to node-b
 
 before tick
@@ -656,24 +738,28 @@ after tick
   outbox : 1
   queued : 1
   failed : 0
+```
 
 The exact output can differ depending on ACK handling, pruning, and the current transport implementation.
 
-What happens when no peer is available
+## What happens when no peer is available
 
 If node B is not running or transport cannot connect, the connection may fail.
 
 Example output:
 
+```txt
 peer connection failed
   peer    : node-b
   address : 127.0.0.1:4042
   error   : connection refused
+```
 
 This should not invalidate the local write.
 
 The correct behavior is:
 
+```txt
 connection failed
   ↓
 local write still works
@@ -681,22 +767,29 @@ local write still works
 sync work remains tracked
   ↓
 retry later
+```
 
 You should still be able to read the local value from node A.
 
 C++:
 
+```cpp
 auto value = node_a.get("message/1");
+```
 
 JavaScript:
 
+```js
 const value = await nodeA.get("message/1");
-Inspect sync state after connection failure
+```
+
+## Inspect sync state after connection failure
 
 A connection failure can leave sync work pending.
 
 Example:
 
+```txt
 Sync status
 
   outbox       : 1
@@ -705,97 +798,122 @@ Sync status
   acknowledged : 0
   failed       : 0
   retries      : 0
+```
 
 This is normal.
 
 Pending work means:
 
+```txt
 local operation exists
   ↓
 sync wants to propagate it
   ↓
 delivery has not completed yet
+```
 
 It does not mean local data is lost.
 
-Use the CLI for the same workflow
+## Use the CLI for the same workflow
 
 You can inspect the same model with the CLI.
 
 Write local data:
 
+```bash
 softadastra store put message/1 hello
+```
 
 Inspect sync:
 
+```bash
 softadastra sync status
+```
 
 Run one tick:
 
+```bash
 softadastra sync tick
+```
 
 Inspect peers:
 
+```bash
 softadastra peers
+```
 
 If no peers are available:
 
+```txt
 Peers
 
   no peers found
+```
 
 That is expected in a one-node local setup.
 
-Sync status fields
+## Sync status fields
 
 The most useful sync fields are:
 
+```txt
 outbox       -> local operations waiting for synchronization
 queued       -> operations ready to be selected for sending
 in flight    -> operations prepared or sent, waiting for ACK
 acknowledged -> operations confirmed by the remote side
 failed       -> operations that exceeded retry policy
 retries      -> total retry attempts
+```
 
 A healthy offline state can still have outbox work.
 
 That means local data exists and will be propagated later when possible.
 
-Tick result fields
+## Tick result fields
 
 A tick result usually exposes:
 
+```txt
 retried -> expired operations retried during the tick
 pruned  -> completed entries removed during the tick
 batch   -> operations produced for delivery
+```
 
 Example:
 
+```txt
 Sync tick
 
   retried : 0
   pruned  : 0
   batch   : 1
+```
 
 A batch greater than zero means sync found work ready for delivery.
 
 It does not always mean the remote peer has applied it yet.
 
-Sync with pruning
+## Sync with pruning
 
-If supported, pruning can remove completed work:
+If supported, pruning can remove completed work.
 
 C++:
 
+```cpp
 auto tick = node_a.tick(true);
+```
 
 JavaScript:
 
+```js
 const tick = await nodeA.tick({ prune: true });
+```
 
 CLI:
 
+```bash
 softadastra sync tick --prune
+```
 
 Pruning must be safe.
 
@@ -803,101 +921,119 @@ It should only remove work that is completed or no longer needed.
 
 It should not remove local store values.
 
-Add discovery later
+## Add discovery later
 
-This guide uses manual peer configuration:
+This guide uses manual peer configuration.
 
 C++:
 
+```cpp
 Peer peer_b{
     "node-b",
     "127.0.0.1",
     4042};
+```
 
 JavaScript:
 
+```js
 const peerB = new Peer("node-b", "127.0.0.1", 4042);
+```
 
 Discovery can be added later to find peers automatically.
 
 The model becomes:
 
+```txt
 discovery finds node-b
   ↓
 transport connects node-b
   ↓
 sync sends operations
+```
 
 Manual peers are simpler for the first sync guide.
 
-Two-node port rules
+## Two-node port rules
 
 When running two nodes on the same machine, ports must not collide.
 
 Good:
 
+```txt
 node-a transport : 4041
 node-b transport : 4042
+```
 
 Bad:
 
+```txt
 node-a transport : 4041
 node-b transport : 4041
+```
 
 If a port is already in use, transport may fail to start.
 
 Check ports:
 
+```bash
 ss -ltnp | grep 4041
 ss -ltnp | grep 4042
-Two-node WAL rules
+```
+
+## Two-node WAL rules
 
 Each node must use its own WAL path.
 
 Good:
 
+```txt
 node-a -> data/node-a.wal
 node-b -> data/node-b.wal
+```
 
 Bad:
 
+```txt
 node-a -> data/shared.wal
 node-b -> data/shared.wal
+```
 
 A WAL belongs to one local runtime.
 
 Sharing WAL files between nodes can make recovery and sync behavior unsafe.
 
-Sync does not mean instant convergence
+## Sync does not mean instant convergence
 
 After one tick, both nodes may not instantly show the same state.
 
 Why?
 
-transport may not be connected
-message may be in flight
-ACK may be required
-remote apply may be delayed
-retry may be needed
-conflict policy may apply
+- transport may not be connected
+- message may be in flight
+- ACK may be required
+- remote apply may be delayed
+- retry may be needed
+- conflict policy may apply
 
 Convergence is eventual.
 
 The important thing is that local work remains valid and sync work remains tracked.
 
-What this guide proves
+## What this guide proves
 
 This guide proves that Softadastra can:
 
-write on one node
-track local operations for sync
-prepare sync batches
-use transport as delivery layer
-keep local data valid when peer delivery fails
-use separate node ids
-use separate WAL paths
-use separate transport ports
-What this guide does not prove
+- write on one node
+- track local operations for sync
+- prepare sync batches
+- use transport as delivery layer
+- keep local data valid when peer delivery fails
+- use separate node ids
+- use separate WAL paths
+- use separate transport ports
+
+## What this guide does not prove
 
 This guide does not fully prove production synchronization.
 
@@ -913,41 +1049,55 @@ It does not prove convergence under complex failure patterns.
 
 Those topics belong to deeper guides and production testing.
 
-Common mistakes
-Using the same port for both nodes
+## Common mistakes
+
+### Using the same port for both nodes
 
 Wrong:
 
+```txt
 node-a transport port = 4041
 node-b transport port = 4041
+```
 
 Fix:
 
+```txt
 node-a transport port = 4041
 node-b transport port = 4042
-Using the same WAL path for both nodes
+```
+
+### Using the same WAL path for both nodes
 
 Wrong:
 
+```txt
 node-a WAL = data/node.wal
 node-b WAL = data/node.wal
+```
 
 Fix:
 
+```txt
 node-a WAL = data/node-a.wal
 node-b WAL = data/node-b.wal
-Assuming connection failure means local write failed
+```
+
+### Assuming connection failure means local write failed
 
 A connection failure is a transport problem.
 
 It should not delete or invalidate local data.
 
+```txt
 transport failure
   ↓
 sync remains pending
   ↓
 local value remains readable
-Assuming tick means remote apply
+```
+
+### Assuming tick means remote apply
 
 A tick moves the sync pipeline forward.
 
@@ -955,27 +1105,35 @@ It may produce a batch.
 
 Remote application may require transport delivery, ACK handling, remote validation, and conflict checks.
 
-Ignoring sync status
+### Ignoring sync status
 
 Always inspect sync state when debugging:
 
+```bash
 softadastra sync status
+```
 
 Or through the SDK:
 
 C++:
 
+```cpp
 auto state = node_a.sync_state();
+```
 
 JavaScript:
 
+```js
 const state = await nodeA.syncStateInfo();
-Summary
+```
+
+## Summary
 
 You configured two local Softadastra nodes and moved local work toward synchronization.
 
 The core flow is:
 
+```txt
 node A write
   ↓
 node A store
@@ -987,11 +1145,12 @@ node A tick
 transport delivery
   ↓
 node B apply, when available
+```
 
 The key idea is that local work is valid before remote delivery completes.
 
-Next step
+## Next step
 
 Continue with:
 
-Use the C++ SDK with the Engine
+[Use the C++ SDK with the Engine](./use-cpp-sdk-with-engine.md)

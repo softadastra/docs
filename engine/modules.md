@@ -10,51 +10,57 @@ The core rule is:
 One module.
 One responsibility.
 Clear boundaries.
+```
 
 The current engine modules are:
 
-cli
-core
-discovery
-fs
-metadata
-store
-sync
-transport
-wal
+- `cli`
+- `core`
+- `discovery`
+- `fs`
+- `metadata`
+- `store`
+- `sync`
+- `transport`
+- `wal`
 
 They live in:
 
+```txt
 modules/
-Why modules exist
+```
+
+## Why modules exist
 
 Softadastra is a local-first runtime.
 
 It needs several different systems:
 
-safe primitives
-filesystem observation
-durable operation logging
-local state
-sync tracking
-peer communication
-peer discovery
-node metadata
-CLI runtime
+- safe primitives
+- filesystem observation
+- durable operation logging
+- local state
+- sync tracking
+- peer communication
+- peer discovery
+- node metadata
+- CLI runtime
 
 Putting everything in one large system would make the engine hard to reason about.
 
 Modules keep the runtime:
 
-readable
-testable
-replaceable
-debuggable
-extensible
-Repository module layout
+- readable
+- testable
+- replaceable
+- debuggable
+- extensible
+
+## Repository module layout
 
 Current module layout:
 
+```txt
 modules/
 ├── cli/
 ├── core/
@@ -65,11 +71,13 @@ modules/
 ├── sync/
 ├── transport/
 └── wal/
+```
 
 Each module should contain its own public headers, implementation files, tests, examples, and build rules when needed.
 
 A typical module shape is:
 
+```txt
 modules/<name>/
 ├── include/
 │   └── softadastra/<name>/
@@ -79,56 +87,61 @@ modules/<name>/
 ├── CMakeLists.txt
 ├── README.md
 └── CHANGELOG.md
+```
 
 The exact structure can vary per module, but the responsibility must stay clear.
 
-Module overview
-Module	Role
-core	Shared primitives and errors
-fs	Filesystem observation
-wal	Durable operation history
-store	Current local state
-sync	Operation propagation tracking
-transport	Peer communication
-discovery	Peer discovery
-metadata	Node identity and capabilities
-cli	Command-line runtime
-Recommended reading order
+## Module overview
+
+| Module | Role |
+|---|---|
+| `core` | Shared primitives and errors |
+| `fs` | Filesystem observation |
+| `wal` | Durable operation history |
+| `store` | Current local state |
+| `sync` | Operation propagation tracking |
+| `transport` | Peer communication |
+| `discovery` | Peer discovery |
+| `metadata` | Node identity and capabilities |
+| `cli` | Command-line runtime |
+
+## Recommended reading order
 
 Read the modules in this order:
 
-1. core
-2. fs
-3. wal
-4. store
-5. sync
-6. transport
-7. discovery
-8. metadata
-9. cli
+1. `core`
+2. `fs`
+3. `wal`
+4. `store`
+5. `sync`
+6. `transport`
+7. `discovery`
+8. `metadata`
+9. `cli`
 
 This order goes from the lowest-level foundation to the user-facing command-line layer.
 
-Recommended development order
+## Recommended development order
 
 When implementing or changing the engine, prefer this order:
 
-1. core
-2. wal
-3. store
-4. sync
-5. transport
-6. discovery
-7. metadata
-8. cli
-9. apps
+1. `core`
+2. `wal`
+3. `store`
+4. `sync`
+5. `transport`
+6. `discovery`
+7. `metadata`
+8. `cli`
+9. `apps`
 
-fs can be developed earlier when the work is related to file synchronization, watchers, snapshots, or filesystem events.
+`fs` can be developed earlier when the work is related to file synchronization, watchers, snapshots, or filesystem events.
 
-Module dependency direction
+## Module dependency direction
 
 The conceptual dependency direction is:
 
+```txt
 core
   ↓
 fs
@@ -146,6 +159,7 @@ discovery
 metadata
   ↓
 cli / apps
+```
 
 This does not mean every module must depend on the one before it.
 
@@ -153,15 +167,17 @@ It means lower-level modules must not depend on higher-level modules.
 
 Important examples:
 
-core must not depend on store
-wal must not depend on sync
-store must not depend on transport
-sync must not depend on discovery
-transport must not depend on cli
-Layer view
+- `core` must not depend on `store`
+- `wal` must not depend on `sync`
+- `store` must not depend on `transport`
+- `sync` must not depend on `discovery`
+- `transport` must not depend on `cli`
+
+## Layer view
 
 Softadastra modules can be grouped by layer:
 
+```txt
 Foundation
   core
 
@@ -188,72 +204,81 @@ Identity
 
 Interface
   cli
+```
 
 This makes the engine easier to explain and maintain.
 
-core
+## core
 
-core is the foundation module.
+`core` is the foundation module.
 
 It provides shared primitives used across the engine.
 
 Responsibilities:
 
-Result
-Error
-ErrorCode
-Severity
-StrongType
-NonCopyable
-FileId
-DeviceId
-OperationId
-Timestamp
-Duration
-Clock
-Hash
-Hasher
-HashAlgorithm
-Config
-ConfigValue
-ConfigValidator
-Assert
-ScopeGuard
-StringUtils
+- `Result`
+- `Error`
+- `ErrorCode`
+- `Severity`
+- `StrongType`
+- `NonCopyable`
+- `FileId`
+- `DeviceId`
+- `OperationId`
+- `Timestamp`
+- `Duration`
+- `Clock`
+- `Hash`
+- `Hasher`
+- `HashAlgorithm`
+- `Config`
+- `ConfigValue`
+- `ConfigValidator`
+- `Assert`
+- `ScopeGuard`
+- `StringUtils`
 
-core should be:
+`core` should be:
 
-minimal
-stable
-deterministic
-dependency-free
-reusable everywhere
-What core does not do
+- minimal
+- stable
+- deterministic
+- dependency-free
+- reusable everywhere
 
-core must not contain:
+### What core does not do
 
-filesystem logic
-WAL logic
-store logic
-sync logic
-network logic
-discovery logic
-metadata service logic
-CLI command logic
-application logic
+`core` must not contain:
+
+- filesystem logic
+- WAL logic
+- store logic
+- sync logic
+- network logic
+- discovery logic
+- metadata service logic
+- CLI command logic
+- application logic
 
 The rule is:
 
+```txt
 core defines primitives, not behavior.
-core dependency rule
+```
 
-core should not depend on any other Softadastra module.
+### core dependency rule
 
+`core` should not depend on any other Softadastra module.
+
+```txt
 core -> no internal dependencies
+```
 
-Everything else can depend on core.
+Everything else can depend on `core`.
 
-core example
+### core example
+
+```cpp
 #include <softadastra/core/Core.hpp>
 
 using namespace softadastra::core;
@@ -272,73 +297,82 @@ IntResult divide(int a, int b)
 
     return IntResult::ok(a / b);
 }
-fs
+```
 
-fs is the filesystem observation module.
+## fs
+
+`fs` is the filesystem observation module.
 
 It turns filesystem state into deterministic snapshots and events.
 
 Responsibilities:
 
-Path
-Scanner
-Snapshot
-SnapshotBuilder
-SnapshotDiff
-Watcher
-FileEvent
-EventBatch
-FileState
-FileMetadata
-FileType
+- `Path`
+- `Scanner`
+- `Snapshot`
+- `SnapshotBuilder`
+- `SnapshotDiff`
+- `Watcher`
+- `FileEvent`
+- `EventBatch`
+- `FileState`
+- `FileMetadata`
+- `FileType`
 
 The key idea is:
 
+```txt
 The filesystem is observed as state and changes.
-What fs does
+```
 
-fs can:
+### What fs does
 
-normalize paths
-scan directories
-build snapshots
-compare snapshots
-produce file events
-watch directories
-track created files
-track updated files
-track deleted files
-What fs does not do
+`fs` can:
 
-fs must not:
+- normalize paths
+- scan directories
+- build snapshots
+- compare snapshots
+- produce file events
+- watch directories
+- track created files
+- track updated files
+- track deleted files
 
-sync files over the network
-decide conflict resolution
-write application data
-own WAL persistence
-own peer communication
-own CLI commands
+### What fs does not do
+
+`fs` must not:
+
+- sync files over the network
+- decide conflict resolution
+- write application data
+- own WAL persistence
+- own peer communication
+- own CLI commands
 
 It observes.
 
 It does not decide.
 
-fs dependency rule
+### fs dependency rule
 
-fs can depend on:
+`fs` can depend on:
 
-core
+- `core`
 
-fs should not depend on:
+`fs` should not depend on:
 
-wal
-store
-sync
-transport
-discovery
-metadata
-cli
-fs example
+- `wal`
+- `store`
+- `sync`
+- `transport`
+- `discovery`
+- `metadata`
+- `cli`
+
+### fs example
+
+```cpp
 #include <iostream>
 
 #include <softadastra/fs/Fs.hpp>
@@ -371,74 +405,83 @@ int main()
 
     return 0;
 }
-wal
+```
 
-wal is the Write-Ahead Log module.
+## wal
+
+`wal` is the Write-Ahead Log module.
 
 It records operations before they are relied on by higher-level systems.
 
 Responsibilities:
 
-WalConfig
-WalRecord
-WalWriter
-WalReader
-WalReplayer
-WalRecordType
-WalRecordStatus
-record append
-record read
-record streaming
-record replay
-event append
+- `WalConfig`
+- `WalRecord`
+- `WalWriter`
+- `WalReader`
+- `WalReplayer`
+- `WalRecordType`
+- `WalRecordStatus`
+- record append
+- record read
+- record streaming
+- record replay
+- event append
 
 The key idea is:
 
+```txt
 Durable history comes before synchronization.
-What wal does
+```
 
-wal can:
+### What wal does
 
-append records
-assign sequences
-attach timestamps
-encode payloads
-flush records
-read records back
-stream records
-replay records into another component
-What wal does not do
+`wal` can:
 
-wal must not:
+- append records
+- assign sequences
+- attach timestamps
+- encode payloads
+- flush records
+- read records back
+- stream records
+- replay records into another component
 
-own current application state
-decide sync retries
-connect peers
-discover nodes
-format CLI output
-apply business rules
+### What wal does not do
+
+`wal` must not:
+
+- own current application state
+- decide sync retries
+- connect peers
+- discover nodes
+- format CLI output
+- apply business rules
 
 The WAL is history.
 
 It is not the current store.
 
-wal dependency rule
+### wal dependency rule
 
-wal can depend on:
+`wal` can depend on:
 
-core
-fs, only for filesystem event records when needed
+- `core`
+- `fs`, only for filesystem event records when needed
 
-wal should not depend on:
+`wal` should not depend on:
 
-store
-sync
-transport
-discovery
-metadata
-cli
-apps
-wal example
+- `store`
+- `sync`
+- `transport`
+- `discovery`
+- `metadata`
+- `cli`
+- `apps`
+
+### wal example
+
+```cpp
 #include <filesystem>
 #include <iostream>
 
@@ -470,77 +513,86 @@ int main()
 
     return 0;
 }
-store
+```
 
-store is the local key-value state module.
+## store
+
+`store` is the local key-value state module.
 
 It exposes the current local state.
 
 Responsibilities:
 
-StoreEngine
-StoreConfig
-Key
-Value
-Entry
-Operation
-OperationEncoder
-OperationDecoder
-SnapshotBuilderStore
-recovery from WAL
-put
-get
-remove
-entries
-size
+- `StoreEngine`
+- `StoreConfig`
+- `Key`
+- `Value`
+- `Entry`
+- `Operation`
+- `OperationEncoder`
+- `OperationDecoder`
+- `SnapshotBuilderStore`
+- recovery from WAL
+- `put`
+- `get`
+- `remove`
+- `entries`
+- `size`
 
 The key idea is:
 
+```txt
 Store is current state.
 WAL is operation history.
-What store does
+```
 
-store can:
+### What store does
 
-write values
-read values
-remove values
-track versions
-recover from WAL
-build snapshots from WAL
-encode operations
-decode operations
-expose current entries
-What store does not do
+`store` can:
 
-store must not:
+- write values
+- read values
+- remove values
+- track versions
+- recover from WAL
+- build snapshots from WAL
+- encode operations
+- decode operations
+- expose current entries
 
-send data to peers
-discover peers
-own transport
-own CLI parsing
-decide network retry policy
-hide WAL failures
+### What store does not do
+
+`store` must not:
+
+- send data to peers
+- discover peers
+- own transport
+- own CLI parsing
+- decide network retry policy
+- hide WAL failures
 
 The store applies operations locally.
 
 Sync and transport handle propagation.
 
-store dependency rule
+### store dependency rule
 
-store can depend on:
+`store` can depend on:
 
-core
-wal
+- `core`
+- `wal`
 
-store should not depend on:
+`store` should not depend on:
 
-transport
-discovery
-metadata
-cli
-apps
-store example
+- `transport`
+- `discovery`
+- `metadata`
+- `cli`
+- `apps`
+
+### store example
+
+```cpp
 #include <filesystem>
 #include <iostream>
 
@@ -579,79 +631,87 @@ int main()
     std::filesystem::remove(wal_path);
     return 0;
 }
-sync
+```
 
-sync is the operation propagation module.
+## sync
+
+`sync` is the operation propagation module.
 
 It tracks local operations that need to move to other nodes.
 
 Responsibilities:
 
-SyncConfig
-SyncContext
-SyncEngine
-SyncOperation
-SyncScheduler
-AckTracker
-ConflictResolver
-outbox
-queue
-retry
-ACK tracking
-remote apply
-conflict policy
-tick
+- `SyncConfig`
+- `SyncContext`
+- `SyncEngine`
+- `SyncOperation`
+- `SyncScheduler`
+- `AckTracker`
+- `ConflictResolver`
+- outbox
+- queue
+- retry
+- ACK tracking
+- remote apply
+- conflict policy
+- tick
 
 The key idea is:
 
+```txt
 Sync decides what should be sent.
 Transport sends it.
-What sync does
+```
 
-sync can:
+### What sync does
 
-submit local operations
-create sync ids
-track operation versions
-queue operations
-produce batches
-retry expired work
-track ACKs
-receive remote operations
-resolve conflicts
-report sync state
-What sync does not do
+`sync` can:
 
-sync must not:
+- submit local operations
+- create sync ids
+- track operation versions
+- queue operations
+- produce batches
+- retry expired work
+- track ACKs
+- receive remote operations
+- resolve conflicts
+- report sync state
 
-open TCP sockets
-discover peers
-own UDP announcements
-format CLI output
-own application UI
-hide failed operations
+### What sync does not do
+
+`sync` must not:
+
+- open TCP sockets
+- discover peers
+- own UDP announcements
+- format CLI output
+- own application UI
+- hide failed operations
 
 Sync prepares work.
 
 Transport delivers work.
 
-sync dependency rule
+### sync dependency rule
 
-sync can depend on:
+`sync` can depend on:
 
-core
-store
+- `core`
+- `store`
 
-sync should not depend directly on:
+`sync` should not depend directly on:
 
-discovery
-metadata
-cli
-apps
+- `discovery`
+- `metadata`
+- `cli`
+- `apps`
 
 Transport can bridge sync work to network messages.
 
-sync example
+### sync example
+
+```cpp
 #include <filesystem>
 #include <iostream>
 
@@ -696,75 +756,84 @@ int main()
     std::filesystem::remove(wal_path);
     return 0;
 }
-transport
+```
 
-transport is the peer communication module.
+## transport
+
+`transport` is the peer communication module.
 
 It moves messages between nodes.
 
 Responsibilities:
 
-TransportConfig
-TransportContext
-TransportMessage
-TcpTransportBackend
-TransportClient
-TransportServer
-TransportEngine
-PeerInfo
-PeerRegistry
-MessageDispatcher
-MessageEncoder
-MessageDecoder
-sync bridge
-ping / pong
-hello messages
+- `TransportConfig`
+- `TransportContext`
+- `TransportMessage`
+- `TcpTransportBackend`
+- `TransportClient`
+- `TransportServer`
+- `TransportEngine`
+- `PeerInfo`
+- `PeerRegistry`
+- `MessageDispatcher`
+- `MessageEncoder`
+- `MessageDecoder`
+- sync bridge
+- ping / pong
+- hello messages
 
 The key idea is:
 
+```txt
 Transport moves messages.
 It does not decide application meaning.
-What transport does
+```
 
-transport can:
+### What transport does
 
-start a local backend
-connect to peers
-send hello messages
-send ping messages
-send sync batches
-receive messages
-decode frames
-dispatch messages
-track peer connection state
-What transport does not do
+`transport` can:
 
-transport must not:
+- start a local backend
+- connect to peers
+- send hello messages
+- send ping messages
+- send sync batches
+- receive messages
+- decode frames
+- dispatch messages
+- track peer connection state
 
-own application state
-decide conflict resolution
-discover peers by itself
-own metadata identity
-format CLI commands
-delete local data on connection failure
+### What transport does not do
+
+`transport` must not:
+
+- own application state
+- decide conflict resolution
+- discover peers by itself
+- own metadata identity
+- format CLI commands
+- delete local data on connection failure
 
 Transport failure means delivery is delayed.
 
 It does not mean local state is invalid.
 
-transport dependency rule
+### transport dependency rule
 
-transport can depend on:
+`transport` can depend on:
 
-core
-sync
+- `core`
+- `sync`
 
-transport should not depend on:
+`transport` should not depend on:
 
-cli
-apps
-business logic
-transport example
+- `cli`
+- `apps`
+- business logic
+
+### transport example
+
+```cpp
 #include <iostream>
 
 #include <softadastra/transport/Transport.hpp>
@@ -795,77 +864,86 @@ int main()
 
     return 0;
 }
-discovery
+```
 
-discovery is the peer discovery module.
+## discovery
+
+`discovery` is the peer discovery module.
 
 It helps nodes find other nodes.
 
 Responsibilities:
 
-DiscoveryConfig
-DiscoveryOptions
-DiscoveryContext
-DiscoveryAnnouncement
-DiscoveryMessage
-UdpDiscoveryBackend
-DiscoveryClient
-DiscoveryServer
-DiscoveryEngine
-DiscoveryService
-DiscoveryRegistry
-announcement
-probe
-peer found callbacks
-peer stale tracking
-peer expiration
+- `DiscoveryConfig`
+- `DiscoveryOptions`
+- `DiscoveryContext`
+- `DiscoveryAnnouncement`
+- `DiscoveryMessage`
+- `UdpDiscoveryBackend`
+- `DiscoveryClient`
+- `DiscoveryServer`
+- `DiscoveryEngine`
+- `DiscoveryService`
+- `DiscoveryRegistry`
+- announcement
+- probe
+- peer found callbacks
+- peer stale tracking
+- peer expiration
 
 The key idea is:
 
+```txt
 Discovery finds peers.
 Transport connects peers.
 Sync sends operations.
-What discovery does
+```
 
-discovery can:
+### What discovery does
 
-announce a node
-probe for peers
-listen for discovery messages
-decode discovery datagrams
-track known peers
-mark peers stale
-mark peers expired
-prune expired peers
-expose available peers
-What discovery does not do
+`discovery` can:
 
-discovery must not:
+- announce a node
+- probe for peers
+- listen for discovery messages
+- decode discovery datagrams
+- track known peers
+- mark peers stale
+- mark peers expired
+- prune expired peers
+- expose available peers
 
-send sync operations
-apply store values
-decide conflicts
-own transport connections directly
-require local writes to work
+### What discovery does not do
+
+`discovery` must not:
+
+- send sync operations
+- apply store values
+- decide conflicts
+- own transport connections directly
+- require local writes to work
 
 No peers is a valid state.
 
 It should not break the local store.
 
-discovery dependency rule
+### discovery dependency rule
 
-discovery can depend on:
+`discovery` can depend on:
 
-core
-transport
+- `core`
+- `transport`
 
-discovery should not own:
+`discovery` should not own:
 
-store logic
-sync policy
-CLI parsing
-application state
-discovery example
+- store logic
+- sync policy
+- CLI parsing
+- application state
+
+### discovery example
+
+```cpp
 #include <iostream>
 
 #include <softadastra/discovery/Discovery.hpp>
@@ -900,68 +978,77 @@ int main()
 
     return 0;
 }
-metadata
+```
 
-metadata is the node identity module.
+## metadata
+
+`metadata` is the node identity module.
 
 It describes the local node and known remote nodes.
 
 Responsibilities:
 
-NodeMetadata
-NodeCapabilities
-MetadataOptions
-MetadataService
-MetadataRegistry
-MetadataEncoder
-MetadataDecoder
-PlatformInfo
-Hostname
-VersionInfo
-capabilities
-runtime info
+- `NodeMetadata`
+- `NodeCapabilities`
+- `MetadataOptions`
+- `MetadataService`
+- `MetadataRegistry`
+- `MetadataEncoder`
+- `MetadataDecoder`
+- `PlatformInfo`
+- `Hostname`
+- `VersionInfo`
+- capabilities
+- runtime info
 
 The key idea is:
 
+```txt
 Metadata tells you who the node is.
-What metadata does
+```
 
-metadata can expose:
+### What metadata does
 
-node id
-display name
-hostname
-operating system
-version
-uptime
-capabilities
-known node metadata
-encoded metadata snapshots
-What metadata does not do
+`metadata` can expose:
 
-metadata must not:
+- node id
+- display name
+- hostname
+- operating system
+- version
+- uptime
+- capabilities
+- known node metadata
+- encoded metadata snapshots
 
-own application data
-sync values
-connect peers
-discover peers alone
-decide store conflicts
-format all CLI output
+### What metadata does not do
+
+`metadata` must not:
+
+- own application data
+- sync values
+- connect peers
+- discover peers alone
+- decide store conflicts
+- format all CLI output
 
 Metadata describes nodes.
 
 Store contains application data.
 
-metadata dependency rule
+### metadata dependency rule
 
-metadata can integrate with discovery when needed.
+`metadata` can integrate with discovery when needed.
 
 It should not own:
 
-store state
-sync conflict rules
-application data
-metadata example
+- store state
+- sync conflict rules
+- application data
+
+### metadata example
+
+```cpp
 #include <iostream>
 
 #include <softadastra/metadata/Metadata.hpp>
@@ -993,68 +1080,79 @@ int main()
 
     return 0;
 }
-cli
+```
 
-cli is the command-line runtime module.
+## cli
+
+`cli` is the command-line runtime module.
 
 It provides reusable CLI building blocks.
 
 Responsibilities:
 
-Tokenizer
-ArgParser
-CommandLine
-ParsedCommand
-CliCommand
-CommandRegistry
-ICommandHandler
-CliConfig
-CliContext
-CliEngine
-CliService
-TableFormatter
-UI style helpers
+- `Tokenizer`
+- `ArgParser`
+- `CommandLine`
+- `ParsedCommand`
+- `CliCommand`
+- `CommandRegistry`
+- `ICommandHandler`
+- `CliConfig`
+- `CliContext`
+- `CliEngine`
+- `CliService`
+- `TableFormatter`
+- UI style helpers
 
 The key idea is:
 
+```txt
 CLI turns terminal input into engine actions.
-What cli does
+```
 
-cli can:
+### What cli does
 
-tokenize command input
-parse arguments
-parse options
-register commands
-execute command handlers
-format tables
-print styled output
-run interactive mode
-run single-command mode
-What cli does not do
+`cli` can:
 
-cli must not:
+- tokenize command input
+- parse arguments
+- parse options
+- register commands
+- execute command handlers
+- format tables
+- print styled output
+- run interactive mode
+- run single-command mode
 
-be required by core modules
-own store internals
-own sync internals
-force engine behavior
-hide engine errors
+### What cli does not do
+
+`cli` must not:
+
+- be required by core modules
+- own store internals
+- own sync internals
+- force engine behavior
+- hide engine errors
 
 CLI is an interface.
 
 Engine modules should work without it.
 
-cli dependency rule
+### cli dependency rule
 
-cli can depend on engine modules.
+`cli` can depend on engine modules.
 
-Engine modules must not depend on cli.
+Engine modules must not depend on `cli`.
 
+```txt
 modules/core -> must not depend on cli
 modules/store -> must not depend on cli
 modules/sync -> must not depend on cli
-cli example
+```
+
+### cli example
+
+```cpp
 #include <iostream>
 #include <memory>
 
@@ -1103,10 +1201,13 @@ int main()
     return service.run(
         softadastra::cli::CliOptions::single_command("status"));
 }
-Module integration flow
+```
+
+## Module integration flow
 
 A complete peer-aware runtime can integrate modules like this:
 
+```txt
 core
   ↓
 wal
@@ -1122,62 +1223,93 @@ discovery
 metadata
   ↓
 cli / sdk / apps
+```
 
 A typical local write uses:
 
-core
-wal
-store
-sync
+- `core`
+- `wal`
+- `store`
+- `sync`
 
 A typical peer sync uses:
 
-core
-wal
-store
-sync
-transport
+- `core`
+- `wal`
+- `store`
+- `sync`
+- `transport`
 
 A typical discovered peer sync uses:
 
-core
-wal
-store
-sync
-transport
-discovery
-metadata
-Module responsibilities by flow
-Local write
+- `core`
+- `wal`
+- `store`
+- `sync`
+- `transport`
+- `discovery`
+- `metadata`
+
+## Module responsibilities by flow
+
+### Local write
+
+```txt
 core   -> Result and Error
 wal    -> append operation, if enabled
 store  -> apply value locally
 sync   -> track propagation work
-Local read
+```
+
+### Local read
+
+```txt
 core   -> Result and Error
 store  -> lookup key
-Recovery
+```
+
+### Recovery
+
+```txt
 wal    -> read records
 store  -> replay operations
 core   -> errors and time
-Sync tick
+```
+
+### Sync tick
+
+```txt
 sync   -> retry, prune, batch
 core   -> timing and errors
 store  -> operation payloads
-Peer send
+```
+
+### Peer send
+
+```txt
 sync      -> produce batch
 transport -> encode and send message
 core      -> errors and identifiers
-Peer discovery
+```
+
+### Peer discovery
+
+```txt
 discovery -> announce, listen, registry
 transport -> connection target later
 metadata  -> node description
-CLI command
-cli    -> parse and dispatch command
-store  -> store command behavior
-sync   -> sync command behavior
+```
+
+### CLI command
+
+```txt
+cli      -> parse and dispatch command
+store    -> store command behavior
+sync     -> sync command behavior
 metadata -> node command behavior
-Module design rules
+```
+
+## Module design rules
 
 Each module should follow these rules:
 
@@ -1191,48 +1323,50 @@ Each module should follow these rules:
 8. Do not require network for local behavior.
 9. Do not hide lower-level failures.
 10. Document what the module does not do.
-Module README rule
+
+## Module README rule
 
 Each module README should include:
 
-purpose
-responsibilities
-what it does not do
-main components
-example usage
-dependencies
-integration
-design rules
-roadmap
+- purpose
+- responsibilities
+- what it does not do
+- main components
+- example usage
+- dependencies
+- integration
+- design rules
+- roadmap
 
 This keeps documentation consistent across modules.
 
-Module examples rule
+## Module examples rule
 
 Each module should have examples that teach one concept at a time.
 
 Good examples:
 
-core_result.cpp
-fs_scan.cpp
-wal_write.cpp
-store_basic.cpp
-sync_basic.cpp
-transport_server.cpp
-discovery_minimal.cpp
-metadata_local_snapshot.cpp
-cli_custom_command.cpp
+- `core_result.cpp`
+- `fs_scan.cpp`
+- `wal_write.cpp`
+- `store_basic.cpp`
+- `sync_basic.cpp`
+- `transport_server.cpp`
+- `discovery_minimal.cpp`
+- `metadata_local_snapshot.cpp`
+- `cli_custom_command.cpp`
 
 Avoid examples that combine everything too early.
 
 Large end-to-end demos can exist, but they should not replace small module examples.
 
-Module testing rule
+## Module testing rule
 
 Each module should have unit tests for its own behavior.
 
 Examples:
 
+```txt
 core
   -> Result, Error, IDs, Timestamp
 
@@ -1259,15 +1393,17 @@ metadata
 
 cli
   -> tokenizer, parser, command registry
+```
 
 Integration tests should verify module flows.
 
-Module failure rule
+## Module failure rule
 
 Each module should report its own failures.
 
 Examples:
 
+```txt
 wal
   -> append failed
   -> read failed
@@ -1300,17 +1436,19 @@ metadata
 cli
   -> unknown command
   -> invalid arguments
+```
 
 Do not convert every failure into a vague unknown error.
 
-Module ownership rule
+## Module ownership rule
 
-Reusable runtime behavior belongs in modules/.
+Reusable runtime behavior belongs in `modules/`.
 
-Runnable composition belongs in apps/.
+Runnable composition belongs in `apps/`.
 
 Examples:
 
+```txt
 modules/store
   -> StoreEngine, Key, Value, Operation
 
@@ -1322,17 +1460,19 @@ modules/sync
 
 apps/node
   -> node runtime composition
+```
 
 If logic can be reused by SDKs, CLI, tests, and apps, it probably belongs in a module.
 
-If logic is only for one executable, it belongs in apps/.
+If logic is only for one executable, it belongs in `apps/`.
 
-Public include rule
+## Public include rule
 
 Each module should expose a clear top-level include.
 
 Examples:
 
+```cpp
 #include <softadastra/core/Core.hpp>
 #include <softadastra/fs/Fs.hpp>
 #include <softadastra/wal/Wal.hpp>
@@ -1342,17 +1482,19 @@ Examples:
 #include <softadastra/discovery/Discovery.hpp>
 #include <softadastra/metadata/Metadata.hpp>
 #include <softadastra/cli/cli.hpp>
+```
 
 This makes examples easy to read.
 
 Internal headers can still exist for advanced users and module implementation.
 
-Build integration
+## Build integration
 
 The top-level engine build should include modules through CMake.
 
 Conceptually:
 
+```txt
 CMakeLists.txt
   ↓
 modules/core
@@ -1366,29 +1508,31 @@ modules/metadata
 modules/cli
 apps
 examples
+```
 
 Each module should be buildable and testable as independently as possible.
 
-Versioning modules
+## Versioning modules
 
 Module changes should be tracked carefully.
 
 Breaking changes in one module can affect:
 
-engine examples
-apps/cli
-apps/node
-SDK C++
-SDK JS
-docs
-tests
+- engine examples
+- apps/cli
+- apps/node
+- SDK C++
+- SDK JS
+- docs
+- tests
 
 Before changing a public module API, check dependent modules.
 
-Module stability levels
+## Module stability levels
 
 A useful stability model:
 
+```txt
 core
   -> highest stability required
 
@@ -1409,48 +1553,52 @@ cli
 
 apps
   -> can evolve fastest
+```
 
 The lower the module, the more careful changes must be.
 
-Common mistakes
-Putting business logic in core
+## Common mistakes
 
-core should stay generic.
+### Putting business logic in core
 
-Do not put sync, store, transport, or app behavior in core.
+`core` should stay generic.
 
-Making store send network messages
+Do not put sync, store, transport, or app behavior in `core`.
+
+### Making store send network messages
 
 The store should not know about transport.
 
-Making transport decide conflicts
+### Making transport decide conflicts
 
 Conflict resolution belongs in sync.
 
-Making discovery required for local writes
+### Making discovery required for local writes
 
 Discovery should be optional.
 
-Hiding WAL failure
+### Hiding WAL failure
 
 If WAL append fails, report it clearly.
 
-Creating circular dependencies
+### Creating circular dependencies
 
 Avoid designs like:
 
+```txt
 sync depends on transport
 transport depends on sync
+```
 
 If two modules need to communicate, use a clear bridge or context boundary.
 
-Making CLI required by modules
+### Making CLI required by modules
 
 The CLI should call modules.
 
 Modules should not call CLI.
 
-Recommended module documentation order
+## Recommended module documentation order
 
 Each module page should follow this structure:
 
@@ -1467,12 +1615,13 @@ Each module page should follow this structure:
 
 This keeps the engine docs consistent like a book.
 
-Summary
+## Summary
 
 Softadastra Engine modules divide the runtime into clear responsibilities.
 
 The key idea is:
 
+```txt
 core gives primitives
 fs observes files
 wal records history
@@ -1482,11 +1631,12 @@ transport moves messages
 discovery finds peers
 metadata describes nodes
 cli exposes commands
+```
 
 Good module boundaries make Softadastra easier to build, test, debug, and extend.
 
-Next step
+## Next step
 
 Continue with core:
 
-Go to Core
+[Go to Core](./core.md)
