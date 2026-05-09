@@ -624,3 +624,26 @@ html.dark{
 .vp-doc [class*='language-'] > button.copy.copied::before {
   background-color: #22c55e;
 }
+/* Code blocks background */
+.vp-doc div[class*="language-"],
+.vp-doc [class*="language-"] {
+  background: #10151c !important;
+  border-color: rgba(255, 255, 255, .08) !important;
+}
+
+.vp-doc div[class*="language-"] pre,
+.vp-doc [class*="language-"] pre {
+  background: #10151c !important;
+}
+
+/* Light mode keeps a dark readable codeblock */
+html:not(.dark) .vp-doc div[class*="language-"],
+html:not(.dark) .vp-doc [class*="language-"] {
+  background: #151a22 !important;
+  border-color: rgba(0, 0, 0, .14) !important;
+}
+
+html:not(.dark) .vp-doc div[class*="language-"] pre,
+html:not(.dark) .vp-doc [class*="language-"] pre {
+  background: #151a22 !important;
+}

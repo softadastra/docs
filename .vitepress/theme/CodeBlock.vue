@@ -416,4 +416,21 @@ html:not(.dark) .cb-body { background: #1a1e26; }
   .cb-pre { font-size: .82rem; padding: 12px 12px; }
   .cb-title { max-width: 28vw; overflow: hidden; text-overflow: ellipsis; }
 }
+.cb {
+  background: #10151c;
+  border-color: rgba(255,255,255,.10);
+}
+
+.cb-body {
+  background: #10151c;
+}
+
+html:not(.dark) .cb {
+  background: #151a22;
+  border-color: rgba(0,0,0,.14);
+}
+
+html:not(.dark) .cb-body {
+  background: #151a22;
+}
 </style>
