@@ -75,7 +75,7 @@ const social = [
         </div>
 
         <div class="sfb-copy">
-          <span>Released under the MIT License.</span>
+         <span>Released under the Apache License 2.0.</span>
           <span>Copyright © 2026 Softadastra.</span>
         </div>
       </footer>
