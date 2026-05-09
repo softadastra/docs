@@ -521,4 +521,25 @@ onMounted(() => {
   width: 22px;
   height: 22px;
 }
+@media (max-width: 520px) {
+  .soft-nav__banner {
+    gap: 4px;
+    padding: 0 42px 0 12px;
+    font-size: 11.5px;
+  }
+
+  .soft-nav__banner a {
+    display: inline-flex;
+    color: #ffffff;
+    font-weight: 750;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 720px) {
+    .sd-docs-home[data-v-4b2c7573] {
+        padding: 0px 0 56px;
+    }
+}
 </style>
