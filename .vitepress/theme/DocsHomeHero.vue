@@ -300,6 +300,24 @@ const engineLayers = [
   background: #c5ccff;
   transform: translateY(-1px);
 }
+.sd-button--primary {
+  padding: 0 24px;
+  color: #071018 !important;
+  background: var(--sd-accent);
+  border: 1px solid transparent;
+}
+
+.sd-button--primary:hover {
+  color: #071018 !important;
+  background: #d7dcff;
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.sd-button--primary:focus-visible {
+  outline: 2px solid #d7dcff;
+  outline-offset: 3px;
+}
 
 .sd-button--link {
   color: var(--sd-muted);
