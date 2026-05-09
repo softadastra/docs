@@ -308,4 +308,4 @@ The CLI helps verify that the local runtime behaves correctly before you build l
 
 Start with the first practical guide:
 
-[Build an Offline-first App](./build-offline-first-app.md)
+[Build an Offline-first App](./build-offline-first-app)

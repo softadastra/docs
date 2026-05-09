@@ -1704,4 +1704,4 @@ WAL does not own current state, networking, discovery, or conflict resolution.
 
 Continue with store:
 
-[Go to Store](./store.md)
+[Go to Store](./store)

@@ -1197,4 +1197,4 @@ If core stays clean, every module above it becomes easier to build.
 
 Continue with filesystem:
 
-[Go to Filesystem](filesystem.md)
+[Go to Filesystem](./fs)

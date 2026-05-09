@@ -1793,4 +1793,4 @@ It does not own store, sync, transport, discovery, or metadata behavior.
 
 Continue with guides:
 
-[Go to Guides](guides/)
+[Go to Guides](../guides/)

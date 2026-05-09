@@ -1865,4 +1865,4 @@ It does not connect peers directly, send sync operations, apply store values, or
 
 Continue with metadata:
 
-[Go to Metadata](cli/metadata.md)
+[Go to Metadata](./metadata)

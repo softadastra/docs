@@ -1649,4 +1649,4 @@ It does not sync data by itself, connect peers, discover nodes, or own transport
 
 Continue with sync:
 
-[Go to Sync](./sync.md)
+[Go to Sync](./sync)

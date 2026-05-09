@@ -599,4 +599,4 @@ The next step is to run a local node and inspect the runtime from the CLI.
 
 Continue with:
 
-[Run a Local Node](./run-local-node.md)
+[Run a Local Node](./run-local-node)

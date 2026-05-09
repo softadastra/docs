@@ -1782,4 +1782,4 @@ It does not open sockets, discover peers, or own application state.
 
 Continue with transport:
 
-[Go to Transport](transport.md)
+[Go to Transport](./transport)

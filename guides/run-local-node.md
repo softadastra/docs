@@ -831,4 +831,4 @@ The node can be useful before it connects to any other node.
 
 Continue with:
 
-[Persist Data Locally](./persist-data-locally.md)
+[Persist Data Locally](./persist-data-locally)

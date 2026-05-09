@@ -1129,4 +1129,4 @@ The SDK lets you build local-first JavaScript applications without manually wiri
 
 Continue with:
 
-[Production](./production.md)
+[Production](./production)

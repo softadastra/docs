@@ -1639,4 +1639,4 @@ Good module boundaries make Softadastra easier to build, test, debug, and extend
 
 Continue with core:
 
-[Go to Core](./core.md)
+[Go to Core](./core)

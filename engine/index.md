@@ -835,4 +835,4 @@ Start from the SDK if you are building an app. Read the engine docs when you wan
 
 Continue with architecture:
 
-[Go to Architecture](architecture.md)
+[Go to Architecture](./architecture)

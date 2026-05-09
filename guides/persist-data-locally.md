@@ -903,4 +903,4 @@ The next step is to synchronize local operations between two nodes.
 
 Continue with:
 
-[Sync Between Nodes](./sync-between-nodes.md)
+[Sync Between Nodes](./sync-between-nodes)

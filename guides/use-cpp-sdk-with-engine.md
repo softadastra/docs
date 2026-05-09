@@ -1141,4 +1141,4 @@ The SDK lets you build local-first applications without manually wiring every en
 
 Continue with:
 
-[Use the JavaScript SDK with the Engine](./use-js-sdk-with-engine.md)
+[Use the JavaScript SDK with the Engine](./use-js-sdk-with-engine)

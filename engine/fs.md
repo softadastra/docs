@@ -1505,4 +1505,4 @@ It does not sync files, send network messages, or decide conflicts.
 
 Continue with WAL:
 
-[Go to WAL](wal.md)
+[Go to WAL](./wal)

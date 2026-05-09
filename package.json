@@ -2,12 +2,27 @@
   "name": "softadastra-docs",
   "version": "0.1.0",
   "private": true,
+  "description": "Softadastra documentation for building local-first and offline-first applications.",
   "type": "module",
   "scripts": {
     "dev": "vitepress dev . --host 0.0.0.0",
     "build": "vitepress build .",
-    "preview": "vitepress preview . --host 0.0.0.0"
+    "preview": "vitepress preview . --host 0.0.0.0",
+    "deploy": "npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:softadastra/docs.git"
+  },
+  "keywords": [
+    "softadastra",
+    "offline-first",
+    "local-first",
+    "documentation",
+    "vitepress"
+  ],
+  "author": "Softadastra",
+  "license": "MIT",
   "devDependencies": {
     "vitepress": "^1.6.4"
   }

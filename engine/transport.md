@@ -2060,4 +2060,4 @@ It does not decide conflicts, discover peers by itself, or make local writes dep
 
 Continue with discovery:
 
-[Go to Discovery](./discovery.md)
+[Go to Discovery](./discovery)

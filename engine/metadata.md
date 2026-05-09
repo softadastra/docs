@@ -1855,4 +1855,4 @@ It does not store application data, sync values, connect peers, or discover peer
 
 Continue with CLI:
 
-[Go to CLI](./cli.md)
+[Go to CLI](./)
