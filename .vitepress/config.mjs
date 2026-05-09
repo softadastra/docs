@@ -19,14 +19,15 @@ export default defineConfig({
   },
 
   head: [
-    ["link", { rel: "icon", href: "/assets/pwa/favicon.ico" }],
+    // Favicons
+    ["link", { rel: "icon", href: "/pwa/favicon.ico" }],
     [
       "link",
       {
         rel: "icon",
         type: "image/png",
         sizes: "16x16",
-        href: "/assets/pwa/favicon-16x16.png",
+        href: "/pwa/favicon-16x16.png",
       },
     ],
     [
@@ -35,29 +36,65 @@ export default defineConfig({
         rel: "icon",
         type: "image/png",
         sizes: "32x32",
-        href: "/assets/pwa/favicon-32x32.png",
+        href: "/pwa/favicon-32x32.png",
       },
     ],
     [
       "link",
       {
         rel: "apple-touch-icon",
-        href: "/assets/pwa/apple-touch-icon.png",
+        sizes: "180x180",
+        href: "/pwa/apple-touch-icon.png",
+      },
+    ],
+    [
+      "link",
+      {
+        rel: "manifest",
+        href: "/pwa/site.webmanifest",
       },
     ],
 
-    ["meta", { name: "theme-color", content: "#0b0e14" }],
+    // Browser / mobile theme
+    ["meta", { name: "theme-color", content: "#11181b" }],
+    ["meta", { name: "color-scheme", content: "dark light" }],
     ["meta", { name: "mobile-web-app-capable", content: "yes" }],
     ["meta", { name: "apple-mobile-web-app-capable", content: "yes" }],
     [
       "meta",
+      { name: "apple-mobile-web-app-title", content: "Softadastra Docs" },
+    ],
+    ["meta", { name: "application-name", content: "Softadastra Docs" }],
+
+    // Primary SEO
+    [
+      "meta",
       {
-        name: "apple-mobile-web-app-title",
-        content: "Softadastra Docs",
+        name: "description",
+        content:
+          "Softadastra documentation for building local-first and offline-first applications with WAL, sync, local storage, SDKs, and resilient runtime primitives.",
       },
     ],
+    [
+      "meta",
+      {
+        name: "keywords",
+        content:
+          "Softadastra, offline-first, local-first, sync engine, WAL, write-ahead log, local storage, distributed systems, C++ SDK, JavaScript SDK, resilient applications",
+      },
+    ],
+    ["meta", { name: "author", content: "Softadastra" }],
+    ["meta", { name: "robots", content: "index, follow" }],
 
+    // Canonical
+    ["link", { rel: "canonical", href: "https://docs.softadastra.com/" }],
+
+    // Open Graph
     ["meta", { property: "og:type", content: "website" }],
+    [
+      "meta",
+      { property: "og:site_name", content: "Softadastra Documentation" },
+    ],
     ["meta", { property: "og:title", content: "Softadastra Documentation" }],
     [
       "meta",
@@ -67,12 +104,23 @@ export default defineConfig({
           "Learn how to build local-first and offline-first applications with Softadastra.",
       },
     ],
+    ["meta", { property: "og:url", content: "https://docs.softadastra.com/" }],
     [
       "meta",
-      { property: "og:site_name", content: "Softadastra Documentation" },
+      {
+        property: "og:image",
+        content: "https://docs.softadastra.com/pwa/icon-512.png",
+      },
+    ],
+    ["meta", { property: "og:image:width", content: "512" }],
+    ["meta", { property: "og:image:height", content: "512" }],
+    [
+      "meta",
+      { property: "og:image:alt", content: "Softadastra Documentation" },
     ],
 
-    ["meta", { name: "twitter:card", content: "summary_large_image" }],
+    // Twitter / X
+    ["meta", { name: "twitter:card", content: "summary" }],
     ["meta", { name: "twitter:title", content: "Softadastra Documentation" }],
     [
       "meta",
@@ -82,8 +130,14 @@ export default defineConfig({
           "Learn how to build local-first and offline-first applications with Softadastra.",
       },
     ],
+    [
+      "meta",
+      {
+        name: "twitter:image",
+        content: "https://docs.softadastra.com/pwa/icon-512.png",
+      },
+    ],
   ],
-
   vite: {
     optimizeDeps: {
       include: ["mark.js", "minisearch"],

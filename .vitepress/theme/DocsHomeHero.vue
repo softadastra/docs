@@ -235,7 +235,7 @@ const engineLayers = [
   gap: clamp(56px, 7vw, 118px);
   align-items: center;
   width: 100%;
-  max-width: 1440px;
+  max-width:1280px ;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -464,7 +464,7 @@ const engineLayers = [
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   width: 100%;
-  max-width: 1440px;
+  max-width: 1280px;
   margin: 72px auto 0;
   padding: 0 20px;
 }

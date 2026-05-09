@@ -1,0 +1,24 @@
+{
+  "name": "Softadastra Documentation",
+  "short_name": "Softadastra Docs",
+  "description": "Documentation for building local-first and offline-first applications with Softadastra.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#11181b",
+  "theme_color": "#11181b",
+  "icons": [
+    {
+      "src": "/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
