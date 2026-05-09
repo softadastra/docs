@@ -117,41 +117,11 @@ export default defineConfig({
   },
 
   themeConfig: {
-    siteTitle: "Softadastra",
-    logo: "/assets/pwa/icon-192.png",
+    siteTitle: false,
+    logo: false,
+    nav: [],
 
     appearance: true,
-
-    nav: [
-      {
-        text: "Guide",
-        link: "/quick-start",
-      },
-      {
-        text: "Concepts",
-        link: "/concepts/",
-      },
-      {
-        text: "CLI",
-        link: "/cli/",
-      },
-      {
-        text: "SDK C++",
-        link: "/sdk-cpp/",
-      },
-      {
-        text: "SDK JS",
-        link: "/sdk-js/",
-      },
-      {
-        text: "Engine",
-        link: "/engine/",
-      },
-      {
-        text: "Builds",
-        link: "https://builds.softadastra.com",
-      },
-    ],
 
     sidebar: [
       {

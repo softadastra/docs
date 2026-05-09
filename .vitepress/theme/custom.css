@@ -168,11 +168,27 @@ html, body { overflow-x: hidden; }
   background: var(--vp-c-divider); border-radius: 999px;
 }
 
-/* ── Doc content ── */
-.VPDoc .vp-doc {
-  max-width: 740px;
+/* ============================================================
+   Wider documentation content
+   ============================================================ */
+
+@media (min-width: 961px) {
+  .VPDoc .container {
+    max-width: 1440px !important;
+  }
+
+  .VPDoc .content {
+    max-width: none !important;
+  }
+
+.VPDoc .content-container {
+  max-width: 980px !important;
 }
 
+.VPDoc .vp-doc {
+  max-width: 980px !important;
+}
+}
 /* Headings */
 .vp-doc h1 {
   font-size: clamp(1.7rem, 3vw, 2.2rem);
@@ -402,17 +418,11 @@ html:not(.dark) .vp-doc [class*="language-"] pre {
 
   /* Devient fixed seulement après scroll */
   body.vix-local-nav-fixed .VPLocalNav {
-    position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
     z-index: 999 !important;
-  }
-
-  /* Empêche le contenu de sauter quand le local nav devient fixed */
-  body.vix-local-nav-fixed .VPContent {
-    padding-top: var(--vp-local-nav-height, 48px) !important;
   }
 }
 /* Active sidebar item spacing */
@@ -468,7 +478,6 @@ html:not(.dark) .vp-doc [class*="language-"] pre {
 }
 @media (max-width: 960px) {
   body.vix-local-nav-fixed .VPSidebar {
-    top: var(--vp-local-nav-height, 20px) !important;
     height: calc(100vh - var(--vp-local-nav-height, 20px)) !important;
   }
 
@@ -646,4 +655,611 @@ html:not(.dark) .vp-doc [class*="language-"] {
 html:not(.dark) .vp-doc div[class*="language-"] pre,
 html:not(.dark) .vp-doc [class*="language-"] pre {
   background: #151a22 !important;
+}
+/* ============================================================
+   Softadastra custom home full width
+   Works with VitePress layout: home
+   ============================================================ */
+
+.VPHome {
+  margin-bottom: 0 !important;
+}
+
+.VPHome:has(.sd-docs-home) {
+  padding: 0 !important;
+}
+
+.VPHome:has(.sd-docs-home) .VPHero {
+  display: none !important;
+}
+
+.VPHome:has(.sd-docs-home) .VPFeatures {
+  display: none !important;
+}
+
+.VPHome:has(.sd-docs-home) .VPHomeContent {
+  padding: 0 !important;
+}
+
+.VPHome:has(.sd-docs-home) .VPHomeContent .container {
+  max-width: none !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+.VPHome:has(.sd-docs-home) .vp-doc {
+  max-width: none !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+.VPNav {
+  display: none !important;
+}
+.VPContent {
+  padding-top: 0 !important;
+}
+
+.Layout {
+  min-height: 100vh;
+}
+/* ============================================================
+   Softadastra custom navbar + VitePress layout behavior
+   Final override
+   ============================================================ */
+
+:root {
+  --soft-nav-height: 118px;
+  --soft-mobile-nav-height: 98px;
+
+  --vix-accent: #aeb9ff;
+  --vix-accent-d: #7c8cff;
+  --vix-accent-s: rgba(174, 185, 255, 0.12);
+  --vix-accent-b: rgba(174, 185, 255, 0.25);
+}
+
+/* Hide native VitePress navbar */
+.VPNav {
+  display: none !important;
+}
+
+/* The custom Softadastra navbar replaces VitePress nav */
+.soft-nav {
+  position: relative !important;
+  top: auto !important;
+  z-index: 100 !important;
+}
+
+/* Desktop behavior */
+@media (min-width: 961px) {
+  .VPContent {
+    padding-top: 0 !important;
+  }
+
+  .VPSidebar {
+    top: 0 !important;
+    background: var(--vp-c-bg) !important;
+  }
+
+  .VPSidebar .curtain,
+  .VPSidebar .content,
+  .VPSidebar .nav {
+    background: var(--vp-c-bg) !important;
+  }
+
+  .VPDocAside {
+    top: 0 !important;
+  }
+}
+
+/* Mobile behavior */
+@media (max-width: 960px) {
+  .soft-nav {
+    position: relative !important;
+    top: auto !important;
+    z-index: 10 !important;
+  }
+
+  .VPContent {
+    padding-top: 0 !important;
+  }
+
+  .VPLocalNav {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9999 !important;
+    background: var(--vp-c-bg) !important;
+    border-top: 1px solid var(--vp-c-divider) !important;
+    border-bottom: 1px solid var(--vp-c-divider) !important;
+  }
+
+  .VPLocalNav .container,
+  .VPLocalNav .items {
+    background: var(--vp-c-bg) !important;
+  }
+
+  .VPSidebar {
+    background: var(--vp-c-bg) !important;
+    z-index: 9998 !important;
+  }
+
+  .VPSidebar .curtain,
+  .VPSidebar .content,
+  .VPSidebar .nav {
+    background: var(--vp-c-bg) !important;
+  }
+}
+/* ============================================================
+   Softadastra fixed navbar layout correction
+   Desktop: content, sidebar and outline stay below custom navbar
+   Mobile: normal navbar, sticky VitePress local menu
+   ============================================================ */
+
+:root {
+  --soft-nav-height: 118px;
+  --soft-mobile-nav-height: 98px;
+}
+
+/* Hide native VitePress navbar */
+.VPNav {
+  display: none !important;
+}
+
+/* Desktop */
+@media (min-width: 961px) {
+  .soft-nav {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+  }
+
+  .VPContent {
+    padding-top: var(--soft-nav-height) !important;
+  }
+
+  .VPSidebar {
+    top: var(--soft-nav-height) !important;
+    height: calc(100vh - var(--soft-nav-height)) !important;
+    background: var(--vp-c-bg) !important;
+  }
+
+  .VPSidebar .curtain,
+  .VPSidebar .content,
+  .VPSidebar .nav {
+    background: var(--vp-c-bg) !important;
+  }
+
+  .VPDocAside {
+    top: var(--soft-nav-height) !important;
+    height: calc(100vh - var(--soft-nav-height)) !important;
+  }
+
+  .VPDoc {
+    padding-top: 0 !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 960px) {
+  .soft-nav {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    z-index: 10 !important;
+  }
+
+  .VPContent {
+    padding-top: 0 !important;
+  }
+
+  .VPLocalNav {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9999 !important;
+    background: var(--vp-c-bg) !important;
+    border-top: 1px solid var(--vp-c-divider) !important;
+    border-bottom: 1px solid var(--vp-c-divider) !important;
+  }
+
+  .VPLocalNav .container,
+  .VPLocalNav .items {
+    background: var(--vp-c-bg) !important;
+  }
+
+  .VPSidebar {
+    background: var(--vp-c-bg) !important;
+    z-index: 9998 !important;
+  }
+
+  .VPSidebar .curtain,
+  .VPSidebar .content,
+  .VPSidebar .nav {
+    background: var(--vp-c-bg) !important;
+  }
+}
+/* ============================================================
+   Mobile fixed banner + fixed VitePress local menu
+   ============================================================ */
+
+@media (max-width: 960px) {
+  :root {
+    --soft-mobile-banner-height: 40px;
+    --soft-mobile-local-nav-height: 48px;
+  }
+
+  .soft-nav {
+    position: relative !important;
+    z-index: 10000 !important;
+    padding-top: var(--soft-mobile-banner-height) !important;
+  }
+
+  .soft-nav__banner {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 10002 !important;
+
+    height: var(--soft-mobile-banner-height) !important;
+    justify-content: flex-start !important;
+    padding: 0 48px 0 16px !important;
+
+    color: rgba(255, 255, 255, 0.94) !important;
+    background: #202b43 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.075) !important;
+
+    font-size: 12px !important;
+  }
+
+  .soft-nav__bar {
+    position: relative !important;
+    z-index: 10001 !important;
+  }
+
+  .VPLocalNav {
+    position: fixed !important;
+    top: var(--soft-mobile-banner-height) !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 10001 !important;
+
+    background: var(--vp-c-bg) !important;
+    border-top: 1px solid var(--vp-c-divider) !important;
+    border-bottom: 1px solid var(--vp-c-divider) !important;
+  }
+
+  .VPLocalNav .container,
+  .VPLocalNav .items {
+    background: var(--vp-c-bg) !important;
+  }
+
+  .VPLocalNav .container {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .VPContent {
+    padding-top: var(--soft-mobile-local-nav-height) !important;
+  }
+
+  .VPSidebar {
+    top: calc(
+      var(--soft-mobile-banner-height) + var(--soft-mobile-local-nav-height)
+    ) !important;
+    height: calc(
+      100vh - var(--soft-mobile-banner-height) - var(--soft-mobile-local-nav-height)
+    ) !important;
+    z-index: 10000 !important;
+    background: var(--vp-c-bg) !important;
+  }
+
+  .VPSidebar .curtain,
+  .VPSidebar .content,
+  .VPSidebar .nav {
+    background: var(--vp-c-bg) !important;
+  }
+}
+/* ============================================================
+   Fix desktop sidebar top gap with custom Softadastra navbar
+   ============================================================ */
+
+@media (min-width: 961px) {
+  :root {
+    --soft-desktop-nav-height: 64px;
+  }
+
+  .VPNav {
+    display: none !important;
+  }
+
+  .soft-nav {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+  }
+
+  .VPContent {
+    padding-top: var(--soft-desktop-nav-height) !important;
+  }
+
+  .VPSidebar {
+    top: var(--soft-desktop-nav-height) !important;
+    height: calc(100vh - var(--soft-desktop-nav-height)) !important;
+    padding-top: 0 !important;
+    background: var(--vp-c-bg) !important;
+  }
+
+  .VPSidebar .curtain,
+  .VPSidebar .content,
+  .VPSidebar .nav {
+    top: 0 !important;
+    margin-top: 0 !important;
+    background: var(--vp-c-bg) !important;
+  }
+
+  .VPSidebar .content {
+    padding-top: 0 !important;
+  }
+
+  .VPSidebar .nav {
+    padding-top: 18px !important;
+  }
+
+  .VPDocAside {
+    top: var(--soft-desktop-nav-height) !important;
+    height: calc(100vh - var(--soft-desktop-nav-height)) !important;
+  }
+}
+/* ============================================================
+   Softadastra unified page background
+   Home and docs pages use the same dark surface
+   ============================================================ */
+
+:root {
+  --soft-bg: #11181b;
+  --soft-bg-soft: #151d22;
+  --soft-bg-alt: #182127;
+  --soft-border: rgba(255, 255, 255, 0.075);
+  --soft-text-1: rgba(255, 255, 255, 0.93);
+  --soft-text-2: rgba(190, 220, 242, 0.72);
+  --soft-accent: #aeb9ff;
+  --soft-accent-strong: #7c8cff;
+}
+
+/* Force VitePress theme surfaces to match Softadastra home */
+html.dark {
+  --vp-c-bg: var(--soft-bg) !important;
+  --vp-c-bg-soft: var(--soft-bg-soft) !important;
+  --vp-c-bg-alt: var(--soft-bg-alt) !important;
+  --vp-c-divider: var(--soft-border) !important;
+
+  --vp-c-text-1: var(--soft-text-1) !important;
+  --vp-c-text-2: var(--soft-text-2) !important;
+
+  --vp-c-brand-1: var(--soft-accent) !important;
+  --vp-c-brand-2: var(--soft-accent-strong) !important;
+  --vp-c-brand-3: var(--soft-accent) !important;
+}
+
+/* Global app background */
+html,
+body,
+#app,
+.VPApp,
+.Layout,
+.VPContent,
+.VPDoc,
+.VPDoc .container,
+.VPDoc .content,
+.VPDoc .content-container,
+.vp-doc {
+  background: var(--soft-bg) !important;
+}
+
+/* Sidebar and outline background */
+.VPSidebar,
+.VPSidebar .curtain,
+.VPSidebar .content,
+.VPSidebar .nav,
+.VPDocAside,
+.VPDocAsideOutline {
+  background: var(--soft-bg) !important;
+}
+
+/* Mobile local navigation */
+.VPLocalNav,
+.VPLocalNav .container,
+.VPLocalNav .items {
+  background: var(--soft-bg) !important;
+}
+
+/* Cards, pager, and soft blocks */
+.VPDocFooter .pager-link,
+.vp-doc .tip,
+.vp-doc .info,
+.vp-doc .warning,
+.vp-doc .danger {
+  background: var(--soft-bg-soft) !important;
+  border-color: var(--soft-border) !important;
+}
+
+/* Tables */
+.vp-doc th,
+.vp-doc td {
+  border-color: var(--soft-border) !important;
+}
+
+/* Horizontal lines and h2 separators */
+.vp-doc h2 {
+  border-top-color: var(--soft-border) !important;
+}
+
+/* Inline code */
+.vp-doc :not(pre) > code {
+  background: var(--soft-bg-soft) !important;
+  border-color: var(--soft-border) !important;
+  color: var(--soft-accent) !important;
+}
+
+/* Active sidebar item */
+.VPSidebarItem.is-active > .item > .link,
+.VPSidebarItem.is-active > .item .link {
+  color: var(--soft-accent) !important;
+  background: rgba(174, 185, 255, 0.12) !important;
+}
+
+.VPSidebarItem.is-active > .item::before {
+  background: var(--soft-accent) !important;
+}
+
+.VPSidebarItem .link:hover {
+  color: var(--soft-accent) !important;
+  background: rgba(174, 185, 255, 0.1) !important;
+}
+
+/* Outline active link */
+.VPDocAside .outline-link.active {
+  color: var(--soft-accent) !important;
+}
+/* ============================================================
+   Softadastra light/dark theme surfaces
+   ============================================================ */
+
+html.dark {
+  --soft-bg: #11181b;
+  --soft-bg-soft: #151d22;
+  --soft-bg-alt: #182127;
+  --soft-border: rgba(255, 255, 255, 0.075);
+  --soft-text-1: rgba(255, 255, 255, 0.93);
+  --soft-text-2: rgba(190, 220, 242, 0.72);
+  --soft-accent: #aeb9ff;
+}
+
+html:not(.dark) {
+  --soft-bg: #ffffff;
+  --soft-bg-soft: #f6f7f9;
+  --soft-bg-alt: #eef0f3;
+  --soft-border: rgba(0, 0, 0, 0.08);
+  --soft-text-1: rgba(0, 0, 0, 0.92);
+  --soft-text-2: rgba(0, 0, 0, 0.66);
+  --soft-accent: #5669d6;
+}
+
+html.dark,
+html:not(.dark) {
+  --vp-c-bg: var(--soft-bg) !important;
+  --vp-c-bg-soft: var(--soft-bg-soft) !important;
+  --vp-c-bg-alt: var(--soft-bg-alt) !important;
+  --vp-c-divider: var(--soft-border) !important;
+  --vp-c-text-1: var(--soft-text-1) !important;
+  --vp-c-text-2: var(--soft-text-2) !important;
+  --vp-c-brand-1: var(--soft-accent) !important;
+  --vp-c-brand-2: var(--soft-accent) !important;
+  --vp-c-brand-3: var(--soft-accent) !important;
+}
+
+html,
+body,
+#app,
+.VPApp,
+.Layout,
+.VPContent,
+.VPDoc,
+.VPDoc .container,
+.VPDoc .content,
+.VPDoc .content-container,
+.vp-doc,
+.VPSidebar,
+.VPSidebar .curtain,
+.VPSidebar .content,
+.VPSidebar .nav,
+.VPDocAside,
+.VPDocAsideOutline,
+.VPLocalNav,
+.VPLocalNav .container,
+.VPLocalNav .items {
+  background: var(--soft-bg) !important;
+}
+.VPNav {
+  display: none !important;
+}
+
+/* ============================================================
+   Final desktop top spacing fix
+   Prevent center content from being hidden under Softadastra navbar
+   ============================================================ */
+
+@media (min-width: 961px) {
+  :root {
+    --soft-desktop-nav-height: 118px;
+  }
+
+  .soft-nav {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+  }
+
+  .VPContent {
+    padding-top: var(--soft-desktop-nav-height) !important;
+  }
+
+  .VPSidebar {
+    top: var(--soft-desktop-nav-height) !important;
+    height: calc(100vh - var(--soft-desktop-nav-height)) !important;
+  }
+
+  .VPDocAside {
+    top: var(--soft-desktop-nav-height) !important;
+    height: calc(100vh - var(--soft-desktop-nav-height)) !important;
+  }
+
+  .VPDoc {
+    padding-top: 32px !important;
+  }
+
+  .VPDoc .container {
+    padding-top: 0 !important;
+  }
+
+  .VPDoc .content {
+    padding-top: 0 !important;
+  }
+}
+/* ============================================================
+   Remove VitePress native sidebar curtain
+   We use a custom Softadastra navbar, so the native nav curtain
+   must not reserve or cover space above the sidebar.
+   ============================================================ */
+
+@media (min-width: 960px) {
+  .VPSidebar .curtain,
+  .curtain[data-v-8f603b0e] {
+    display: none !important;
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .VPSidebar .content {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .VPSidebar .nav {
+    padding-top: 18px !important;
+    margin-top: 0 !important;
+  }
 }

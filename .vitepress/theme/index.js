@@ -28,23 +28,5 @@ export default {
     window.addEventListener("load", () => {
       window.scrollTo(0, 0);
     });
-
-    const updateLocalNavState = () => {
-      const nav = document.querySelector(".VPNavBar");
-      const localNav = document.querySelector(".VPLocalNav");
-
-      if (!nav || !localNav) {
-        return;
-      }
-
-      const navHeight = nav.getBoundingClientRect().height;
-      const shouldFix = window.scrollY > navHeight;
-
-      document.body.classList.toggle("vix-local-nav-fixed", shouldFix);
-    };
-
-    window.addEventListener("scroll", updateLocalNavState, { passive: true });
-    window.addEventListener("resize", updateLocalNavState);
-    window.requestAnimationFrame(updateLocalNavState);
   },
 };

@@ -1,420 +1,593 @@
 <script setup>
-import CodeBlock from "./CodeBlock.vue";
-
-const heroCode = `#include <vix.hpp>
-using namespace vix;
-
-int main() {
-  App app;
-
-  app.get("/", [](Request&, Response& res) {
-    res.json({"message", "Hello from Vix.cpp"});
-  });
-
-  app.get("/ping", [](Request&, Response& res) {
-    res.send("pong");
-  });
-
-  app.run(8080);
-}`;
-
-const features = [
+const cards = [
   {
-    title: "HTTP APIs",
-    desc: "Clean routing, middleware, and JSON serialization with zero overhead.",
-    icon: "swap",
-    href: "/api/http",
-    tag: "Core",
+    icon: "cpp",
+    title: "C++ SDK",
+    desc: "Build native local-first applications with durable WAL, persistent store, and sync primitives.",
+    href: "/sdk-cpp/",
   },
   {
-    title: "WebSockets",
-    desc: "Real-time bidirectional communication, built for production workloads.",
-    icon: "bolt",
-    href: "/api/websocket",
-    tag: "Realtime",
+    icon: "js",
+    title: "JavaScript SDK",
+    desc: "Use the same Softadastra model from Node.js or browser apps with a friendly async API.",
+    href: "/sdk-js/",
   },
   {
-    title: "Async Runtime",
-    desc: "Timers, background jobs, and concurrent tasks — one unified model.",
-    icon: "chip",
-    href: "/api/async",
-    tag: "Async",
+    icon: "terminal",
+    title: "CLI",
+    desc: "Inspect nodes, read and write local data, trigger sync, and debug runtime state from the terminal.",
+    href: "/cli/",
   },
   {
-    title: "Local-first",
-    desc: "Applications that keep working under unstable networks and failure conditions.",
-    icon: "p2p",
-    href: "/book/18-offline-first-sync",
-    tag: "Sync",
+    icon: "engine",
+    title: "Engine internals",
+    desc: "Understand WAL, store, sync, transport, discovery, metadata, and the full runtime flow.",
+    href: "/engine/",
+  },
+  {
+    icon: "guide",
+    title: "Guides",
+    desc: "Build offline-first apps, persist data locally, run local nodes, and sync between peers.",
+    href: "/guides/",
+  },
+  {
+    icon: "reference",
+    title: "Reference",
+    desc: "Compact technical reference for the CLI, C++ API, JavaScript API, config, and errors.",
+    href: "/reference/",
   },
 ];
 
-function iconPath(name) {
-  if (name === "swap")   return "M7 7h11l-2-2m2 2l-2 2M17 17H6l2 2m-2-2l2-2";
-  if (name === "bolt")   return "M13 2L4 14h7l-1 8 9-12h-7l1-8z";
-  if (name === "chip")   return "M9 9h6v6H9V9zm-5 3h2m12 0h2M12 4v2m0 12v2M6.5 6.5l1.4 1.4m8.2 8.2l1.4 1.4m0-12.4l-1.4 1.4M7.9 16.1l-1.4 1.4";
-  return "M6 12a2 2 0 114 0 2 2 0 01-4 0zm8-6a2 2 0 114 0 2 2 0 01-4 0zm0 12a2 2 0 114 0 2 2 0 01-4 0zM10 12l4-6M10 12l4 6";
-}
+const engineLayers = [
+  {
+    name: "WAL",
+    href: "/engine/wal",
+    desc: "Every accepted write is persisted before sync.",
+    icon: "wal",
+  },
+  {
+    name: "Store",
+    href: "/engine/store",
+    desc: "Local state remains available without network.",
+    icon: "store",
+  },
+  {
+    name: "Sync",
+    href: "/engine/sync",
+    desc: "Outbox, retry, delivery, acknowledgement.",
+    icon: "sync",
+  },
+  {
+    name: "Transport",
+    href: "/engine/transport",
+    desc: "Peer and network delivery layer.",
+    icon: "transport",
+  },
+];
 </script>
 
 <template>
-  <!-- ── Hero ── -->
-  <div class="vdh">
-    <div class="vdh-left">
-      <div class="vdh-eyebrow">
-        <span class="vdh-badge">v2.5.2</span>
-        <span class="vdh-sep">·</span>
-        <span>MIT · Open source</span>
-      </div>
+  <section class="sd-docs-home">
+    <div class="sd-hero">
+      <div class="sd-hero__copy">
+        <h1>Softadastra Documentation</h1>
 
-      <h1 class="vdh-h1">
-        Build C++ apps<br class="vdh-br"/>
-        that ship fast.
-      </h1>
+        <p>
+          Softadastra is a local-first and offline-first foundation for
+          applications that must keep working when the network becomes slow,
+          unstable, or unavailable.
+        </p>
 
-      <p class="vdh-lead">
-        Learn how to build HTTP APIs, WebSocket services, async tasks,
-        and local-first systems with Vix.cpp, a modern C++ runtime focused
-        on clarity and predictable performance.
-      </p>
+        <p>
+          Write locally, persist every operation to a WAL, then sync when the
+          network allows it. The system is designed to protect correctness
+          before convenience.
+        </p>
 
-      <div class="vdh-actions">
-        <a class="vdh-btn vdh-btn--primary" href="/book/01-introduction">
-          Get started
-          <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
-            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>
-        <a class="vdh-btn vdh-btn--ghost" href="https://github.com/vixcpp/vix" target="_blank" rel="noreferrer">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.54 2.87 8.39 6.84 9.75.5.1.68-.22.68-.48 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.49-1.11-1.49-.9-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.89 1.57 2.34 1.12 2.91.86.09-.66.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05A9.2 9.2 0 0 1 12 7.07c.85 0 1.71.12 2.51.35 1.9-1.32 2.74-1.05 2.74-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.93-2.34 4.79-4.57 5.05.36.32.68.95.68 1.92 0 1.38-.01 2.5-.01 2.84 0 .27.18.59.69.48A10.04 10.04 0 0 0 22 12.26C22 6.58 17.52 2 12 2z"/></svg>
-          GitHub
-        </a>
-      </div>
+        <div class="sd-hero__actions">
+          <a class="sd-button sd-button--primary" href="/quick-start">
+            Get started
+            <span aria-hidden="true">→</span>
+          </a>
 
-      <div class="vdh-stats">
-        <div class="vdh-stat">
-          <div class="vdh-stat-v">135+</div>
-          <div class="vdh-stat-l">Registry packages</div>
-        </div>
-        <div class="vdh-stat-div"></div>
-        <div class="vdh-stat">
-          <div class="vdh-stat-v">C++17</div>
-          <div class="vdh-stat-l">Minimum standard</div>
-        </div>
-        <div class="vdh-stat-div"></div>
-        <div class="vdh-stat">
-          <div class="vdh-stat-v">MIT</div>
-          <div class="vdh-stat-l">Open source</div>
+          <a class="sd-button sd-button--link" href="/engine/">
+            Explore the engine
+          </a>
         </div>
       </div>
-    </div>
 
-    <div class="vdh-right">
-      <div class="vdh-code-label">Quick start</div>
-      <CodeBlock
-        title="main.cpp"
-        lang="cpp"
-        :chips="['http', 'json']"
-        :code="heroCode"
-        :maxHeight="400"
-      />
-      <div class="vdh-run">
-        <span class="vdh-run-prompt">$</span>
-        <span class="vdh-run-cmd">vix run main.cpp</span>
-        <span class="vdh-run-comment"># compiles &amp; runs</span>
-      </div>
-    </div>
-  </div>
+     <div class="sd-hero__system" aria-label="Softadastra engine layers">
+  <a
+    v-for="(layer, index) in engineLayers"
+    :key="layer.name"
+    :href="layer.href"
+    class="sd-system-row"
+  >
+    <span
+      class="sd-system-plate"
+      :class="`sd-system-plate--${index + 1}`"
+      aria-hidden="true"
+    ></span>
 
-  <!-- ── Feature cards ── -->
-  <div class="vdh-cards">
-    <a
-      v-for="f in features"
-      :key="f.title"
-      class="vdh-card"
-      :href="f.href"
-    >
-      <div class="vdh-card-top">
-        <div class="vdh-card-icon">
-          <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
-            <path :d="iconPath(f.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <span class="vdh-card-tag">{{ f.tag }}</span>
-      </div>
-      <div class="vdh-card-title">{{ f.title }}</div>
-      <div class="vdh-card-desc">{{ f.desc }}</div>
-      <div class="vdh-card-arrow">
-        <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
-          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <span class="sd-system-copy">
+      <span class="sd-layer__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <template v-if="layer.icon === 'wal'">
+            <path d="M12 3 20 7.5 12 12 4 7.5 12 3Z" />
+            <path d="M20 12 12 16.5 4 12" />
+            <path d="M20 16.5 12 21 4 16.5" />
+          </template>
+
+          <template v-else-if="layer.icon === 'store'">
+            <rect x="4" y="5" width="16" height="14" rx="2" />
+            <path d="M4 9h16" />
+            <path d="M8 13h4" />
+          </template>
+
+          <template v-else-if="layer.icon === 'sync'">
+            <path d="M17 3 21 7 17 11" />
+            <path d="M3 7h18" />
+            <path d="M7 21 3 17 7 13" />
+            <path d="M21 17H3" />
+          </template>
+
+          <template v-else>
+            <path d="M12 4v4" />
+            <path d="M12 16v4" />
+            <path d="M4 12h4" />
+            <path d="M16 12h4" />
+            <circle cx="12" cy="12" r="4" />
+          </template>
         </svg>
-      </div>
-    </a>
-  </div>
+      </span>
+
+      <span class="sd-layer__body">
+        <strong>{{ layer.name }}</strong>
+        <small>{{ layer.desc }}</small>
+      </span>
+    </span>
+  </a>
+</div>
+    </div>
+
+    <div class="sd-card-grid">
+      <a
+        v-for="card in cards"
+        :key="card.title"
+        :href="card.href"
+        class="sd-card"
+      >
+        <span class="sd-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <template v-if="card.icon === 'cpp'">
+              <path d="M12 3 20 7.5V16.5L12 21 4 16.5V7.5L12 3Z" />
+              <path d="M9.5 9.5A3.5 3.5 0 1 0 9.5 14.5" />
+              <path d="M14 10V14" />
+              <path d="M16 10V14" />
+            </template>
+
+            <template v-else-if="card.icon === 'js'">
+              <rect x="4" y="4" width="16" height="16" rx="2" />
+              <path d="M9 16.5c1.4 0 2-.7 2-2V10" />
+              <path d="M15.5 10H14a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-1.8" />
+            </template>
+
+            <template v-else-if="card.icon === 'terminal'">
+              <path d="M4 6h16v12H4z" />
+              <path d="M7 10l2 2-2 2" />
+              <path d="M11 15h4" />
+            </template>
+
+            <template v-else-if="card.icon === 'engine'">
+              <rect x="7" y="7" width="10" height="10" rx="2" />
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+              <path d="M4.9 4.9 7 7M17 17l2.1 2.1" />
+              <path d="M19.1 4.9 17 7M7 17l-2.1 2.1" />
+            </template>
+
+            <template v-else-if="card.icon === 'guide'">
+              <path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 0-4-4V4Z" />
+              <path d="M9 8h6M9 12h6" />
+            </template>
+
+            <template v-else>
+              <path d="M5 6h14M5 12h10M5 18h12" />
+              <path d="M3 6h.01M3 12h.01M3 18h.01" />
+            </template>
+          </svg>
+        </span>
+
+        <strong>{{ card.title }}</strong>
+        <span>{{ card.desc }}</span>
+      </a>
+    </div>
+  </section>
 </template>
 
 <style scoped>
-/* ── Tokens ── */
-.vdh {
-  --accent: #22c55e;
-  --accent-d: #16a34a;
-  --accent-s: rgba(34, 197, 94, .12);
-  --accent-b: rgba(34, 197, 94, .25);
+.sd-docs-home {
+  --sd-bg: #11181b;
+  --sd-card: #11181b;
+  --sd-card-hover: #172025;
+  --sd-border-soft: rgba(255, 255, 255, 0.075);
+  --sd-text: rgba(255, 255, 255, 0.93);
+  --sd-muted: rgba(190, 220, 242, 0.78);
+  --sd-dim: rgba(190, 220, 242, 0.55);
+  --sd-icon: rgba(190, 220, 242, 0.48);
+  --sd-accent: #aeb9ff;
 
+  width: 100vw;
+  min-height: calc(100vh - 64px);
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding: 96px 0 80px;
+  color: var(--sd-text);
+  background: var(--sd-bg);
+}
+
+/* =========================
+   Hero
+   ========================= */
+
+.sd-hero {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 52px;
-  align-items: start;
-  padding: 20px 0 40px;
+  grid-template-columns: minmax(0, 1fr) minmax(520px, 560px);
+  gap: clamp(56px, 7vw, 118px);
+  align-items: center;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-/* ── Left ── */
-.vdh-left { display: flex; flex-direction: column; gap: 0; }
-
-.vdh-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 12.5px; font-weight: 600;
-  color: var(--vp-c-text-2);
-  margin-bottom: 16px;
+.sd-hero__copy h1 {
+  max-width: 680px;
+  margin: 0 0 28px;
+  color: var(--sd-text);
+  font-size: clamp(42px, 4.6vw, 58px);
+  line-height: 1.02;
+  letter-spacing: -0.055em;
+  font-weight: 740;
 }
 
-.vdh-badge {
-  display: inline-flex; align-items: center;
-  padding: 3px 9px; border-radius: 999px;
-  font-size: 11.5px; font-weight: 700;
-  background: var(--accent-s);
-  border: 1px solid var(--accent-b);
-  color: var(--accent);
+.sd-hero__copy p {
+  max-width: 650px;
+  margin: 0;
+  color: var(--sd-muted);
+  font-size: 18px;
+  line-height: 1.64;
 }
 
-.vdh-sep { color: var(--vp-c-divider); }
-
-.vdh-h1 {
-  margin: 0 0 18px;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.06;
-  letter-spacing: -0.03em;
-  font-weight: 900;
-  color: var(--vp-c-text-1);
+.sd-hero__copy p + p {
+  margin-top: 22px;
 }
 
-.vdh-br { display: block; }
-
-.vdh-lead {
-  margin: 0 0 24px;
-  font-size: 15.5px;
-  line-height: 1.72;
-  color: var(--vp-c-text-2);
-  max-width: 46ch;
-}
-
-/* CTAs */
-.vdh-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
-
-.vdh-btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 16px; border-radius: 10px;
-  font-size: 13.5px; font-weight: 700; text-decoration: none;
-  transition: all .14s ease;
-}
-
-.vdh-btn--primary {
-  background: var(--accent);
-  color: #052e16;
-  box-shadow: 0 4px 14px rgba(34,197,94,.30);
-}
-.vdh-btn--primary:hover {
-  background: #4ade80;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(34,197,94,.40);
-}
-
-.vdh-btn--ghost {
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-1);
-}
-.vdh-btn--ghost:hover {
-  border-color: var(--accent-b);
-  background: var(--accent-s);
-}
-
-/* Stats */
-.vdh-stats {
-  display: flex; align-items: center; gap: 20px;
+.sd-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
   flex-wrap: wrap;
+  margin-top: 34px;
 }
 
-.vdh-stat { display: flex; flex-direction: column; gap: 3px; }
-.vdh-stat-v { font-size: 17px; font-weight: 900; color: var(--vp-c-text-1); letter-spacing: -0.02em; }
-.vdh-stat-l { font-size: 11.5px; font-weight: 600; color: var(--vp-c-text-2); }
-.vdh-stat-div { width: 1px; height: 28px; background: var(--vp-c-divider); }
+/* =========================
+   Buttons
+   ========================= */
 
-/* ── Right ── */
-.vdh-right { display: flex; flex-direction: column; gap: 10px; }
-
-.vdh-code-label {
-  font-size: 11.5px; font-weight: 700; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--vp-c-text-2);
-}
-
-.vdh-run {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 14px; border-radius: 10px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 13px;
-}
-
-.vdh-run-prompt { color: var(--accent); font-weight: 800; }
-.vdh-run-cmd    { color: var(--vp-c-text-1); font-weight: 700; }
-.vdh-run-comment{ color: var(--vp-c-text-2); font-size: 12px; margin-left: auto; }
-
-/* ── Feature cards ── */
-.vdh-cards {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  padding-bottom: 8px;
-}
-
-.vdh-card {
-  display: flex; flex-direction: column; gap: 8px;
-  padding: 16px; border-radius: 14px;
-  border: 1px solid var(--vp-c-divider);
-  background: transparent;
+.sd-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  border-radius: 2px;
+  font-size: 15px;
+  font-weight: 680;
   text-decoration: none;
-  color: var(--vp-c-text-1);
-  transition: border-color .14s, transform .14s, background .14s;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.sd-button--primary {
+  padding: 0 24px;
+  color: #071018;
+  background: var(--sd-accent);
+}
+
+.sd-button--primary:hover {
+  background: #c5ccff;
+  transform: translateY(-1px);
+}
+
+.sd-button--link {
+  color: var(--sd-muted);
+}
+
+.sd-button--link:hover {
+  color: var(--sd-text);
+}
+
+/* =========================
+   Right visual, Modular-like
+   ========================= */
+
+.sd-hero__system {
+  display: grid;
+  grid-template-columns: 230px 260px;
+  grid-template-rows: repeat(4, 72px);
+  column-gap: 34px;
+  row-gap: 14px;
+  align-items: center;
+  justify-content: end;
+  width: 100%;
+  max-width: 560px;
+  justify-self: end;
+}
+
+.sd-system-row {
+  display: contents;
+  color: inherit;
+  text-decoration: none;
+}
+
+.sd-system-plate {
   position: relative;
+  display: block;
+  justify-self: center;
+  align-self: center;
+  width: 150px;
+  height: 150px;
+  border-radius: 8px;
+  transform:
+    rotateX(62deg)
+    rotateZ(45deg)
+    scaleY(0.52);
+  transform-origin: center;
+  box-shadow:
+    0 16px 22px rgba(0, 0, 0, 0.24),
+    inset 0 -13px 0 rgba(0, 0, 0, 0.16);
 }
 
-.vdh-card:hover {
-  border-color: var(--accent-b);
-  background: var(--accent-s);
-  transform: translateY(-2px);
+.sd-system-plate::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -10px;
+  height: 10px;
+  border-radius: 0 0 8px 8px;
+  background: rgba(0, 0, 0, 0.16);
 }
 
-.vdh-card-top {
-  display: flex; align-items: center;
-  justify-content: space-between; gap: 8px;
-  margin-bottom: 4px;
+.sd-system-plate--1 {
+  grid-column: 1;
+  grid-row: 1;
+  background: #b8c4ff;
 }
 
-.vdh-card-icon {
-  width: 34px; height: 34px; border-radius: 10px;
-  display: grid; place-items: center;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-2);
-  transition: border-color .14s, color .14s;
-}
-.vdh-card:hover .vdh-card-icon {
-  border-color: var(--accent-b);
-  color: var(--accent);
+.sd-system-plate--2 {
+  grid-column: 1;
+  grid-row: 2;
+  background: #8d9ded;
 }
 
-.vdh-card-tag {
-  font-size: 10.5px; font-weight: 700; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--accent);
-  background: var(--accent-s); border: 1px solid var(--accent-b);
-  padding: 2px 8px; border-radius: 999px;
-  opacity: 0; transition: opacity .14s;
+.sd-system-plate--3 {
+  grid-column: 1;
+  grid-row: 3;
+  background: #6576d0;
 }
-.vdh-card:hover .vdh-card-tag { opacity: 1; }
 
-.vdh-card-title {
-  font-size: 14px; font-weight: 800; color: var(--vp-c-text-1);
+.sd-system-plate--4 {
+  grid-column: 1;
+  grid-row: 4;
+  background: #4252ad;
+}
+
+.sd-system-copy {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 12px;
+  align-items: start;
+  align-self: center;
+}
+
+.sd-system-row:nth-child(1) .sd-system-copy {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.sd-system-row:nth-child(2) .sd-system-copy {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.sd-system-row:nth-child(3) .sd-system-copy {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.sd-system-row:nth-child(4) .sd-system-copy {
+  grid-column: 2;
+  grid-row: 4;
+}
+
+.sd-layer__icon {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  color: var(--sd-icon);
+}
+
+.sd-layer__icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sd-layer__body {
+  display: block;
+}
+
+.sd-layer__body strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--sd-text);
+  font-size: 17px;
+  font-weight: 720;
   line-height: 1.2;
 }
 
-.vdh-card-desc {
-  font-size: 12.5px; line-height: 1.6; color: var(--vp-c-text-2);
-  flex: 1;
+.sd-layer__body small {
+  display: block;
+  max-width: 230px;
+  color: var(--sd-dim);
+  font-size: 14px;
+  line-height: 1.42;
 }
 
-.vdh-card-arrow {
-  display: flex; align-items: center;
-  color: var(--vp-c-text-2);
-  opacity: 0; transform: translateX(-4px);
-  transition: opacity .14s, transform .14s;
-}
-.vdh-card:hover .vdh-card-arrow {
-  opacity: 1; transform: translateX(0);
-  color: var(--accent);
+.sd-system-row:hover .sd-layer__body strong,
+.sd-system-row:hover .sd-layer__icon {
+  color: var(--sd-accent);
 }
 
-/* ── Responsive ── */
+/* =========================
+   Cards
+   ========================= */
+
+.sd-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  max-width: 1440px;
+  margin: 72px auto 0;
+  padding: 0 20px;
+}
+
+.sd-card {
+  min-height: 184px;
+  padding: 30px 28px;
+  color: inherit;
+  text-decoration: none;
+  background: var(--sd-card);
+  border: 1px solid var(--sd-border-soft);
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.sd-card:hover {
+  background: var(--sd-card-hover);
+  border-color: rgba(174, 185, 255, 0.28);
+  transform: translateY(-2px);
+}
+
+.sd-card__icon {
+  display: inline-flex;
+  margin-bottom: 34px;
+  color: var(--sd-icon);
+}
+
+.sd-card__icon svg {
+  width: 26px;
+  height: 26px;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sd-card strong {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--sd-text);
+  font-size: 19px;
+  line-height: 1.25;
+}
+
+.sd-card span:last-child {
+  display: block;
+  color: var(--sd-dim);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* =========================
+   Tablet
+   ========================= */
+
 @media (max-width: 1100px) {
-  .vdh-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 960px) {
-  .vdh {
+  .sd-hero {
     grid-template-columns: 1fr;
-    gap: 28px;
-    padding-top: 12px;
-  }
-  .vdh-h1 { font-size: 2.2rem; }
-  .vdh-br { display: none; }
-  .vdh-lead { max-width: 100%; }
-  .vdh-run-comment { display: none; }
-}
-
-@media (max-width: 640px) {
-  .vdh-h1 { font-size: 1.85rem; }
-  .vdh-lead { font-size: 14.5px; }
-  .vdh-cards { grid-template-columns: 1fr; gap: 10px; }
-  .vdh-stats { gap: 14px; }
-  .vdh-stat-div { display: none; }
-  .vdh-card-tag { opacity: 1; }
-  .vdh-card-arrow { opacity: 1; transform: translateX(0); }
-}
-
-@media (max-width: 640px) {
-  .vdh {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
   }
 
-  .vdh-left,
-  .vdh-right {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
+  .sd-hero__system {
+    justify-self: start;
   }
 
-  .vdh-right :deep(.code-block),
-  .vdh-right :deep(.vix-code-block),
-  .vdh-right :deep(pre),
-  .vdh-right :deep(code) {
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .vdh-right :deep(pre) {
-    overflow-x: auto;
-  }
-
-  .vdh-run {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
+  .sd-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-.vdh-btn--primary {
-  background: var(--accent);
-  color: #052e16;
-  box-shadow: 0 4px 14px rgba(34,197,94,.30);
+
+/* =========================
+   Mobile
+   ========================= */
+
+@media (max-width: 720px) {
+  .sd-docs-home {
+    padding: 56px 0 56px;
+  }
+
+  .sd-hero,
+  .sd-card-grid {
+    padding: 0 20px;
+  }
+
+ .sd-hero__copy h1 {
+  font-size: 36px;
+  line-height: 1.04;
 }
 
-.vdh-btn--primary:hover {
-  background: #4ade80;
-  color: #052e16;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(34,197,94,.40);
+  .sd-hero__copy p {
+    font-size: 16px;
+  }
+
+  .sd-hero__system {
+    grid-template-columns: 130px 1fr;
+    grid-template-rows: repeat(4, 62px);
+    column-gap: 20px;
+    row-gap: 12px;
+    justify-self: start;
+  }
+
+  .sd-system-plate {
+    width: 105px;
+    height: 105px;
+    transform:
+      rotateX(62deg)
+      rotateZ(45deg)
+      scaleY(0.52);
+  }
+
+  .sd-card-grid {
+    grid-template-columns: 1fr;
+    margin-top: 48px;
+  }
+
+  .sd-card {
+    min-height: auto;
+    padding: 24px 22px;
+  }
+
+  .sd-card__icon {
+    margin-bottom: 24px;
+  }
 }
 </style>
