@@ -1313,3 +1313,30 @@ body,
 .vp-doc pre::-webkit-scrollbar-thumb {
   background: rgba(174, 185, 255, 0.34) !important;
 }
+/* ============================================================
+   Fix plain text color in native VitePress code blocks
+   Example: ```txt
+   ============================================================ */
+
+.vp-doc div[class*="language-txt"] code,
+.vp-doc div[class*="language-text"] code,
+.vp-doc div[class*="language-plain"] code,
+.vp-doc div[class*="language-plaintext"] code,
+.vp-doc [class*="language-txt"] code,
+.vp-doc [class*="language-text"] code,
+.vp-doc [class*="language-plain"] code,
+.vp-doc [class*="language-plaintext"] code {
+  color: #f8fafc !important;
+}
+
+/* Keep the native dark surface consistent */
+.vp-doc div[class*="language-txt"] pre,
+.vp-doc div[class*="language-text"] pre,
+.vp-doc div[class*="language-plain"] pre,
+.vp-doc div[class*="language-plaintext"] pre,
+.vp-doc [class*="language-txt"] pre,
+.vp-doc [class*="language-text"] pre,
+.vp-doc [class*="language-plain"] pre,
+.vp-doc [class*="language-plaintext"] pre {
+  color: #f8fafc !important;
+}
