@@ -6,20 +6,20 @@
 
 /* ── Tokens ── */
 :root {
-  --vix-accent:   #22c55e;
+  --vix-accent: #22c55e;
   --vix-accent-d: #16a34a;
-  --vix-accent-s: rgba(34, 197, 94, .12);
-  --vix-accent-b: rgba(34, 197, 94, .25);
+  --vix-accent-s: rgba(34, 197, 94, 0.12);
+  --vix-accent-b: rgba(34, 197, 94, 0.25);
 }
 
 /* Light */
 html:not(.dark) {
-  --vp-c-bg:      #ffffff;
+  --vp-c-bg: #ffffff;
   --vp-c-bg-soft: #f6f7f9;
-  --vp-c-bg-alt:  #eef0f3;
-  --vp-c-divider: rgba(0, 0, 0, .08);
-  --vp-c-text-1:  rgba(0, 0, 0, .92);
-  --vp-c-text-2:  rgba(0, 0, 0, .62);
+  --vp-c-bg-alt: #eef0f3;
+  --vp-c-divider: rgba(0, 0, 0, 0.08);
+  --vp-c-text-1: rgba(0, 0, 0, 0.92);
+  --vp-c-text-2: rgba(0, 0, 0, 0.62);
   --vp-c-brand-1: #16a34a;
   --vp-c-brand-2: #22c55e;
   --vp-c-brand-3: #4ade80;
@@ -27,22 +27,35 @@ html:not(.dark) {
 
 /* Dark */
 html.dark {
-  --vp-c-bg:      #0d1117;
+  --vp-c-bg: #0d1117;
   --vp-c-bg-soft: #161b22;
-  --vp-c-bg-alt:  #1c2128;
-  --vp-c-divider: rgba(255, 255, 255, .08);
-  --vp-c-text-1:  rgba(255, 255, 255, .92);
-  --vp-c-text-2:  rgba(255, 255, 255, .62);
+  --vp-c-bg-alt: #1c2128;
+  --vp-c-divider: rgba(255, 255, 255, 0.08);
+  --vp-c-text-1: rgba(255, 255, 255, 0.92);
+  --vp-c-text-2: rgba(255, 255, 255, 0.62);
   --vp-c-brand-1: #22c55e;
   --vp-c-brand-2: #4ade80;
   --vp-c-brand-3: #86efac;
 }
 
 /* ── App / Layout ── */
-html, body, #app, .VPApp { min-height: 100vh; }
-.VPApp { display: flex; flex-direction: column; }
-.VPContent { flex: 1 0 auto; }
-html, body { overflow-x: hidden; }
+html,
+body,
+#app,
+.VPApp {
+  min-height: 100vh;
+}
+.VPApp {
+  display: flex;
+  flex-direction: column;
+}
+.VPContent {
+  flex: 1 0 auto;
+}
+html,
+body {
+  overflow-x: hidden;
+}
 
 /* ── Navbar ── */
 .VPNavBar {
@@ -66,7 +79,9 @@ html, body { overflow-x: hidden; }
 }
 
 /* Brand logo color in navbar */
-.VPNavBarTitle .VPImage { border-radius: 8px; }
+.VPNavBarTitle .VPImage {
+  border-radius: 8px;
+}
 
 /* ── Sidebar ── */
 .VPSidebar {
@@ -133,7 +148,7 @@ html, body { overflow-x: hidden; }
 .VPSidebarGroup .title {
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: .06em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--vp-c-text-2);
 }
@@ -143,7 +158,9 @@ html, body { overflow-x: hidden; }
   font-weight: 550;
   line-height: 1.4;
   border-radius: 7px;
-  transition: background .12s, color .12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 .VPSidebarItem .link:hover {
   background: var(--vix-accent-s);
@@ -162,10 +179,15 @@ html, body { overflow-x: hidden; }
   scrollbar-width: thin;
   scrollbar-color: var(--vp-c-divider) transparent;
 }
-.VPSidebar .nav::-webkit-scrollbar { width: 6px; }
-.VPSidebar .nav::-webkit-scrollbar-track { background: transparent; }
+.VPSidebar .nav::-webkit-scrollbar {
+  width: 6px;
+}
+.VPSidebar .nav::-webkit-scrollbar-track {
+  background: transparent;
+}
 .VPSidebar .nav::-webkit-scrollbar-thumb {
-  background: var(--vp-c-divider); border-radius: 999px;
+  background: var(--vp-c-divider);
+  border-radius: 999px;
 }
 
 /* ============================================================
@@ -181,13 +203,13 @@ html, body { overflow-x: hidden; }
     max-width: none !important;
   }
 
-.VPDoc .content-container {
-  max-width: 980px !important;
-}
+  .VPDoc .content-container {
+    max-width: 980px !important;
+  }
 
-.VPDoc .vp-doc {
-  max-width: 980px !important;
-}
+  .VPDoc .vp-doc {
+    max-width: 980px !important;
+  }
 }
 /* Headings */
 .vp-doc h1 {
@@ -206,15 +228,21 @@ html, body { overflow-x: hidden; }
   padding-top: 1.5rem;
 }
 
-.vp-doc h3 { font-size: 1.05rem; font-weight: 800; }
+.vp-doc h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
 
 /* Paragraphs */
-.vp-doc p { line-height: 1.75; font-size: 15px; }
+.vp-doc p {
+  line-height: 1.75;
+  font-size: 15px;
+}
 
 /* Inline code */
 .vp-doc :not(pre) > code {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: .82em;
+  font-size: 0.82em;
   padding: 2px 6px;
   border-radius: 6px;
   background: var(--vp-c-bg-soft);
@@ -235,7 +263,7 @@ html, body { overflow-x: hidden; }
 .vp-doc div[class*="language-"] pre,
 .vp-doc [class*="language-"] pre {
   padding: 14px 16px !important;
-  font-size: .875rem !important;
+  font-size: 0.875rem !important;
   line-height: 1.7 !important;
   font-family: "JetBrains Mono", ui-monospace, monospace !important;
   background: #0d1117 !important;
@@ -251,54 +279,80 @@ html:not(.dark) .vp-doc [class*="language-"] pre {
 /* Language label */
 .vp-doc div[class*="language-"] .lang {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 11px; font-weight: 700; letter-spacing: .04em;
-  color: rgba(255,255,255,.35);
-  top: 10px; right: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.35);
+  top: 10px;
+  right: 12px;
 }
 
 /* Copy button on native code blocks */
 .vp-doc div[class*="language-"] button.copy {
-  top: 8px; right: 8px;
-  width: 30px; height: 30px;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.10);
-  transition: background .12s;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.12s;
 }
 .vp-doc div[class*="language-"] button.copy:hover {
-  background: rgba(34,197,94,.14);
-  border-color: rgba(34,197,94,.28);
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgba(34, 197, 94, 0.28);
 }
 
 /* Scrollbar on code blocks */
-.vp-doc pre::-webkit-scrollbar { height: 6px; }
-.vp-doc pre::-webkit-scrollbar-thumb { background: rgba(34,197,94,.28); border-radius: 999px; }
-.vp-doc pre::-webkit-scrollbar-track { background: transparent; }
+.vp-doc pre::-webkit-scrollbar {
+  height: 6px;
+}
+.vp-doc pre::-webkit-scrollbar-thumb {
+  background: rgba(34, 197, 94, 0.28);
+  border-radius: 999px;
+}
+.vp-doc pre::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 /* ── Tables ── */
 .vp-doc table {
-  width: 100%; border-collapse: collapse;
-  font-size: 13.5px; margin: 18px 0;
-  display: block; overflow-x: auto;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  margin: 18px 0;
+  display: block;
+  overflow-x: auto;
 }
 .vp-doc th {
-  padding: 9px 12px; border-bottom: 2px solid var(--vp-c-divider);
-  font-weight: 800; font-size: 12px; letter-spacing: .04em;
-  text-transform: uppercase; color: var(--vp-c-text-2);
+  padding: 9px 12px;
+  border-bottom: 2px solid var(--vp-c-divider);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-2);
   text-align: left;
 }
 .vp-doc td {
-  padding: 9px 12px; border-bottom: 1px solid var(--vp-c-divider);
-  vertical-align: top; line-height: 1.6;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--vp-c-divider);
+  vertical-align: top;
+  line-height: 1.6;
 }
-.vp-doc tr:last-child td { border-bottom: 0; }
+.vp-doc tr:last-child td {
+  border-bottom: 0;
+}
 
 /* ── Blockquotes ── */
 .vp-doc blockquote {
   border-left: 3px solid var(--vix-accent);
-  padding: 12px 16px; border-radius: 0 10px 10px 0;
-  background: var(--vix-accent-s); margin: 18px 0;
-  font-size: 14.5px; line-height: 1.7;
+  padding: 12px 16px;
+  border-radius: 0 10px 10px 0;
+  background: var(--vix-accent-s);
+  margin: 18px 0;
+  font-size: 14.5px;
+  line-height: 1.7;
 }
 
 /* ── Badges / custom containers ── */
@@ -308,22 +362,29 @@ html:not(.dark) .vp-doc [class*="language-"] pre {
 .vp-doc .info {
   border-radius: 10px;
   border: 1px solid;
-  padding: 14px 16px; margin: 18px 0;
+  padding: 14px 16px;
+  margin: 18px 0;
 }
 
 /* ── Outline (TOC) ── */
 .VPDocAside .outline-link {
-  font-size: 12.5px; font-weight: 600;
-  transition: color .12s;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: color 0.12s;
 }
-.VPDocAside .outline-link.active { color: var(--vix-accent) !important; font-weight: 700; }
+.VPDocAside .outline-link.active {
+  color: var(--vix-accent) !important;
+  font-weight: 700;
+}
 
 /* ── Prev / Next ── */
 .VPDocFooter .pager-link {
   border-radius: 12px;
   border: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg-soft);
-  transition: border-color .14s, background .14s;
+  transition:
+    border-color 0.14s,
+    background 0.14s;
 }
 .VPDocFooter .pager-link:hover {
   border-color: var(--vix-accent-b);
@@ -336,39 +397,70 @@ html:not(.dark) .vp-doc [class*="language-"] pre {
   border-radius: 10px;
   border: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg-soft);
-  font-size: 13px; font-weight: 600;
-  height: 34px; padding: 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  height: 34px;
+  padding: 0 12px;
 }
 
-.VPLocalSearchBox { background: transparent !important; border: none !important; }
+.VPLocalSearchBox {
+  background: transparent !important;
+  border: none !important;
+}
 .VPBackdrop,
 .VPNavBarSearch .DocSearch-Overlay,
-.VPLocalSearchBox .backdrop { background: transparent !important; backdrop-filter: none !important; }
+.VPLocalSearchBox .backdrop {
+  background: transparent !important;
+  backdrop-filter: none !important;
+}
 
 /* ── Responsive ── */
 @media (max-width: 960px) {
-  .VPNavBarTitle .title { font-size: 14px; }
-  .vp-doc h1 { font-size: 1.7rem; }
-  .vp-doc h2 { font-size: 1.15rem; }
+  .VPNavBarTitle .title {
+    font-size: 14px;
+  }
+  .vp-doc h1 {
+    font-size: 1.7rem;
+  }
+  .vp-doc h2 {
+    font-size: 1.15rem;
+  }
 }
 
 @media (max-width: 640px) {
-  .VPDoc .container { padding: 0 16px !important; }
-  .vp-doc h1 { font-size: 1.5rem; }
-  .vp-doc p  { font-size: 14.5px; }
-  .vp-doc div[class*="language-"] pre { font-size: .82rem !important; padding: 12px !important; }
+  .VPDoc .container {
+    padding: 0 16px !important;
+  }
+  .vp-doc h1 {
+    font-size: 1.5rem;
+  }
+  .vp-doc p {
+    font-size: 14.5px;
+  }
+  .vp-doc div[class*="language-"] pre {
+    font-size: 0.82rem !important;
+    padding: 12px !important;
+  }
 }
 
 @media (max-width: 400px) {
-  .VPDoc .container { padding: 0 12px !important; }
-  .vp-doc h1 { font-size: 1.3rem; }
+  .VPDoc .container {
+    padding: 0 12px !important;
+  }
+  .vp-doc h1 {
+    font-size: 1.3rem;
+  }
 }
 
 /* ── Utilities ── */
-.VPFooter { display: none !important; }
+.VPFooter {
+  display: none !important;
+}
 
 /* Remove VitePress default sidebar background differences */
-.VPLocalNav { background: var(--vp-c-bg) !important; }
+.VPLocalNav {
+  background: var(--vp-c-bg) !important;
+}
 
 /* Active sidebar item accent dot */
 .VPSidebarItem.is-active > .item {
@@ -377,18 +469,20 @@ html:not(.dark) .vp-doc [class*="language-"] pre {
 .VPSidebarItem.is-active > .item::before {
   content: "";
   position: absolute;
-  left: 0; top: 50%; transform: translateY(-50%);
-  width: 3px; height: 16px;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 16px;
   background: var(--vix-accent);
   border-radius: 999px;
 }
 
-.vp-doc [class*='language-'] code,
-.vp-doc div[class*='language-'] code {
+.vp-doc [class*="language-"] code,
+.vp-doc div[class*="language-"] code {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
-
 
 @media (max-width: 960px) {
   /* Header principal normal */
@@ -473,7 +567,7 @@ html:not(.dark) .vp-doc [class*="language-"] pre {
   }
 }
 .vp-doc .line-numbers-wrapper {
-  font-size: .875rem !important;
+  font-size: 0.875rem !important;
   font-family: "JetBrains Mono", ui-monospace, monospace !important;
 }
 @media (max-width: 960px) {
@@ -526,88 +620,87 @@ html:not(.dark) .vp-doc [class*="language-"] pre {
    ========================= */
 
 /* LIGHT (quand html n'a PAS .dark) */
-html:not(.dark){
+html:not(.dark) {
   --vp-c-bg: #ffffff;
   --vp-c-bg-soft: #f6f7f9;
   --vp-c-bg-alt: #eef0f3;
 
-  --vp-c-divider: rgba(0,0,0,.08);
+  --vp-c-divider: rgba(0, 0, 0, 0.08);
 
-  --vp-c-text-1: rgba(0,0,0,.92);
-  --vp-c-text-2: rgba(0,0,0,.70);
+  --vp-c-text-1: rgba(0, 0, 0, 0.92);
+  --vp-c-text-2: rgba(0, 0, 0, 0.7);
 
   /* Local tokens for the hero card */
-  --vix-card-bg: rgba(255,255,255,.92);
-  --vix-card-top-bg: rgba(245,246,248,.92);
-  --vix-card-border: rgba(0,0,0,.10);
-  --vix-card-divider: rgba(0,0,0,.08);
-  --vix-card-shadow: 0 18px 50px rgba(0,0,0,.10);
+  --vix-card-bg: rgba(255, 255, 255, 0.92);
+  --vix-card-top-bg: rgba(245, 246, 248, 0.92);
+  --vix-card-border: rgba(0, 0, 0, 0.1);
+  --vix-card-divider: rgba(0, 0, 0, 0.08);
+  --vix-card-shadow: 0 18px 50px rgba(0, 0, 0, 0.1);
 
-  --vix-chip-bg: rgba(0,0,0,.04);
-  --vix-chip-border: rgba(0,0,0,.10);
-  --vix-chip-text: rgba(0,0,0,.78);
+  --vix-chip-bg: rgba(0, 0, 0, 0.04);
+  --vix-chip-border: rgba(0, 0, 0, 0.1);
+  --vix-chip-text: rgba(0, 0, 0, 0.78);
 
-  --vix-annot-line: rgba(0,0,0,.10);
+  --vix-annot-line: rgba(0, 0, 0, 0.1);
 }
 
-html.dark{
+html.dark {
   --vp-c-bg: #14181b;
   --vp-c-bg-soft: #1b2024;
   --vp-c-bg-alt: #232a2f;
 
-  --vp-c-divider: rgba(255,255,255,.06);
+  --vp-c-divider: rgba(255, 255, 255, 0.06);
 
-  --vp-c-text-1: rgba(255,255,255,.92);
-  --vp-c-text-2: rgba(255,255,255,.70);
+  --vp-c-text-1: rgba(255, 255, 255, 0.92);
+  --vp-c-text-2: rgba(255, 255, 255, 0.7);
 
-  --vix-card-bg: rgba(26,27,30,.92);
-  --vix-card-top-bg: rgba(37,38,43,.75);
-  --vix-card-border: rgba(255,255,255,.10);
-  --vix-card-divider: rgba(255,255,255,.08);
-  --vix-card-shadow: 0 22px 60px rgba(0,0,0,.40);
+  --vix-card-bg: rgba(26, 27, 30, 0.92);
+  --vix-card-top-bg: rgba(37, 38, 43, 0.75);
+  --vix-card-border: rgba(255, 255, 255, 0.1);
+  --vix-card-divider: rgba(255, 255, 255, 0.08);
+  --vix-card-shadow: 0 22px 60px rgba(0, 0, 0, 0.4);
 
-  --vix-chip-bg: rgba(0,0,0,.22);
-  --vix-chip-border: rgba(255,255,255,.10);
-  --vix-chip-text: rgba(255,255,255,.92);
+  --vix-chip-bg: rgba(0, 0, 0, 0.22);
+  --vix-chip-border: rgba(255, 255, 255, 0.1);
+  --vix-chip-text: rgba(255, 255, 255, 0.92);
 
-  --vix-annot-line: rgba(255,255,255,.10);
+  --vix-annot-line: rgba(255, 255, 255, 0.1);
 }
 
-
 /* Fix VitePress native copy icon color */
-.vp-doc [class*='language-'] > button.copy {
+.vp-doc [class*="language-"] > button.copy {
   top: 8px !important;
   right: 8px !important;
   width: 34px !important;
   height: 34px !important;
 
   border-radius: 8px !important;
-  border: 1px solid rgba(255, 255, 255, .16) !important;
-  background-color: rgba(255, 255, 255, .08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
 
   /* Important: remove VitePress black background-image icon */
   background-image: none !important;
 
   opacity: 0;
   transition:
-    opacity .18s,
-    background-color .14s,
-    border-color .14s,
-    transform .12s !important;
+    opacity 0.18s,
+    background-color 0.14s,
+    border-color 0.14s,
+    transform 0.12s !important;
 }
 
-.vp-doc [class*='language-']:hover > button.copy {
+.vp-doc [class*="language-"]:hover > button.copy {
   opacity: 1 !important;
 }
 
-.vp-doc [class*='language-'] > button.copy::before {
+.vp-doc [class*="language-"] > button.copy::before {
   content: "";
   display: block;
   width: 18px;
   height: 18px;
   margin: auto;
 
-  background-color: rgba(255, 255, 255, .82);
+  background-color: rgba(255, 255, 255, 0.82);
 
   mask-image: var(--vp-icon-copy);
   mask-position: center;
@@ -620,24 +713,24 @@ html.dark{
   -webkit-mask-size: 18px 18px;
 }
 
-.vp-doc [class*='language-'] > button.copy:hover {
-  background-color: rgba(34, 197, 94, .16) !important;
-  border-color: rgba(34, 197, 94, .35) !important;
+.vp-doc [class*="language-"] > button.copy:hover {
+  background-color: rgba(34, 197, 94, 0.16) !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
   transform: translateY(-1px);
 }
 
-.vp-doc [class*='language-'] > button.copy:hover::before {
+.vp-doc [class*="language-"] > button.copy:hover::before {
   background-color: #86efac;
 }
 
-.vp-doc [class*='language-'] > button.copy.copied::before {
+.vp-doc [class*="language-"] > button.copy.copied::before {
   background-color: #22c55e;
 }
 /* Code blocks background */
 .vp-doc div[class*="language-"],
 .vp-doc [class*="language-"] {
   background: #10151c !important;
-  border-color: rgba(255, 255, 255, .08) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .vp-doc div[class*="language-"] pre,
@@ -649,7 +742,7 @@ html.dark{
 html:not(.dark) .vp-doc div[class*="language-"],
 html:not(.dark) .vp-doc [class*="language-"] {
   background: #151a22 !important;
-  border-color: rgba(0, 0, 0, .14) !important;
+  border-color: rgba(0, 0, 0, 0.14) !important;
 }
 
 html:not(.dark) .vp-doc div[class*="language-"] pre,
@@ -951,7 +1044,8 @@ html:not(.dark) .vp-doc [class*="language-"] pre {
       var(--soft-mobile-banner-height) + var(--soft-mobile-local-nav-height)
     ) !important;
     height: calc(
-      100vh - var(--soft-mobile-banner-height) - var(--soft-mobile-local-nav-height)
+      100vh - var(--soft-mobile-banner-height) -
+        var(--soft-mobile-local-nav-height)
     ) !important;
     z-index: 10000 !important;
     background: var(--vp-c-bg) !important;
@@ -1339,4 +1433,450 @@ body,
 .vp-doc [class*="language-plain"] pre,
 .vp-doc [class*="language-plaintext"] pre {
   color: #f8fafc !important;
+}
+/* ============================================================
+   Softadastra docs - expert flat documentation style
+   Final override
+   ============================================================ */
+
+/* Page text rhythm */
+.vp-doc h1 {
+  font-size: clamp(1.85rem, 3vw, 2.45rem) !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.04em !important;
+  font-weight: 780 !important;
+  margin-bottom: 1rem !important;
+  color: var(--vp-c-text-1) !important;
+}
+
+.vp-doc h2 {
+  border-top: 0 !important;
+  padding-top: 0 !important;
+  margin-top: 1.65rem !important;
+  margin-bottom: 0.6rem !important;
+  font-size: 1.35rem !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.025em !important;
+  font-weight: 760 !important;
+  color: var(--vp-c-text-1) !important;
+}
+
+.vp-doc h3 {
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.45rem !important;
+  font-size: 1.08rem !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.015em !important;
+  font-weight: 720 !important;
+  color: var(--vp-c-text-1) !important;
+}
+
+.vp-doc p,
+.vp-doc li {
+  font-size: 15.8px !important;
+  line-height: 1.72 !important;
+  color: var(--vp-c-text-1) !important;
+}
+
+.vp-doc p {
+  margin: 0.7rem 0 !important;
+}
+
+.vp-doc h2 + p,
+.vp-doc h3 + p {
+  margin-top: 0.35rem !important;
+}
+
+/* Inline code - serious and neutral */
+.vp-doc :not(pre) > code {
+  font-family:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, monospace !important;
+  font-size: 0.84em !important;
+  font-weight: 650 !important;
+  padding: 1px 4px !important;
+  border-radius: 3px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  color: rgba(235, 241, 248, 0.92) !important;
+}
+
+html:not(.dark) .vp-doc :not(pre) > code {
+  background: rgba(0, 0, 0, 0.045) !important;
+  border-color: rgba(0, 0, 0, 0.075) !important;
+  color: #1f2937 !important;
+}
+
+/* Code blocks - flat, no card shadow */
+.vp-doc div[class*="language-"],
+.vp-doc [class*="language-"] {
+  background: #0f151b !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  margin: 18px 0 24px !important;
+  overflow: hidden !important;
+}
+
+.vp-doc div[class*="language-"]:hover,
+.vp-doc [class*="language-"]:hover {
+  box-shadow: none !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+.vp-doc div[class*="language-"] pre,
+.vp-doc [class*="language-"] pre {
+  background: #0f151b !important;
+  color: #d7e2ee !important;
+  padding: 15px 16px !important;
+  line-height: 1.68 !important;
+  font-size: 0.875rem !important;
+  box-shadow: none !important;
+}
+
+.vp-doc div[class*="language-"] code,
+.vp-doc [class*="language-"] code {
+  background: transparent !important;
+  border: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  font-style: normal !important;
+}
+
+.vp-doc div[class*="language-"] code *,
+.vp-doc [class*="language-"] code * {
+  font-style: normal !important;
+}
+
+/* Line numbers stay flat */
+.vp-doc div[class*="language-"] .line-numbers-wrapper,
+.vp-doc [class*="language-"] .line-numbers-wrapper {
+  background: #0f151b !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.075) !important;
+  color: rgba(215, 226, 238, 0.36) !important;
+}
+
+/* Remove page/card shadow feeling from doc blocks */
+.VPDocFooter .pager-link,
+.vp-doc .tip,
+.vp-doc .info,
+.vp-doc .warning,
+.vp-doc .danger,
+.vp-doc blockquote {
+  box-shadow: none !important;
+  border-radius: 8px !important;
+}
+
+/* Blockquotes - flatter */
+.vp-doc blockquote {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border-left: 3px solid rgba(174, 185, 255, 0.55) !important;
+  padding: 12px 15px !important;
+}
+
+/* Tables - flat technical style */
+.vp-doc table {
+  display: table !important;
+  width: auto !important;
+  min-width: 360px !important;
+  max-width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 18px 0 26px !important;
+  font-size: 14px !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+.vp-doc th {
+  padding: 9px 12px !important;
+  border: 1px solid var(--vp-c-divider) !important;
+  background: var(--vp-c-bg-soft) !important;
+  font-size: 13px !important;
+  font-weight: 720 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--vp-c-text-1) !important;
+}
+
+.vp-doc td {
+  padding: 9px 12px !important;
+  border: 1px solid var(--vp-c-divider) !important;
+  background: transparent !important;
+  font-size: 13.5px !important;
+  line-height: 1.58 !important;
+}
+
+.vp-doc tr:hover td {
+  background: transparent !important;
+}
+
+/* Sidebar less marketing, more docs */
+.VPSidebarGroup .title {
+  font-size: 13px !important;
+  font-weight: 740 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+  color: var(--vp-c-text-1) !important;
+}
+
+.VPSidebarItem .link {
+  font-size: 13.5px !important;
+  font-weight: 560 !important;
+}
+
+.VPSidebarItem.is-active > .item > .link,
+.VPSidebarItem.is-active > .item .link {
+  color: var(--vp-c-text-1) !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
+.VPSidebarItem.is-active > .item::before {
+  background: rgba(174, 185, 255, 0.75) !important;
+}
+
+/* Right outline stays calm */
+.VPDocAside .outline-link.active {
+  color: var(--vp-c-text-1) !important;
+}
+
+.VPDocAsideOutline .content {
+  border-left: 1px solid var(--vp-c-divider) !important;
+  padding-left: 14px !important;
+}
+/* ============================================================
+   Softadastra docs - expert style polish
+   No background or color changes
+   ============================================================ */
+
+/* Page typography */
+.vp-doc h1 {
+  font-size: clamp(1.9rem, 3vw, 2.45rem) !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.045em !important;
+  font-weight: 780 !important;
+  margin-bottom: 1rem !important;
+}
+
+.vp-doc h2 {
+  border-top: 0 !important;
+  padding-top: 0 !important;
+  margin-top: 1.65rem !important;
+  margin-bottom: 0.6rem !important;
+  font-size: 1.34rem !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.03em !important;
+  font-weight: 760 !important;
+}
+
+.vp-doc h3 {
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.45rem !important;
+  font-size: 1.08rem !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.015em !important;
+  font-weight: 720 !important;
+}
+
+.vp-doc h4 {
+  margin-top: 1rem !important;
+  margin-bottom: 0.35rem !important;
+  font-size: 1rem !important;
+  line-height: 1.35 !important;
+  font-weight: 700 !important;
+}
+
+.vp-doc p,
+.vp-doc li {
+  font-size: 15.8px !important;
+  line-height: 1.72 !important;
+}
+
+.vp-doc p {
+  margin: 0.7rem 0 !important;
+}
+
+.vp-doc h2 + p,
+.vp-doc h3 + p,
+.vp-doc h4 + p {
+  margin-top: 0.35rem !important;
+}
+
+.vp-doc ul,
+.vp-doc ol {
+  margin-top: 0.65rem !important;
+  margin-bottom: 0.9rem !important;
+  padding-left: 1.35rem !important;
+}
+
+.vp-doc li + li {
+  margin-top: 0.25rem !important;
+}
+
+/* Inline code: keep existing colors/backgrounds, improve shape */
+.vp-doc :not(pre) > code {
+  font-size: 0.84em !important;
+  font-weight: 650 !important;
+  padding: 1px 4px !important;
+  border-radius: 3px !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Code blocks: remove card feeling without changing surface colors */
+.vp-doc div[class*="language-"],
+.vp-doc [class*="language-"] {
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  margin: 18px 0 24px !important;
+}
+
+.vp-doc div[class*="language-"]:hover,
+.vp-doc [class*="language-"]:hover {
+  box-shadow: none !important;
+}
+
+.vp-doc div[class*="language-"] pre,
+.vp-doc [class*="language-"] pre {
+  padding: 15px 16px !important;
+  font-size: 0.875rem !important;
+  line-height: 1.68 !important;
+  box-shadow: none !important;
+}
+
+.vp-doc div[class*="language-"] code,
+.vp-doc [class*="language-"] code,
+.vp-doc div[class*="language-"] code *,
+.vp-doc [class*="language-"] code * {
+  font-style: normal !important;
+}
+
+/* Tables: flatter and more technical */
+.vp-doc table {
+  display: table !important;
+  width: auto !important;
+  min-width: 360px !important;
+  max-width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 18px 0 26px !important;
+  font-size: 14px !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+.vp-doc th {
+  padding: 9px 12px !important;
+  font-size: 13px !important;
+  font-weight: 720 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  text-align: left !important;
+}
+
+.vp-doc td {
+  padding: 9px 12px !important;
+  font-size: 13.5px !important;
+  line-height: 1.58 !important;
+}
+
+.vp-doc tr:hover td {
+  background: transparent !important;
+}
+
+/* Blockquotes and custom containers: less card-like */
+.vp-doc blockquote,
+.vp-doc .tip,
+.vp-doc .info,
+.vp-doc .warning,
+.vp-doc .danger {
+  box-shadow: none !important;
+  border-radius: 8px !important;
+}
+
+.vp-doc blockquote {
+  padding: 12px 15px !important;
+  margin: 18px 0 !important;
+}
+
+/* Prev / next cards: flatter */
+.VPDocFooter .pager-link {
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  transition:
+    border-color 0.12s ease,
+    background-color 0.12s ease !important;
+}
+
+.VPDocFooter .pager-link:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Sidebar: more expert, less marketing */
+.VPSidebarGroup {
+  border-top: 0 !important;
+}
+
+.VPSidebarGroup .title {
+  font-size: 13px !important;
+  font-weight: 740 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+  margin-bottom: 7px !important;
+}
+
+.VPSidebarItem .link {
+  font-size: 13.5px !important;
+  font-weight: 560 !important;
+  line-height: 1.42 !important;
+  border-radius: 6px !important;
+}
+
+.VPSidebarItem .item .text,
+.VPSidebarItem .link .text {
+  line-height: 22px !important;
+}
+
+/* Outline: clean right navigation */
+.VPDocAsideOutline .content {
+  padding-left: 14px !important;
+}
+
+.VPDocAside .outline-title {
+  font-size: 12px !important;
+  font-weight: 720 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+  margin-bottom: 10px !important;
+}
+
+.VPDocAside .outline-link {
+  font-size: 12.5px !important;
+  font-weight: 560 !important;
+}
+
+/* Mobile polish */
+@media (max-width: 640px) {
+  .vp-doc h1 {
+    font-size: 1.65rem !important;
+  }
+
+  .vp-doc h2 {
+    font-size: 1.18rem !important;
+    margin-top: 1.35rem !important;
+  }
+
+  .vp-doc p,
+  .vp-doc li {
+    font-size: 14.8px !important;
+    line-height: 1.68 !important;
+  }
+
+  .vp-doc div[class*="language-"],
+  .vp-doc [class*="language-"] {
+    border-radius: 7px !important;
+  }
+
+  .vp-doc div[class*="language-"] pre,
+  .vp-doc [class*="language-"] pre {
+    padding: 13px 12px !important;
+    font-size: 0.82rem !important;
+  }
 }
