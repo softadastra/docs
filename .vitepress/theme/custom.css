@@ -1880,3 +1880,9 @@ html:not(.dark) .vp-doc :not(pre) > code {
     font-size: 0.82rem !important;
   }
 }
+.vp-doc div[class*="language-"],
+.vp-doc [class*="language-"] {
+  box-shadow:
+    0 14px 35px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+}
