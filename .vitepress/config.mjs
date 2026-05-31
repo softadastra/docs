@@ -284,7 +284,7 @@ export default defineConfig({
       },
 
       {
-        text: "Part III. SDK C++",
+        text: "Part III. C++ SDK",
         collapsed: false,
         items: [
           {
@@ -296,8 +296,8 @@ export default defineConfig({
             link: "/sdk-cpp/installation",
           },
           {
-            text: "First App",
-            link: "/sdk-cpp/first-app",
+            text: "Quick Start",
+            link: "/sdk-cpp/quick-start",
           },
           {
             text: "Client",
@@ -308,6 +308,10 @@ export default defineConfig({
             link: "/sdk-cpp/client-options",
           },
           {
+            text: "Results and Errors",
+            link: "/sdk-cpp/results-and-errors",
+          },
+          {
             text: "Local Store",
             link: "/sdk-cpp/local-store",
           },
@@ -316,8 +320,16 @@ export default defineConfig({
             link: "/sdk-cpp/persistent-store",
           },
           {
-            text: "Sync",
-            link: "/sdk-cpp/sync",
+            text: "Restart Recovery",
+            link: "/sdk-cpp/restart-recovery",
+          },
+          {
+            text: "Sync State",
+            link: "/sdk-cpp/sync-state",
+          },
+          {
+            text: "Manual Tick",
+            link: "/sdk-cpp/tick",
           },
           {
             text: "Transport",
@@ -330,10 +342,6 @@ export default defineConfig({
           {
             text: "Metadata",
             link: "/sdk-cpp/metadata",
-          },
-          {
-            text: "Errors",
-            link: "/sdk-cpp/errors",
           },
           {
             text: "Examples",

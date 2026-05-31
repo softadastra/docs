@@ -34,7 +34,7 @@ const socials = [
 
 const openSearch = () => {
   const searchButton = document.querySelector(
-    ".DocSearch-Button, .VPNavBarSearchButton, .VPLocalSearchBox button"
+    ".DocSearch-Button, .VPNavBarSearchButton, .VPLocalSearchBox button",
   );
 
   if (searchButton instanceof HTMLElement) {
@@ -72,55 +72,79 @@ onMounted(() => {
 
 <template>
   <header class="soft-nav">
-  <div v-if="showBanner" class="soft-nav__banner">
-    <span class="soft-nav__banner-mark" aria-hidden="true">
-      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="soft-banner-vix-left" x1="5" y1="6" x2="18" y2="30" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#d4fcd4" />
-            <stop offset="55%" stop-color="#4ade80" />
-            <stop offset="100%" stop-color="#22c55e" />
-          </linearGradient>
+    <div v-if="showBanner" class="soft-nav__banner">
+      <span class="soft-nav__banner-mark" aria-hidden="true">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient
+              id="soft-banner-vix-left"
+              x1="5"
+              y1="6"
+              x2="18"
+              y2="30"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0%" stop-color="#d4fcd4" />
+              <stop offset="55%" stop-color="#4ade80" />
+              <stop offset="100%" stop-color="#22c55e" />
+            </linearGradient>
 
-          <linearGradient id="soft-banner-vix-right" x1="31" y1="6" x2="18" y2="30" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#22c55e" />
-            <stop offset="100%" stop-color="#15803d" />
-          </linearGradient>
-        </defs>
+            <linearGradient
+              id="soft-banner-vix-right"
+              x1="31"
+              y1="6"
+              x2="18"
+              y2="30"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0%" stop-color="#22c55e" />
+              <stop offset="100%" stop-color="#15803d" />
+            </linearGradient>
+          </defs>
 
-        <polygon points="5,6 12,6 18,28 14,28" fill="url(#soft-banner-vix-left)" />
-        <polygon points="31,6 24,6 18,28 22,28" fill="url(#soft-banner-vix-right)" />
-        <line
-          x1="9"
-          y1="16"
-          x2="13.5"
-          y2="29"
-          stroke="#bbf7d0"
-          stroke-width="1.1"
-          stroke-linecap="round"
-          opacity="0.7"
-        />
-      </svg>
-    </span>
+          <polygon
+            points="5,6 12,6 18,28 14,28"
+            fill="url(#soft-banner-vix-left)"
+          />
+          <polygon
+            points="31,6 24,6 18,28 22,28"
+            fill="url(#soft-banner-vix-right)"
+          />
+          <line
+            x1="9"
+            y1="16"
+            x2="13.5"
+            y2="29"
+            stroke="#bbf7d0"
+            stroke-width="1.1"
+            stroke-linecap="round"
+            opacity="0.7"
+          />
+        </svg>
+      </span>
 
-    <span>Vix.cpp docs moved to</span>
-    <a href="https://vixcpp.com" target="_blank" rel="noreferrer">
-      vixcpp.com
-    </a>
+      <span>Vix.cpp docs moved to</span>
+      <a href="https://vixcpp.com" target="_blank" rel="noreferrer">
+        vixcpp.com
+      </a>
 
-    <button
-      class="soft-nav__banner-close"
-      type="button"
-      aria-label="Close announcement"
-      @click="showBanner = false"
-    >
-      <span aria-hidden="true">×</span>
-    </button>
-  </div>
+      <button
+        class="soft-nav__banner-close"
+        type="button"
+        aria-label="Close announcement"
+        @click="showBanner = false"
+      >
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
 
     <div class="soft-nav__bar">
       <div class="soft-nav__inner">
-        <a class="soft-nav__brand" href="/" aria-label="Softadastra Documentation">
+        <a
+          class="soft-nav__brand"
+          href="/"
+          aria-label="Softadastra Documentation"
+        >
           <span class="soft-nav__brand-name">Softadastra</span>
           <span class="soft-nav__slash">/</span>
           <span class="soft-nav__docs">Docs</span>
@@ -141,10 +165,17 @@ onMounted(() => {
           <button
             class="soft-nav__theme"
             type="button"
-            :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
+            :aria-label="
+              isDark ? 'Switch to light theme' : 'Switch to dark theme'
+            "
             @click="toggleTheme"
           >
-            <svg v-if="isDark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg
+              v-if="isDark"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
               <path d="M12 4V2" />
               <path d="M12 22v-2" />
               <path d="m4.93 4.93-1.41-1.41" />
@@ -178,7 +209,12 @@ onMounted(() => {
             ></svg>
           </a>
 
-          <button class="soft-nav__search" type="button" aria-label="Search" @click="openSearch">
+          <button
+            class="soft-nav__search"
+            type="button"
+            aria-label="Search"
+            @click="openSearch"
+          >
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="11" cy="11" r="7" />
               <path d="m16 16 4 4" />
@@ -537,6 +573,4 @@ onMounted(() => {
     white-space: nowrap;
   }
 }
-
-
 </style>
