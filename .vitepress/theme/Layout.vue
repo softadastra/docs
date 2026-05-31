@@ -5,14 +5,11 @@ import SoftNavBar from "./SoftNavBar.vue";
 const { Layout } = DefaultTheme;
 
 const links = [
-  { text: "Docs", href: "/" },
   { text: "Guides", href: "/guides/" },
-  { text: "Concepts", href: "/concepts/" },
   { text: "CLI", href: "/cli/" },
   { text: "SDK C++", href: "/sdk-cpp/" },
   { text: "SDK JS", href: "/sdk-js/" },
   { text: "Engine", href: "/engine/" },
-  { text: "Builds", href: "/builds/" },
 ];
 
 const social = [
@@ -36,9 +33,9 @@ const social = [
     <template #layout-bottom>
       <footer class="sfb" role="contentinfo">
         <div class="sfb-inner">
-        <a class="sfb-brand" href="/" aria-label="Softadastra Documentation">
-  <span class="sfb-name">Softadastra</span>
-</a>
+          <a class="sfb-brand" href="/" aria-label="Softadastra Documentation">
+            <span class="sfb-name">Softadastra</span>
+          </a>
 
           <nav class="sfb-nav" aria-label="Footer navigation">
             <a
@@ -75,7 +72,7 @@ const social = [
         </div>
 
         <div class="sfb-copy">
-         <span>Released under the Apache License 2.0.</span>
+          <span>Released under the Apache License 2.0.</span>
           <span>Copyright © 2026 Softadastra.</span>
         </div>
       </footer>

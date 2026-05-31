@@ -1,180 +1,104 @@
 # Builds
 
-This page explains how Softadastra builds should be produced, checked, and verified.
+This page explains how to build and verify the Softadastra repositories.
 
-Use this page when you want to build the engine, CLI, node app, SDK examples, documentation, or release artifacts.
+Use it when you are working inside the source repositories and need to build the CLI, the node app, the C++ SDK, the documentation, or release artifacts.
 
-The core rule is:
+This page is for repository maintainers and contributors.
 
-```txt
+For normal installation, use the official installer:
+
+```sh
+curl -fsSL https://softadastra.com/install.sh | sh
+```
+
+On Windows:
+
+```powershell
+irm https://softadastra.com/install.ps1 | iex
+```
+
+## Main rule
+
 A build is useful only if it can be reproduced and verified.
-```
 
-## What this page covers
+Before publishing or trusting a build, verify at least:
 
-This page covers:
+- the project builds
+- the CLI starts
+- the version command works
+- the status command works
+- local store put/get works
+- sync status works
+- sync tick works
+- peers handles the empty state
+- docs build successfully
+- release artifacts have the expected names and contents
 
-- development builds
-- release builds
-- CLI builds
-- node app builds
-- engine builds
-- C++ SDK verification
-- JavaScript SDK verification
-- documentation builds
-- artifact naming
-- release verification
-- common build issues
+## Repositories
 
-Softadastra has several build surfaces:
-
-- engine repository
-- product CLI
-- node app
-- C++ SDK
-- JavaScript SDK
-- documentation site
-- release artifacts
-
-## Repository layout
-
-The main engine repository is usually:
-
-```bash
-~/softadastra/softadastra
-```
-
-Expected structure:
+Softadastra currently has several repository surfaces.
 
 ```txt
-softadastra/
-├── apps/
-│   ├── cli/
-│   ├── node/
-│   └── CMakeLists.txt
-├── modules/
-│   ├── cli/
-│   ├── core/
-│   ├── discovery/
-│   ├── fs/
-│   ├── metadata/
-│   ├── store/
-│   ├── sync/
-│   ├── transport/
-│   └── wal/
-├── examples/
-├── data/
-├── cmake/
-├── CMakeLists.txt
-├── CMakePresets.json
-├── CHANGELOG.md
-├── README.md
-├── cmd.md
-├── vix.json
-└── LICENSE
+softadastra/softadastra   -> runtime, modules, CLI, node app
+softadastra/sdk           -> C++ SDK
+softadastra/docs          -> documentation site
 ```
 
-The most important folders are:
+Future SDK repositories can be added later.
 
-```txt
-modules/  -> reusable engine modules
-apps/     -> runnable applications
-examples/ -> focused examples
-data/     -> local runtime data
-cmake/    -> build helpers
-```
+## Engine repository
 
-## Requirements
+The main runtime repository contains the runtime modules and product applications.
 
-Recommended tools:
+Typical local path:
 
-- C++20 compiler
-- CMake
-- Ninja
-- Git
-- Vix
-- Node.js
-- npm
-
-Check tools:
-
-```bash
-g++ --version
-cmake --version
-ninja --version
-git --version
-vix --version
-node --version
-npm --version
-```
-
-For the engine and CLI, the important build tools are:
-
-- C++20 compiler
-- CMake
-- Ninja
-- Vix
-
-For the documentation and JavaScript SDK, the important tools are:
-
-- Node.js
-- npm
-
-## Development build
-
-Go to the engine repository:
-
-```bash
+```sh
 cd ~/softadastra/softadastra
 ```
 
-Run the default build:
+Important areas:
 
-```bash
+```txt
+apps/       -> runnable applications
+modules/    -> runtime modules
+examples/   -> examples
+cmake/      -> CMake helpers
+data/       -> local runtime data
+```
+
+Build with Vix:
+
+```sh
 vix build
 ```
 
-This should configure and build the project using the default project settings.
+Build release mode:
 
-If the project uses a development preset:
-
-```bash
-vix build --preset dev
-```
-
-If Ninja is the default development generator:
-
-```bash
-vix build --preset dev-ninja
-```
-
-The exact preset names depend on `CMakePresets.json`.
-
-Inspect presets:
-
-```bash
-cat CMakePresets.json
-```
-
-## Release build
-
-For release mode:
-
-```bash
+```sh
 vix build --preset release
 ```
 
-If the project requires app options explicitly:
+Build with the CLI app enabled:
 
-```bash
-vix build --preset release -- \
+```sh
+vix build -- \
   -DSOFTADASTRA_BUILD_APPS=ON \
   -DSOFTADASTRA_BUILD_CLI_APP=ON
 ```
 
-If the release should include both CLI and node app:
+Build with the CLI and node app enabled:
 
-```bash
+```sh
+vix build -- \
+  -DSOFTADASTRA_BUILD_APPS=ON \
+  -DSOFTADASTRA_BUILD_CLI_APP=ON \
+  -DSOFTADASTRA_BUILD_NODE_APP=ON
+```
+
+Build release with apps enabled:
+
+```sh
 vix build --preset release -- \
   -DSOFTADASTRA_BUILD_APPS=ON \
   -DSOFTADASTRA_BUILD_CLI_APP=ON \
@@ -183,82 +107,63 @@ vix build --preset release -- \
 
 ## Build with CMake directly
 
-Vix is the recommended developer entry point, but CMake can be used directly.
+Vix is the recommended developer command, but CMake can still be used directly.
 
 Configure:
 
-```bash
+```sh
 cmake --preset dev-ninja
 ```
 
 Build:
 
-```bash
+```sh
 cmake --build --preset build-ninja
 ```
 
 Release configure:
 
-```bash
+```sh
 cmake --preset release
 ```
 
 Release build:
 
-```bash
+```sh
 cmake --build --preset build-release
 ```
 
-If these preset names do not exist, inspect:
+If a preset does not exist, check the repository presets:
 
-```bash
+```sh
 cat CMakePresets.json
 ```
-
-Then use the actual preset names from the repository.
 
 ## Build options
 
 Common build options can include:
 
-- `SOFTADASTRA_BUILD_APPS`
-- `SOFTADASTRA_BUILD_CLI_APP`
-- `SOFTADASTRA_BUILD_NODE_APP`
-- `SOFTADASTRA_BUILD_EXAMPLES`
-- `SOFTADASTRA_BUILD_TESTS`
-
-Only rely on options that exist in the current `CMakeLists.txt` and `CMakePresets.json`.
-
-Example:
-
-```bash
-vix build -- \
-  -DSOFTADASTRA_BUILD_APPS=ON \
-  -DSOFTADASTRA_BUILD_CLI_APP=ON
+```txt
+SOFTADASTRA_BUILD_APPS
+SOFTADASTRA_BUILD_CLI_APP
+SOFTADASTRA_BUILD_NODE_APP
+SOFTADASTRA_BUILD_EXAMPLES
+SOFTADASTRA_BUILD_TESTS
 ```
 
-With node app:
+Only use options that exist in the current repository.
 
-```bash
-vix build -- \
-  -DSOFTADASTRA_BUILD_APPS=ON \
-  -DSOFTADASTRA_BUILD_CLI_APP=ON \
-  -DSOFTADASTRA_BUILD_NODE_APP=ON
-```
+Check:
 
-With examples and tests, if supported:
-
-```bash
-vix build -- \
-  -DSOFTADASTRA_BUILD_EXAMPLES=ON \
-  -DSOFTADASTRA_BUILD_TESTS=ON
+```sh
+grep -R "SOFTADASTRA_BUILD_" -n CMakeLists.txt apps modules cmake
 ```
 
 ## Export the CLI binary
 
-If your Vix build supports binary export:
+If the Vix project supports binary export, run:
 
-```bash
+```sh
 vix build --bin
 ```
 
@@ -268,232 +173,106 @@ Expected result:
 ./softadastra
 ```
 
-Then verify:
+Verify:
 
-```bash
-./softadastra help
+```sh
 ./softadastra version
 ./softadastra status
 ```
 
-If `--bin` is not supported in the current setup, find the binary manually.
+If `--bin` does not export the binary in the current setup, find it manually:
 
-## Find build artifacts
-
-Depending on the current build layout, the CLI binary can be in one of these paths:
-
-```txt
-./softadastra
-build-ninja/softadastra
-build-ninja/apps/cli/softadastra
-build-ninja/apps/cli/softadastra_cli
-build-release/softadastra
-build-release/apps/cli/softadastra
-```
-
-Find binaries:
-
-```bash
+```sh
 find . -type f -executable -name "softadastra*"
 ```
 
-Run the found binary:
+Then run the binary using its full path.
 
-```bash
-./path/to/softadastra help
-```
+## Verify the CLI
 
-## Verify the CLI build
+After building the CLI, verify the stable command surface.
 
-After building the CLI, run:
-
-```bash
-softadastra help
+```sh
 softadastra version
 softadastra status
 ```
 
 If the binary is not in `PATH`, run it directly:
 
-```bash
-./softadastra help
+```sh
 ./softadastra version
 ./softadastra status
 ```
 
-Expected behavior:
+Then verify local store commands:
 
-```txt
-help     -> prints available commands
-version  -> prints the CLI version
-status   -> prints local runtime status
-```
-
-## Verify store commands
-
-Run:
-
-```bash
+```sh
 softadastra store put app/name Softadastra
 softadastra store get app/name
-softadastra store remove app/name
 ```
 
-Expected output style:
+Then verify sync commands:
 
-```txt
-Stored value
-
-  key     : app/name
-  value   : Softadastra
-  created : yes
-```
-
-Then:
-
-```txt
-Value
-
-  key   : app/name
-  value : Softadastra
-```
-
-Then:
-
-```txt
-Removed value
-
-  key     : app/name
-  removed : yes
-```
-
-If a missing key is read:
-
-```bash
-softadastra store get app/name
-```
-
-Expected output style:
-
-```txt
-error: key not found
-key: app/name
-```
-
-## Verify sync commands
-
-Run:
-
-```bash
+```sh
 softadastra sync status
 softadastra sync tick
 ```
 
-Expected output style:
+Then verify node and peers:
 
-```txt
-Sync status
-
-  outbox       : 0
-  queued       : 0
-  in flight    : 0
-  acknowledged : 0
-  failed       : 0
-  retries      : 0
-```
-
-Tick output style:
-
-```txt
-Sync tick
-
-  retried : 0
-  pruned  : 0
-  batch   : 0
-```
-
-Exact numbers can differ depending on previous local writes and runtime configuration.
-
-## Verify node commands
-
-Run:
-
-```bash
+```sh
 softadastra node info
-```
-
-Expected output style:
-
-```txt
-Node
-
-  id           : node-a
-  display name : Local Node
-  hostname     : softadastra-dev
-  os           : linux
-  version      : 0.1.0
-  uptime ms    : 18420
-  capabilities : core, store, sync, transport, discovery, metadata
-```
-
-If the node app is available:
-
-```bash
-softadastra node start
-```
-
-Expected output style:
-
-```txt
-Softadastra node
-
-  id       : node-a
-  address  : 127.0.0.1:4041
-  state    : running
-```
-
-If the node app is not available:
-
-```txt
-error: node app is not available in this build
-hint: rebuild with SOFTADASTRA_BUILD_NODE_APP=ON
-```
-
-## Verify peers command
-
-Run:
-
-```bash
 softadastra peers
 ```
 
-Expected output when no peer exists:
+If you need node services for the current CLI session:
 
-```txt
-Peers
-
-  no peers found
+```sh
+softadastra node start
+softadastra peers
 ```
 
-This is valid.
+## Expected CLI commands
 
-No peers found should not break local store behavior.
+The current stable CLI surface is:
+
+```sh
+softadastra status
+
+softadastra node
+softadastra node info
+softadastra node start
+
+softadastra store
+softadastra store put <key> <value>
+softadastra store get <key>
+
+softadastra sync
+softadastra sync status
+softadastra sync tick
+
+softadastra peers
+```
+
+Do not use non-existing commands in build verification.
+
+For example, do not verify with:
+
+```sh
+softadastra store remove app/name
+```
+
+unless that command is implemented and stable.
 
 ## Verify interactive mode
 
-If interactive mode is enabled:
+Start the CLI without arguments:
 
-```bash
+```sh
 softadastra
 ```
 
-Expected prompt:
-
-```txt
-softadastra>
-```
-
-Try:
+Inside the session:
 
 ```txt
 softadastra> status
@@ -508,71 +287,31 @@ softadastra> exit
 
 Inside interactive mode, do not repeat the binary name.
 
-Wrong:
-
-```txt
-softadastra> softadastra status
-```
-
 Correct:
 
 ```txt
 softadastra> status
 ```
 
-## Verify persistence behavior
-
-Create the data directory:
-
-```bash
-mkdir -p data
-```
-
-Run a persistent example from the SDK or application.
-
-The verification flow should be:
+Wrong:
 
 ```txt
-open runtime
-  ↓
-write value
-  ↓
-close runtime
-  ↓
-open runtime with same WAL path
-  ↓
-read value
+softadastra> softadastra status
 ```
-
-Expected result:
-
-```txt
-recovered value is readable
-```
-
-This verifies WAL-backed recovery.
 
 ## Verify local-first behavior
 
-A release build should preserve local-first behavior.
+Softadastra must keep local work useful without peers.
 
 Run:
 
-```bash
+```sh
 softadastra store put draft/1 hello
 softadastra store get draft/1
 softadastra peers
 ```
 
-Even if peers output says:
-
-```txt
-Peers
-
-  no peers found
-```
-
-The local value should still be readable.
+Even if peers are empty, the local value should still be readable.
 
 The rule is:
 
@@ -582,210 +321,271 @@ no peer
 local store still works
 ```
 
-## Verify transport failure behavior
+## Verify sync visibility
 
-If transport or peer connection fails, local state should remain valid.
+After a local write, sync should be inspectable.
 
-Expected behavior:
-
-```txt
-peer connection failed
-  ↓
-sync work remains pending
-  ↓
-local data remains readable
+```sh
+softadastra store put message/1 hello
+softadastra sync status
+softadastra sync tick
+softadastra sync status
 ```
 
-A release should not treat transport failure as local data failure.
+A tick may show no connected peers.
 
-## Verify discovery empty state
+That is normal when no peer is connected.
 
-If no peer is discovered:
+The important part is that sync state is visible and local data is still readable.
 
-```bash
+## Verify node behavior
+
+Run:
+
+```sh
+softadastra node info
+```
+
+If metadata is unavailable, the CLI should still show basic node information.
+
+Then start node services:
+
+```sh
+softadastra node start
+```
+
+Verify:
+
+```sh
+softadastra node info
+softadastra status
 softadastra peers
 ```
 
-Expected output:
+`node start` starts services for the current CLI runtime.
+
+For a long-running daemon, use the Softadastra node app.
+
+## Verify peers empty state
+
+Run:
+
+```sh
+softadastra peers
+```
+
+If no peer exists, this is valid:
 
 ```txt
-Peers
-
-  no peers found
+No discovery peers found.
+No transport peers found.
 ```
 
-This should be treated as a valid empty state.
+No peers should not break local store behavior.
 
-It should not be a crash.
+## Verify persistent recovery
 
-## Verify C++ SDK
+Persistent recovery is verified with the C++ SDK or a runtime example.
 
-Go to the C++ SDK repository:
+The flow is:
 
-```bash
-cd ~/softadastra/sdk-cpp
+```txt
+open persistent runtime
+write value
+close runtime
+open again with the same WAL path
+read value
 ```
 
-Expected example areas:
+Before running persistent examples, create the data directory:
 
-- local store
-- persistent store
-- remove value
-- basic sync
-- transport
-- discovery
-- metadata
-- errors
+```sh
+mkdir -p data
+```
 
-Run the examples according to the SDK repository build setup.
+Expected result:
 
-If the SDK uses Vix:
+```txt
+the value written before restart is readable after restart
+```
 
-```bash
+## C++ SDK repository
+
+The C++ SDK repository is the developer-facing C++ API.
+
+Typical local path:
+
+```sh
+cd ~/softadastra/sdk
+```
+
+Build with Vix:
+
+```sh
 vix build
 ```
 
-If it uses CMake:
+Or with CMake:
 
-```bash
+```sh
 cmake --preset dev-ninja
 cmake --build --preset build-ninja
 ```
 
-If examples are built as binaries, find them:
+If examples are enabled, run the current examples from the repository.
 
-```bash
-find . -type f -executable
+Useful verification areas:
+
+```txt
+local store
+persistent store
+restart recovery
+sync state
+manual tick
+transport
+discovery
+metadata
 ```
 
-Recommended verification:
+Do not verify with old examples that no longer exist.
 
-- local store example prints stored value
-- persistent store example creates WAL file
-- remove value example returns `not_found` after remove
-- basic sync example shows outbox and tick result
-- transport example handles missing peer cleanly
-- discovery example handles no peers cleanly
-- metadata example prints node info
-- errors example shows explicit errors
+## Verify installed C++ SDK
 
-## Verify JavaScript SDK
+After installing Softadastra, the SDK should be available here:
 
-Go to the JavaScript SDK repository:
+Linux and macOS:
 
-```bash
-cd ~/softadastra/sdk-js
+```txt
+~/.softadastra/sdk
+```
+
+Windows:
+
+```txt
+%LOCALAPPDATA%\Softadastra\sdk
+```
+
+Use it with Vix:
+
+```sh
+vix build -- -DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
+```
+
+On Windows:
+
+```powershell
+vix build -- -DCMAKE_PREFIX_PATH="$env:LOCALAPPDATA\Softadastra\sdk"
+```
+
+Use it with CMake:
+
+```sh
+cmake -S . -B build \
+  -DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
+```
+
+## Documentation repository
+
+Typical local path:
+
+```sh
+cd ~/softadastra/docs
 ```
 
 Install dependencies:
 
-```bash
+```sh
 npm install
 ```
 
-Create data directory:
+Run the docs locally:
 
-```bash
-mkdir -p data
+```sh
+npm run dev
 ```
 
-Run examples:
+Build the docs:
 
-```bash
-npm run examples:local-store
-npm run examples:persistent-store
-npm run examples:remove-value
-npm run examples:basic-sync
-npm run examples:tcp-peer-sync
-npm run examples:discovery
-npm run examples:node-metadata
-```
-
-Run tests:
-
-```bash
-npm test
-```
-
-Expected verification:
-
-- local store example prints stored value
-- persistent store example creates WAL file
-- remove value example returns `not_found` after remove
-- basic sync example shows outbox and tick result
-- TCP peer sync handles missing peer cleanly
-- discovery handles no peers cleanly
-- metadata prints node info
-- tests pass
-
-## Verify documentation build
-
-Go to the documentation project root.
-
-If the docs have a package file:
-
-```bash
-npm install
-```
-
-Build:
-
-```bash
+```sh
 npm run build
 ```
 
-or, depending on scripts:
+Preview the production build:
 
-```bash
-npm run docs:build
+```sh
+npm run preview
 ```
 
-For VitePress, a successful build should generate:
+For VitePress, a successful build should produce:
 
 ```txt
 .vitepress/dist
 ```
 
-The build should not fail on broken links, missing pages, or invalid sidebar entries.
+The docs build should not fail because of:
+
+- broken links
+- missing pages
+- invalid sidebar entries
+- invalid nav links
+- wrong relative links
+- case-sensitive filename mismatch
 
 ## Verify documentation routes
 
-Check that these sections exist:
+Check the main public routes:
 
 ```txt
 /
-what-is-softadastra
 installation
 quick-start
+sdks
 
-/concepts/
 /cli/
 /sdk-cpp/
-/sdk-js/
-/engine/
-/guides/
 /reference/
 /releases/
 ```
 
-Important guide routes:
+Important CLI routes:
 
 ```txt
-/guides/build-offline-first-app
-/guides/run-local-node
-/guides/persist-data-locally
-/guides/sync-between-nodes
-/guides/use-cpp-sdk-with-engine
-/guides/use-js-sdk-with-engine
-/guides/production
+/cli/
+/cli/commands
+/cli/interactive-mode
+/cli/node
+/cli/store
+/cli/sync
+/cli/peers
+/cli/reference
+```
+
+Important C++ SDK routes:
+
+```txt
+/sdk-cpp/
+/sdk-cpp/installation
+/sdk-cpp/quick-start
+/sdk-cpp/client
+/sdk-cpp/client-options
+/sdk-cpp/results-and-errors
+/sdk-cpp/local-store
+/sdk-cpp/persistent-store
+/sdk-cpp/restart-recovery
+/sdk-cpp/sync-state
+/sdk-cpp/tick
+/sdk-cpp/transport
+/sdk-cpp/discovery
+/sdk-cpp/metadata
+/sdk-cpp/examples
 ```
 
 Important reference routes:
 
 ```txt
+/reference/
 /reference/cli
 /reference/cpp-api
-/reference/js-api
 /reference/config
 /reference/errors
 ```
@@ -793,6 +593,7 @@ Important reference routes:
 Important release routes:
 
 ```txt
+/releases/
 /releases/changelog
 /releases/builds
 ```
@@ -801,118 +602,144 @@ Important release routes:
 
 Release artifacts should be named clearly.
 
-Possible artifact names:
+The installer expects platform archives for the CLI and C++ SDK.
+
+CLI archive names:
 
 ```txt
 softadastra-linux-x86_64.tar.gz
-softadastra-cli-linux-x86_64.tar.gz
-softadastra-engine-linux-x86_64.tar.gz
-softadastra-sdk-cpp-linux-x86_64.tar.gz
-softadastra-sdk-js.tgz
+softadastra-linux-aarch64.tar.gz
+softadastra-macos-x86_64.tar.gz
+softadastra-macos-aarch64.tar.gz
+softadastra-windows-x86_64.zip
 ```
 
-Use names that include:
-
-- project
-- component
-- platform
-- architecture
-- version
-
-Example:
+C++ SDK archive names:
 
 ```txt
-softadastra-cli-v0.1.0-linux-x86_64.tar.gz
+softadastra-sdk-linux-x86_64.tar.gz
+softadastra-sdk-linux-aarch64.tar.gz
+softadastra-sdk-macos-x86_64.tar.gz
+softadastra-sdk-macos-aarch64.tar.gz
+softadastra-sdk-windows-x86_64.zip
 ```
 
-## Artifact contents
+Each archive must also have a SHA256 file:
 
-A CLI artifact can include:
+```txt
+<archive>.sha256
+```
+
+If available, add a minisign signature:
+
+```txt
+<archive>.minisig
+```
+
+## CLI artifact contents
+
+The Linux and macOS CLI archive should contain the binary in one of these accepted layouts:
+
+```txt
+bin/softadastra
+```
+
+or:
 
 ```txt
 softadastra
+```
+
+The Windows CLI archive should contain:
+
+```txt
+softadastra.exe
+```
+
+The installer searches recursively for `softadastra.exe` on Windows.
+
+## C++ SDK artifact contents
+
+The SDK archive must contain:
+
+```txt
+include/softadastra/sdk
+lib/cmake/sdk-cpp/sdk-cppConfig.cmake
+```
+
+A good SDK archive can also include:
+
+```txt
+include/softadastra/sdk.hpp
+lib/
 README.md
 LICENSE
 CHANGELOG.md
-```
-
-An engine artifact can include:
-
-```txt
-include/
-lib/
-cmake/
-README.md
-LICENSE
-CHANGELOG.md
-```
-
-A C++ SDK artifact can include:
-
-```txt
-include/
-lib/
-cmake/
 examples/
-README.md
-LICENSE
-CHANGELOG.md
 ```
 
-A JavaScript SDK artifact is usually published as an npm package or archive:
+The installer fails if the required include directory or CMake config is missing.
 
-```txt
-package.json
-src/
-README.md
-LICENSE
-CHANGELOG.md
-```
+## Verify release artifacts
 
-## Artifact verification
+Create a clean test directory:
 
-After producing an artifact, test it in a clean directory.
-
-Example:
-
-```bash
+```sh
 mkdir -p /tmp/softadastra-release-test
 cd /tmp/softadastra-release-test
-tar -xzf /path/to/softadastra-cli-v0.1.0-linux-x86_64.tar.gz
-./softadastra help
-./softadastra version
 ```
 
-For SDK artifacts, test a minimal application that imports or links the SDK.
+Test the CLI archive:
+
+```sh
+tar -xzf /path/to/softadastra-linux-x86_64.tar.gz
+./softadastra version
+./softadastra status
+```
+
+If the archive contains `bin/softadastra`:
+
+```sh
+./bin/softadastra version
+./bin/softadastra status
+```
+
+Test the SDK archive by installing or extracting it into a clean prefix, then building a tiny C++ app with:
+
+```sh
+-DCMAKE_PREFIX_PATH=/path/to/sdk
+```
 
 ## Version verification
 
 Before publishing, check:
 
-```bash
+```sh
 softadastra version
-```
-
-Expected output style:
-
-```txt
-Softadastra 0.1.0
 ```
 
 Also verify version references in:
 
-- `CHANGELOG.md`
-- `README.md`
-- docs
-- `package.json`, for JavaScript SDK
-- `vix.json`, if used
-- CMake project version, if used
+```txt
+CHANGELOG.md
+README.md
+docs
+vix.json
+CMake project version
+release tag
+```
+
+For the C++ SDK, verify the SDK version helpers if needed:
+
+```cpp
+softadastra::sdk::sdk_version()
+```
 
 ## Build logs
 
 Keep build logs useful.
 
-Important information:
+A good build log should make these clear:
 
 - compiler
 - CMake version
@@ -923,180 +750,123 @@ Important information:
 - enabled options
 - target platform
 - commit hash
-- version
-
-A release build should be traceable.
+- release version
 
 ## Common build issues
 
-### Missing package.json in docs
-
-If you run npm in the wrong directory, you may see:
-
-```txt
-Could not read package.json
-```
-
-Fix:
-
-```bash
-cd /path/to/docs-project-root
-ls package.json
-npm install
-npm run build
-```
-
-If the docs directory only contains markdown files and `.vitepress/`, create or use the correct VitePress project root.
-
-### Missing data directory
+## Missing data directory
 
 Persistent examples can fail if `data/` does not exist.
 
 Fix:
 
-```bash
+```sh
 mkdir -p data
 ```
 
-### CLI binary not found
+## CLI binary not found
 
 Find it:
 
-```bash
+```sh
 find . -type f -executable -name "softadastra*"
 ```
 
 Then run the full path:
 
-```bash
-./build-ninja/apps/cli/softadastra help
+```sh
+./path/to/softadastra version
 ```
 
-### Command not found
+## Command not found
 
-If `softadastra` is not in `PATH`, run:
+If `softadastra` is not in `PATH`, run the binary directly:
 
-```bash
-./softadastra help
+```sh
+./softadastra version
 ```
 
-Or install locally:
+Or install the official release:
 
-```bash
-mkdir -p ~/.local/bin
-cp ./softadastra ~/.local/bin/softadastra
-chmod +x ~/.local/bin/softadastra
-export PATH="$HOME/.local/bin:$PATH"
+```sh
+curl -fsSL https://softadastra.com/install.sh | sh
 ```
 
-### Port already in use
+## Port already in use
 
-If transport fails to start:
+If transport fails to start, check the port:
 
-```bash
-ss -ltnp | grep 4041
+```sh
+ss -ltnp | grep 9100
 ```
 
-Use another port:
+Use another port if needed.
 
-```txt
-node-a -> 4041
-node-b -> 4042
-```
+## Node app not available
 
-### Node app not available
+If a long-running node app is not built, rebuild with:
 
-If `softadastra node start` fails:
-
-```txt
-error: node app is not available in this build
-```
-
-Rebuild with:
-
-```bash
+```sh
 vix build -- \
   -DSOFTADASTRA_BUILD_APPS=ON \
   -DSOFTADASTRA_BUILD_CLI_APP=ON \
   -DSOFTADASTRA_BUILD_NODE_APP=ON
 ```
 
-### Documentation broken links
+## Documentation broken links
 
-If VitePress reports missing pages, check:
+If VitePress reports broken links, check:
 
-- docs tree
-- sidebar config
-- nav links
-- relative links
-- file names
-- case sensitivity
-
-Route names should match file names.
+- the file exists
+- the route matches the filename
+- the sidebar points to the right path
+- the header nav points to the right path
+- relative links do not include wrong extensions
+- file case matches the link case
 
 Example:
 
 ```txt
-/guides/sync-between-nodes
+/reference/cpp-api
 ```
 
 should map to:
 
 ```txt
-guides/sync-between-nodes.md
+reference/cpp-api.md
 ```
 
 ## Build verification checklist
 
 Before publishing a build, verify:
 
-- engine builds successfully
-- release build succeeds
+- engine repository builds
+- release preset builds
 - CLI binary exists
-- CLI help works
 - CLI version works
 - CLI status works
-- store put/get/remove works
+- store put/get works
 - sync status works
 - sync tick works
-- peers handles empty state
 - node info works
+- peers handles empty state
+- local-first behavior still works
 - persistent recovery works
-- transport failure does not delete local data
-- discovery empty state is handled
-- C++ SDK examples build or run
-- JavaScript SDK examples run
-- JavaScript SDK tests pass
-- docs build succeeds
+- C++ SDK builds
+- C++ SDK can be found with `CMAKE_PREFIX_PATH`
+- documentation builds
 - changelog is updated
 - version is correct
-- artifacts are named consistently
+- release artifacts are named correctly
+- release artifacts contain required files
+- release artifacts have `.sha256`
+- installer can install the release
 
-## Release safety checklist
+## Minimal release verification sequence
 
-Softadastra builds should protect local-first behavior.
+From the engine repository:
 
-Before release, verify:
-
-- local writes work without network
-- local reads work without network
-- missing keys return explicit errors
-- WAL paths are validated
-- WAL recovery works
-- sync status exposes pending work
-- sync tick exposes batch information
-- transport failure is visible
-- transport failure does not invalidate local state
-- discovery no-peers state is valid
-- metadata identifies the node
-- CLI errors are actionable
-- SDK errors are explicit
-
-## Minimal release command sequence
-
-A useful local release verification sequence:
-
-```bash
+```sh
 cd ~/softadastra/softadastra
 
 vix build --preset release -- \
@@ -1105,80 +875,57 @@ vix build --preset release -- \
   -DSOFTADASTRA_BUILD_NODE_APP=ON
 
 find . -type f -executable -name "softadastra*"
+```
 
-./softadastra help
+Then run the built binary:
+
+```sh
 ./softadastra version
 ./softadastra status
 
 ./softadastra store put app/name Softadastra
 ./softadastra store get app/name
+
 ./softadastra sync status
 ./softadastra sync tick
+
+./softadastra node info
 ./softadastra peers
 ```
 
-Adjust `./softadastra` if the binary is generated elsewhere.
+Adjust `./softadastra` if the binary is generated in another folder.
 
-## Documentation release command sequence
+## Documentation verification sequence
 
-A useful docs verification sequence:
-
-```bash
+```sh
 cd ~/softadastra/docs
 
 npm install
 npm run build
 ```
 
-If the docs project uses another root, run the command from the directory containing `package.json`.
+Then check:
 
-If VitePress is used, check:
-
-```bash
+```sh
 ls .vitepress/dist
 ```
 
-## JavaScript SDK release command sequence
+## C++ SDK verification sequence
 
-```bash
-cd ~/softadastra/sdk-js
-
-npm install
-mkdir -p data
-
-npm test
-
-npm run examples:local-store
-npm run examples:persistent-store
-npm run examples:remove-value
-npm run examples:basic-sync
-npm run examples:tcp-peer-sync
-npm run examples:discovery
-npm run examples:node-metadata
-```
-
-If publishing to npm later, verify package contents:
-
-```bash
-npm pack --dry-run
-```
-
-## C++ SDK release command sequence
-
-```bash
-cd ~/softadastra/sdk-cpp
+```sh
+cd ~/softadastra/sdk
 
 vix build
 ```
 
 or:
 
-```bash
+```sh
 cmake --preset dev-ninja
 cmake --build --preset build-ninja
 ```
 
-Then run available examples or tests according to the SDK repository layout.
+Then run the available examples or tests from the SDK repository.
 
 ## What a good build proves
 
@@ -1186,35 +933,29 @@ A good build proves:
 
 - the code compiles
 - the CLI starts
-- the SDK examples work
+- the CLI stable commands work
+- the C++ SDK builds
 - the docs build
 - local-first behavior still works
 - persistence can be verified
 - sync state is visible
 - errors are explicit
+- release artifacts can be installed
 
-It does not automatically prove:
+It does not prove everything about production behavior.
 
-- production readiness
-- perfect convergence
-- all network failures
-- all conflict cases
-- all platform-specific behavior
-- all deployment environments
-
-Those require deeper testing.
+Production reliability still needs deeper testing, including network failures, crash recovery, conflict cases, and real deployment constraints.
 
 ## Stable versus experimental artifacts
 
 Only publish artifacts as stable when they are intended to be supported.
 
-Recommended rule:
+Good rule:
 
 ```txt
 stable CLI binary        -> publish as release artifact
-stable SDK package       -> publish as SDK artifact
-experimental node app    -> mark as experimental
-unstable JSON schema     -> do not advertise as stable
+stable C++ SDK package   -> publish as SDK artifact
+experimental node app    -> mark clearly if needed
 internal test binary     -> do not publish as public artifact
 ```
 
@@ -1222,19 +963,20 @@ internal test binary     -> do not publish as public artifact
 
 Softadastra builds should be reproducible, verifiable, and clear.
 
-The release build process should verify:
+The release process should verify:
 
-- build
+- repositories
 - CLI
-- SDKs
+- C++ SDK
 - docs
 - local-first behavior
 - persistence
 - sync visibility
 - error handling
 - artifacts
+- installer compatibility
 
-The most important build rule is:
+The most important rule is:
 
 ```txt
 do not ship a build that cannot be verified
@@ -1242,11 +984,10 @@ do not ship a build that cannot be verified
 
 ## Related pages
 
-- [Releases](./index.md)
-- [Changelog](./changelog.md)
-- [Production Guide](../guides/production.md)
-- [CLI Reference](../reference/cli.md)
-- [C++ API Reference](../reference/cpp-api.md)
-- [JavaScript API Reference](../reference/js-api.md)
-- [Configuration Reference](../reference/config.md)
-- [Errors Reference](../reference/errors.md)
+- [Releases](./index)
+- [Changelog](./changelog)
+- [Installation](../installation)
+- [CLI Reference](../reference/cli)
+- [C++ API Reference](../reference/cpp-api)
+- [Configuration Reference](../reference/config)
+- [Errors Reference](../reference/errors)

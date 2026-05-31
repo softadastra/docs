@@ -1,576 +1,313 @@
 # Quick Start
 
-This guide helps you run your first Softadastra flow.
+This page gives you the fastest way to try Softadastra.
 
-You will learn how to:
+You will:
 
-```txt
-open a local client
-write a value
-read it back
-inspect sync state
-run one sync tick
-close the client
-```
+- check the local runtime
+- write a local value
+- read it back
+- inspect sync state
+- run one sync tick
+- start node services
+- inspect peers
 
-Softadastra is local-first. That means your first write does not require a server, cloud API, transport connection, or discovered peer.
+## 1. Check Softadastra
 
-## What you will build
-
-You will create a small local Softadastra client and store one value:
-
-```txt
-key   : app/name
-value : Softadastra SDK
-```
-
-The flow is:
-
-```txt
-open client
-  ↓
-put value
-  ↓
-get value
-  ↓
-inspect sync state
-  ↓
-tick sync pipeline
-  ↓
-close client
-```
-
-## Choose your SDK
-
-Softadastra provides two main SDKs:
-
-- **SDK C++** — native C++ applications
-- **SDK JS** — JavaScript / Node.js applications
-
-Use the C++ quick start if you are building native software. Use the JavaScript quick start if you are building with Node.js.
-
-## Quick Start with C++
-
-Create a file:
+Run:
 
 ```sh
-nano main.cpp
+softadastra status
 ```
 
-Paste this:
+You should see the local runtime status.
 
-```cpp
-#include <iostream>
+Example:
 
-#include <softadastra/sdk.hpp>
+```txt
+Softadastra status
 
-int main()
-{
-    using namespace softadastra::sdk;
-
-    ClientOptions options =
-        ClientOptions::local("node-quickstart");
-
-    options.enable_transport = false;
-    options.enable_discovery = false;
-    options.enable_wal = false;
-
-    Client client{options};
-
-    auto open_result = client.open();
-
-    if (open_result.is_err())
-    {
-        std::cerr << "failed to open client: "
-                  << open_result.error().message()
-                  << "\n";
-
-        return 1;
-    }
-
-    auto put_result = client.put(
-        "app/name",
-        "Softadastra SDK");
-
-    if (put_result.is_err())
-    {
-        std::cerr << "failed to store value: "
-                  << put_result.error().message()
-                  << "\n";
-
-        client.close();
-        return 1;
-    }
-
-    auto value_result = client.get("app/name");
-
-    if (value_result.is_err())
-    {
-        std::cerr << "failed to read value: "
-                  << value_result.error().message()
-                  << "\n";
-
-        client.close();
-        return 1;
-    }
-
-    std::cout << "key   : app/name\n";
-    std::cout << "value : "
-              << value_result.value().to_string()
-              << "\n";
-
-    std::cout << "size  : "
-              << client.size()
-              << "\n";
-
-    client.close();
-
-    return 0;
-}
+Component   Metric        Value
+node        id            node-1
+node        running       no
+store       entries       0
+sync        outbox        0
+sync        queued        0
+sync        in_flight     0
+sync        acknowledged  0
+sync        failed        0
+transport   running       no
+transport   peers         0
+discovery   running       no
+discovery   peers         0
+metadata    running       no
 ```
 
-This creates a memory-only local Softadastra client.
+If this command works, Softadastra is installed and the CLI is available.
 
-The important part is:
+## 2. Write a local value
 
-```cpp
-ClientOptions options =
-    ClientOptions::local("node-quickstart");
-
-options.enable_transport = false;
-options.enable_discovery = false;
-options.enable_wal = false;
-```
-
-For this first example, transport, discovery, and WAL persistence are disabled. The client runs locally without network or persistent storage.
-
-### Run the C++ example
-
-If you are inside the C++ SDK repository, build the SDK first:
+Run:
 
 ```sh
-cd ~/softadastra/sdk
-vix build
+softadastra store put app/name Softadastra
 ```
 
-Then run the existing example:
+Example output:
+
+```txt
+✓ Stored value.
+
+Field    Value
+key      app/name
+version  1
+status   created
+```
+
+This writes a value locally.
+
+No server is required.
+
+No peer is required.
+
+No network is required.
+
+## 3. Read the value
+
+Run:
 
 ```sh
-./build-ninja/examples/01_local_store
+softadastra store get app/name
 ```
 
-Expected output:
+Example output:
 
 ```txt
-key   : app/name
-value : Softadastra SDK
-size  : 1
+Store entry
+
+Field      Value
+key        app/name
+value      Softadastra
+version    1
+timestamp  1760000000000
 ```
 
-If you are integrating the SDK from another C++ project, make sure your project includes `#include <softadastra/sdk.hpp>` and links against the Softadastra SDK according to your build setup.
+You have now written and read local data with Softadastra.
 
-## Quick Start with JavaScript
+## 4. Inspect sync
 
-Create a file:
+Run:
 
 ```sh
-nano quick-start.js
+softadastra sync status
 ```
 
-Paste this:
+Example output:
 
-```js
-import { Client, ClientOptions } from "@softadastra/sdk";
+```txt
+Softadastra sync status
 
-const client = new Client(
-  ClientOptions.local("node-quickstart")
-);
-
-const openResult = await client.open();
-
-if (openResult.isErr()) {
-  console.error(`failed to open client: ${openResult.error().message}`);
-  process.exit(1);
-}
-
-const putResult = await client.put("app/name", "Softadastra SDK");
-
-if (putResult.isErr()) {
-  console.error(`failed to store value: ${putResult.error().message}`);
-  await client.close();
-  process.exit(1);
-}
-
-const valueResult = await client.get("app/name");
-
-if (valueResult.isErr()) {
-  console.error(`failed to read value: ${valueResult.error().message}`);
-  await client.close();
-  process.exit(1);
-}
-
-console.log("key   : app/name");
-console.log(`value : ${valueResult.value().toString()}`);
-console.log(`size  : ${client.size()}`);
-
-await client.close();
+Metric                       Value
+node_id                      node-1
+outbox_size                  1
+queued_count                 1
+in_flight_count              0
+acknowledged_count           0
+failed_count                 0
+last_submitted_version       1
+last_applied_remote_version  0
+total_retries                0
 ```
 
-Install the SDK:
+This shows what Softadastra is tracking for synchronization.
+
+A local write can create sync work.
+
+That does not mean the data is lost or waiting for the network to be useful. The value is already local.
+
+## 5. Run one sync tick
+
+Run:
 
 ```sh
-npm install @softadastra/sdk
+softadastra sync tick
 ```
 
-Run it:
+Example output:
+
+```txt
+Softadastra sync tick
+
+Metric           Value
+retried_count    0
+batch_size       1
+connected_peers  0
+sent_count       0
+pruned_count     0
+
+No connected transport peers available.
+```
+
+This is normal if no peer is connected.
+
+Softadastra can keep local work and move sync forward later when peers are available.
+
+## 6. Start node services
+
+Run:
 
 ```sh
-node quick-start.js
+softadastra node start
 ```
 
-Expected output:
+Example output:
 
 ```txt
-key   : app/name
-value : Softadastra SDK
-size  : 1
+Starting Softadastra node
+
+✓ Softadastra node services started for this CLI session.
+node_id    node-1
+transport  running
+discovery  running
+metadata   running
 ```
 
-If you are inside the `sdk-js` repository, examples import from local source:
+This starts transport, discovery, and metadata for the current CLI session.
 
-```js
-import { Client, ClientOptions } from "../src/index.js";
+For a long-running node, use the Softadastra node app.
+
+## 7. Inspect the local node
+
+Run:
+
+```sh
+softadastra node info
 ```
 
-In an external project, use:
-
-```js
-import { Client, ClientOptions } from "@softadastra/sdk";
-```
-
-## Add persistence
-
-The previous examples are local and memory-only.
-
-To make local writes recoverable after restart, enable WAL-backed persistence.
-
-### C++
-
-```cpp
-ClientOptions options =
-    ClientOptions::persistent(
-        "node-persistent",
-        "data/quick-start.wal");
-```
-
-Or manually:
-
-```cpp
-ClientOptions options =
-    ClientOptions::local("node-persistent");
-
-options.enable_wal = true;
-options.wal_path = "data/quick-start.wal";
-options.auto_flush = true;
-```
-
-### JavaScript
-
-```js
-const options = ClientOptions.persistent(
-  "node-persistent",
-  "data/quick-start.wal"
-);
-```
-
-With persistence enabled, the flow becomes:
+Example output:
 
 ```txt
-put value
-  ↓
-append operation to WAL
-  ↓
-apply to local store
-  ↓
-track for sync
+Softadastra node
+
+Field          Value
+node_id        node-1
+display_name   Softadastra Node
+hostname       local-machine
+os             linux
+version        0.1.0
+started_at     1760000000000
+uptime_ms      1250
+capabilities   6
+node_running   yes
 ```
 
-The network is still not required.
+The exact values depend on your machine.
 
-## Inspect sync state
+## 8. Check peers
 
-Every local write can be tracked by the sync pipeline.
+Run:
 
-### C++
-
-```cpp
-auto state = client.sync_state();
-
-if (state.is_ok())
-{
-    std::cout << "outbox : "
-              << state.value().outbox_size
-              << "\n";
-
-    std::cout << "queued : "
-              << state.value().queued_count
-              << "\n";
-
-    std::cout << "failed : "
-              << state.value().failed_count
-              << "\n";
-}
+```sh
+softadastra peers
 ```
 
-### JavaScript
-
-```js
-const state = await client.syncStateInfo();
-
-if (state.isOk()) {
-  console.log(`outbox : ${state.value().outboxSize}`);
-  console.log(`queued : ${state.value().queuedCount}`);
-  console.log(`failed : ${state.value().failedCount}`);
-}
-```
-
-This tells you how much sync work is currently tracked.
-
-## Run one sync tick
-
-A sync tick moves the sync pipeline forward once.
-
-### C++
-
-```cpp
-auto tick = client.tick();
-
-if (tick.is_ok())
-{
-    std::cout << "retried : "
-              << tick.value().retried_count
-              << "\n";
-
-    std::cout << "pruned  : "
-              << tick.value().pruned_count
-              << "\n";
-
-    std::cout << "batch   : "
-              << tick.value().batch_size
-              << "\n";
-}
-```
-
-### JavaScript
-
-```js
-const tick = await client.tick();
-
-if (tick.isOk()) {
-  console.log(`retried : ${tick.value().retriedCount}`);
-  console.log(`pruned  : ${tick.value().prunedCount}`);
-  console.log(`batch   : ${tick.value().batchSize}`);
-}
-```
-
-A tick can retry expired operations, produce the next batch, and prune completed work when requested.
-
-Softadastra keeps this explicit so synchronization stays observable and testable.
-
-## Enable transport
-
-Transport allows a node to connect to another peer.
-
-### C++
-
-```cpp
-ClientOptions options =
-    ClientOptions::local("node-a");
-
-options.enable_wal = true;
-options.wal_path = "data/node-a.wal";
-options.auto_flush = true;
-
-options.enable_transport = true;
-options.transport_host = "127.0.0.1";
-options.transport_port = 4041;
-
-Client client{options};
-
-client.open();
-client.start_transport();
-
-Peer peer{
-    "node-b",
-    "127.0.0.1",
-    4042};
-
-client.connect(peer);
-```
-
-### JavaScript
-
-```js
-import { Client, ClientOptions, Peer } from "@softadastra/sdk";
-
-const options = ClientOptions.local("node-a");
-
-options.enableWal = true;
-options.walPath = "data/node-a.wal";
-options.autoFlush = true;
-
-options.enableTransport = true;
-options.transportHost = "127.0.0.1";
-options.transportPort = 4041;
-
-const client = new Client(options);
-
-await client.open();
-await client.startTransport();
-
-const peer = new Peer("node-b", "127.0.0.1", 4042);
-
-await client.connect(peer);
-```
-
-Transport is optional. If the peer is unavailable, local writes should still work.
-
-## Enable discovery
-
-Discovery lets the node list known peers.
-
-### C++
-
-```cpp
-ClientOptions options =
-    ClientOptions::local("node-discovery-a");
-
-options.enable_transport = true;
-options.transport_host = "127.0.0.1";
-options.transport_port = 4051;
-
-options.enable_discovery = true;
-options.discovery_host = "127.0.0.1";
-options.discovery_port = 5051;
-options.discovery_broadcast_host = "127.0.0.1";
-options.discovery_broadcast_port = 5052;
-
-Client client{options};
-
-client.open();
-client.start_discovery();
-
-auto peers = client.peers();
-```
-
-### JavaScript
-
-```js
-const options = ClientOptions.local("node-discovery-a");
-
-options.enableTransport = true;
-options.transportHost = "127.0.0.1";
-options.transportPort = 4051;
-
-options.enableDiscovery = true;
-options.discoveryHost = "127.0.0.1";
-options.discoveryPort = 5051;
-options.discoveryBroadcastHost = "127.0.0.1";
-options.discoveryBroadcastPort = 5052;
-
-const client = new Client(options);
-
-await client.open();
-await client.startDiscovery();
-
-const peers = await client.peers();
-```
-
-The relationship is:
+If no other node is available, you may see:
 
 ```txt
-Discovery finds peers
-  ↓
-Transport connects peers
-  ↓
-Sync sends operations
+Softadastra peers
+
+discovery  yes
+transport  yes
+
+Discovery peers
+No discovery peers found.
+
+Transport peers
+No transport peers found.
 ```
 
-## Read node metadata
+No peers is not an error.
 
-Metadata describes the local node.
+Local reads and writes still work.
 
-### C++
+## The full first flow
 
-```cpp
-auto info = client.refresh_node_info();
+You can copy this whole flow:
 
-if (info.is_ok())
-{
-    const auto &node = info.value();
+```sh
+softadastra status
 
-    std::cout << "node id      : " << node.node_id << "\n";
-    std::cout << "display name : " << node.display_name << "\n";
-    std::cout << "hostname     : " << node.hostname << "\n";
-    std::cout << "os           : " << node.os_name << "\n";
-    std::cout << "version      : " << node.version << "\n";
-}
+softadastra store put app/name Softadastra
+softadastra store get app/name
+
+softadastra sync status
+softadastra sync tick
+
+softadastra node start
+softadastra node info
+softadastra peers
+
+softadastra status
 ```
 
-### JavaScript
+## Interactive mode
 
-```js
-const info = await client.refreshNodeInfo();
+You can also run the same flow inside one session:
 
-if (info.isOk()) {
-  const node = info.value();
-
-  console.log(`node id      : ${node.nodeId}`);
-  console.log(`display name : ${node.displayName}`);
-  console.log(`hostname     : ${node.hostname}`);
-  console.log(`os           : ${node.osName}`);
-  console.log(`version      : ${node.version}`);
-}
+```sh
+softadastra
 ```
 
-Metadata answers: who is this node, what version is it running, what platform is it on, and what capabilities does it support.
-
-## The complete mental model
-
-Softadastra follows this model:
+Then type:
 
 ```txt
-write locally
-persist locally
-track operation
-sync when possible
-retry when needed
-converge later
+softadastra> status
+softadastra> store put app/name Softadastra
+softadastra> store get app/name
+softadastra> sync status
+softadastra> sync tick
+softadastra> node start
+softadastra> node info
+softadastra> peers
+softadastra> status
+softadastra> exit
 ```
 
-A local write is the first step. Network delivery is a later step.
+Inside interactive mode, do not repeat `softadastra`.
+
+Use:
 
 ```txt
-Local write
-  ↓
-Store
-  ↓
-WAL, if enabled
-  ↓
-Sync state
-  ↓
-Transport, if enabled
-  ↓
-Discovery, if enabled
-  ↓
-Remote peer
+softadastra> status
 ```
 
-## Recommended next steps
+not:
 
-Now that you have written and read your first value:
+```txt
+softadastra> softadastra status
+```
 
-- Learn the core model in [Concepts](/concepts/)
-- Use the CLI in [CLI](/cli/)
-- Build with C++ in [SDK C++](/sdk-cpp/)
-- Build with JavaScript in [SDK JS](/sdk-js/)
+## What you just learned
+
+You used Softadastra to:
+
+- write data locally
+- read data locally
+- inspect sync state
+- run one sync tick
+- start node services
+- inspect the local node
+- check peers
+
+The important idea is simple:
+
+```txt
+local work comes first
+network synchronization can happen later
+```
+
+## Next step
+
+Continue with [CLI](./cli/) to learn the command line interface.
+
+Or continue with [SDKs](./sdks) if you want to use Softadastra inside your own application.

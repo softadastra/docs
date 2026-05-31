@@ -1,11 +1,91 @@
 import { defineConfig } from "vitepress";
 
+const softadastraCodeTheme = {
+  name: "softadastra-code",
+  type: "dark",
+  colors: {
+    "editor.background": "#0f151b",
+    "editor.foreground": "#d7e2ee",
+  },
+  tokenColors: [
+    {
+      scope: ["comment", "punctuation.definition.comment"],
+      settings: {
+        foreground: "#6a9955",
+        fontStyle: "italic",
+      },
+    },
+    {
+      scope: ["string"],
+      settings: {
+        foreground: "#ce9178",
+      },
+    },
+    {
+      scope: ["constant.numeric", "constant.language"],
+      settings: {
+        foreground: "#b5cea8",
+      },
+    },
+    {
+      scope: ["keyword.control"],
+      settings: {
+        foreground: "#c586c0",
+        fontStyle: "",
+      },
+    },
+    {
+      scope: ["keyword", "storage.type", "storage.modifier"],
+      settings: {
+        foreground: "#569cd6",
+        fontStyle: "",
+      },
+    },
+    {
+      scope: ["entity.name.function", "support.function"],
+      settings: {
+        foreground: "#dcdcaa",
+      },
+    },
+    {
+      scope: ["entity.name.type", "support.type", "support.class"],
+      settings: {
+        foreground: "#4ec9b0",
+      },
+    },
+    {
+      scope: ["entity.name.namespace", "support.namespace"],
+      settings: {
+        foreground: "#4fc1ff",
+      },
+    },
+    {
+      scope: ["variable.other.member", "variable.parameter"],
+      settings: {
+        foreground: "#9cdcfe",
+      },
+    },
+    {
+      scope: ["keyword.operator", "punctuation"],
+      settings: {
+        foreground: "#8b949e",
+      },
+    },
+    {
+      scope: ["variable", "identifier"],
+      settings: {
+        foreground: "#d7e2ee",
+      },
+    },
+  ],
+};
+
 export default defineConfig({
   lang: "en-US",
 
   title: "Softadastra Documentation",
   description:
-    "Learn how to build local-first and offline-first applications with Softadastra.",
+    "Learn how to build reliable local-first applications with Softadastra.",
 
   base: "/",
 
@@ -16,10 +96,13 @@ export default defineConfig({
   markdown: {
     html: true,
     lineNumbers: true,
+    theme: {
+      light: softadastraCodeTheme,
+      dark: softadastraCodeTheme,
+    },
   },
 
   head: [
-    // Favicons
     ["link", { rel: "icon", href: "/pwa/favicon.ico" }],
     [
       "link",
@@ -47,32 +130,27 @@ export default defineConfig({
         href: "/pwa/apple-touch-icon.png",
       },
     ],
-    [
-      "link",
-      {
-        rel: "manifest",
-        href: "/pwa/site.webmanifest",
-      },
-    ],
+    ["link", { rel: "manifest", href: "/pwa/site.webmanifest" }],
 
-    // Browser / mobile theme
     ["meta", { name: "theme-color", content: "#11181b" }],
     ["meta", { name: "color-scheme", content: "dark light" }],
     ["meta", { name: "mobile-web-app-capable", content: "yes" }],
     ["meta", { name: "apple-mobile-web-app-capable", content: "yes" }],
     [
       "meta",
-      { name: "apple-mobile-web-app-title", content: "Softadastra Docs" },
+      {
+        name: "apple-mobile-web-app-title",
+        content: "Softadastra Docs",
+      },
     ],
     ["meta", { name: "application-name", content: "Softadastra Docs" }],
 
-    // Primary SEO
     [
       "meta",
       {
         name: "description",
         content:
-          "Softadastra documentation for building local-first and offline-first applications with WAL, sync, local storage, SDKs, and resilient runtime primitives.",
+          "Softadastra documentation for installing and using the Softadastra CLI, C++ SDK, and JavaScript SDK to build reliable local-first applications.",
       },
     ],
     [
@@ -80,20 +158,21 @@ export default defineConfig({
       {
         name: "keywords",
         content:
-          "Softadastra, offline-first, local-first, sync engine, WAL, write-ahead log, local storage, distributed systems, C++ SDK, JavaScript SDK, resilient applications",
+          "Softadastra, Softadastra CLI, Softadastra SDK, C++ SDK, JavaScript SDK, local-first, offline-first, sync, WAL, local storage, reliable applications",
       },
     ],
     ["meta", { name: "author", content: "Softadastra" }],
     ["meta", { name: "robots", content: "index, follow" }],
 
-    // Canonical
     ["link", { rel: "canonical", href: "https://docs.softadastra.com/" }],
 
-    // Open Graph
     ["meta", { property: "og:type", content: "website" }],
     [
       "meta",
-      { property: "og:site_name", content: "Softadastra Documentation" },
+      {
+        property: "og:site_name",
+        content: "Softadastra Documentation",
+      },
     ],
     ["meta", { property: "og:title", content: "Softadastra Documentation" }],
     [
@@ -101,7 +180,7 @@ export default defineConfig({
       {
         property: "og:description",
         content:
-          "Learn how to build local-first and offline-first applications with Softadastra.",
+          "Install the Softadastra CLI and SDKs, then build reliable local-first applications.",
       },
     ],
     ["meta", { property: "og:url", content: "https://docs.softadastra.com/" }],
@@ -116,10 +195,12 @@ export default defineConfig({
     ["meta", { property: "og:image:height", content: "512" }],
     [
       "meta",
-      { property: "og:image:alt", content: "Softadastra Documentation" },
+      {
+        property: "og:image:alt",
+        content: "Softadastra Documentation",
+      },
     ],
 
-    // Twitter / X
     ["meta", { name: "twitter:card", content: "summary" }],
     ["meta", { name: "twitter:title", content: "Softadastra Documentation" }],
     [
@@ -127,7 +208,7 @@ export default defineConfig({
       {
         name: "twitter:description",
         content:
-          "Learn how to build local-first and offline-first applications with Softadastra.",
+          "Install the Softadastra CLI and SDKs, then build reliable local-first applications.",
       },
     ],
     [
@@ -138,6 +219,7 @@ export default defineConfig({
       },
     ],
   ],
+
   vite: {
     optimizeDeps: {
       include: ["mark.js", "minisearch"],
@@ -179,12 +261,12 @@ export default defineConfig({
 
     sidebar: [
       {
-        text: "The Softadastra Book",
+        text: "Start",
         collapsed: false,
         items: [
           {
-            text: "Introduction",
-            link: "/",
+            text: "Welcome",
+            link: "/welcome",
           },
           {
             text: "What is Softadastra?",
@@ -202,55 +284,12 @@ export default defineConfig({
       },
 
       {
-        text: "Part I. Concepts",
-        collapsed: false,
-        items: [
-          {
-            text: "Overview",
-            link: "/concepts/",
-          },
-          {
-            text: "Offline-first",
-            link: "/concepts/offline-first",
-          },
-          {
-            text: "Local-first",
-            link: "/concepts/local-first",
-          },
-          {
-            text: "Failure Model",
-            link: "/concepts/failure-model",
-          },
-          {
-            text: "Write-Ahead Log",
-            link: "/concepts/wal",
-          },
-          {
-            text: "Outbox",
-            link: "/concepts/outbox",
-          },
-          {
-            text: "Sync Engine",
-            link: "/concepts/sync-engine",
-          },
-          {
-            text: "Convergence",
-            link: "/concepts/convergence",
-          },
-        ],
-      },
-
-      {
-        text: "Part II. CLI",
+        text: "CLI",
         collapsed: false,
         items: [
           {
             text: "Overview",
             link: "/cli/",
-          },
-          {
-            text: "Installation",
-            link: "/cli/installation",
           },
           {
             text: "Commands",
@@ -284,7 +323,7 @@ export default defineConfig({
       },
 
       {
-        text: "Part III. C++ SDK",
+        text: "C++ SDK",
         collapsed: false,
         items: [
           {
@@ -292,11 +331,11 @@ export default defineConfig({
             link: "/sdk-cpp/",
           },
           {
-            text: "Installation",
+            text: "Install",
             link: "/sdk-cpp/installation",
           },
           {
-            text: "Quick Start",
+            text: "First App",
             link: "/sdk-cpp/quick-start",
           },
           {
@@ -304,31 +343,27 @@ export default defineConfig({
             link: "/sdk-cpp/client",
           },
           {
-            text: "Client Options",
+            text: "Options",
             link: "/sdk-cpp/client-options",
           },
           {
-            text: "Results and Errors",
-            link: "/sdk-cpp/results-and-errors",
-          },
-          {
-            text: "Local Store",
+            text: "Store",
             link: "/sdk-cpp/local-store",
           },
           {
-            text: "Persistent Store",
+            text: "Persistence",
             link: "/sdk-cpp/persistent-store",
           },
           {
-            text: "Restart Recovery",
+            text: "Recovery",
             link: "/sdk-cpp/restart-recovery",
           },
           {
-            text: "Sync State",
+            text: "Sync",
             link: "/sdk-cpp/sync-state",
           },
           {
-            text: "Manual Tick",
+            text: "Tick",
             link: "/sdk-cpp/tick",
           },
           {
@@ -344,6 +379,10 @@ export default defineConfig({
             link: "/sdk-cpp/metadata",
           },
           {
+            text: "Errors",
+            link: "/sdk-cpp/results-and-errors",
+          },
+          {
             text: "Examples",
             link: "/sdk-cpp/examples",
           },
@@ -351,7 +390,7 @@ export default defineConfig({
       },
 
       {
-        text: "Part IV. SDK JS",
+        text: "JavaScript SDK",
         collapsed: false,
         items: [
           {
@@ -359,7 +398,7 @@ export default defineConfig({
             link: "/sdk-js/",
           },
           {
-            text: "Installation",
+            text: "Install",
             link: "/sdk-js/installation",
           },
           {
@@ -371,15 +410,15 @@ export default defineConfig({
             link: "/sdk-js/client",
           },
           {
-            text: "Client Options",
+            text: "Options",
             link: "/sdk-js/client-options",
           },
           {
-            text: "Local Store",
+            text: "Store",
             link: "/sdk-js/local-store",
           },
           {
-            text: "Persistent Store",
+            text: "Persistence",
             link: "/sdk-js/persistent-store",
           },
           {
@@ -410,11 +449,92 @@ export default defineConfig({
       },
 
       {
-        text: "Part V. Engine",
+        text: "Guides",
         collapsed: true,
         items: [
           {
             text: "Overview",
+            link: "/guides/",
+          },
+          {
+            text: "Build an App",
+            link: "/guides/build-offline-first-app",
+          },
+          {
+            text: "Run a Node",
+            link: "/guides/run-local-node",
+          },
+          {
+            text: "Persist Data",
+            link: "/guides/persist-data-locally",
+          },
+          {
+            text: "Sync Nodes",
+            link: "/guides/sync-between-nodes",
+          },
+          {
+            text: "Production",
+            link: "/guides/production",
+          },
+        ],
+      },
+
+      {
+        text: "Reference",
+        collapsed: true,
+        items: [
+          {
+            text: "Overview",
+            link: "/reference/",
+          },
+          {
+            text: "CLI",
+            link: "/reference/cli",
+          },
+          {
+            text: "C++ API",
+            link: "/reference/cpp-api",
+          },
+          {
+            text: "JavaScript API",
+            link: "/reference/js-api",
+          },
+          {
+            text: "Configuration",
+            link: "/reference/config",
+          },
+          {
+            text: "Errors",
+            link: "/reference/errors",
+          },
+        ],
+      },
+
+      {
+        text: "Releases",
+        collapsed: true,
+        items: [
+          {
+            text: "Overview",
+            link: "/releases/",
+          },
+          {
+            text: "Changelog",
+            link: "/releases/changelog",
+          },
+          {
+            text: "Builds",
+            link: "/releases/builds",
+          },
+        ],
+      },
+
+      {
+        text: "Internal Architecture",
+        collapsed: true,
+        items: [
+          {
+            text: "Engine",
             link: "/engine/",
           },
           {
@@ -422,7 +542,7 @@ export default defineConfig({
             link: "/engine/architecture",
           },
           {
-            text: "Runtime Flow",
+            text: "Runtime",
             link: "/engine/runtime-flow",
           },
           {
@@ -467,95 +587,6 @@ export default defineConfig({
           },
         ],
       },
-
-      {
-        text: "Part VI. Guides",
-        collapsed: true,
-        items: [
-          {
-            text: "Overview",
-            link: "/guides/",
-          },
-          {
-            text: "Build an Offline-first App",
-            link: "/guides/build-offline-first-app",
-          },
-          {
-            text: "Run a Local Node",
-            link: "/guides/run-local-node",
-          },
-          {
-            text: "Persist Data Locally",
-            link: "/guides/persist-data-locally",
-          },
-          {
-            text: "Sync Between Nodes",
-            link: "/guides/sync-between-nodes",
-          },
-          {
-            text: "Use the C++ SDK with the Engine",
-            link: "/guides/use-cpp-sdk-with-engine",
-          },
-          {
-            text: "Use the JS SDK with the Engine",
-            link: "/guides/use-js-sdk-with-engine",
-          },
-          {
-            text: "Production",
-            link: "/guides/production",
-          },
-        ],
-      },
-
-      {
-        text: "Part VII. Reference",
-        collapsed: true,
-        items: [
-          {
-            text: "Overview",
-            link: "/reference/",
-          },
-          {
-            text: "CLI Reference",
-            link: "/reference/cli",
-          },
-          {
-            text: "C++ API",
-            link: "/reference/cpp-api",
-          },
-          {
-            text: "JavaScript API",
-            link: "/reference/js-api",
-          },
-          {
-            text: "Configuration",
-            link: "/reference/config",
-          },
-          {
-            text: "Errors",
-            link: "/reference/errors",
-          },
-        ],
-      },
-
-      {
-        text: "Part VIII. Releases",
-        collapsed: true,
-        items: [
-          {
-            text: "Overview",
-            link: "/releases/",
-          },
-          {
-            text: "Changelog",
-            link: "/releases/changelog",
-          },
-          {
-            text: "Builds",
-            link: "/releases/builds",
-          },
-        ],
-      },
     ],
 
     search: {
@@ -577,7 +608,7 @@ export default defineConfig({
       },
       {
         icon: "x",
-        link: "https://x.com/",
+        link: "https://x.com/softadastra",
       },
     ],
 

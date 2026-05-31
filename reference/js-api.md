@@ -37,21 +37,13 @@ The main package is:
 Use the main import:
 
 ```js
-import {
-  Client,
-  ClientOptions,
-} from "@softadastra/sdk";
+import { Client, ClientOptions } from "@softadastra/sdk";
 ```
 
 Other public types can be imported when needed:
 
 ```js
-import {
-  Client,
-  ClientOptions,
-  Value,
-  Peer,
-} from "@softadastra/sdk";
+import { Client, ClientOptions, Value, Peer } from "@softadastra/sdk";
 ```
 
 ## ESM requirement
@@ -76,29 +68,24 @@ node main.js
 
 The JavaScript SDK exposes these main public types:
 
-| Type | Purpose |
-|---|---|
-| `Client` | Main SDK object |
-| `ClientOptions` | Runtime configuration |
-| `Value` | Local store value |
-| `Peer` | Remote peer description |
-| `NodeInfo` | Local node metadata |
-| `Result` | Success or failure result |
-| `SoftadastraError` | Structured error |
-| `SyncResult` | Sync state result value |
-| `TickResult` | Sync tick result value |
+| Type               | Purpose                   |
+| ------------------ | ------------------------- |
+| `Client`           | Main SDK object           |
+| `ClientOptions`    | Runtime configuration     |
+| `Value`            | Local store value         |
+| `Peer`             | Remote peer description   |
+| `NodeInfo`         | Local node metadata       |
+| `Result`           | Success or failure result |
+| `SoftadastraError` | Structured error          |
+| `SyncResult`       | Sync state result value   |
+| `TickResult`       | Sync tick result value    |
 
 ## Minimal client
 
 ```js
-import {
-  Client,
-  ClientOptions,
-} from "@softadastra/sdk";
+import { Client, ClientOptions } from "@softadastra/sdk";
 
-const client = new Client(
-  ClientOptions.local("node-local"),
-);
+const client = new Client(ClientOptions.local("node-local"));
 
 const opened = await client.open();
 
@@ -132,9 +119,9 @@ It provides one async public API for local store, persistence, sync, transport, 
 
 ### Lifecycle methods
 
-| Method | Purpose |
-|---|---|
-| `open()` | Open and initialize the local runtime |
+| Method    | Purpose                                 |
+| --------- | --------------------------------------- |
+| `open()`  | Open and initialize the local runtime   |
 | `close()` | Close the runtime and release resources |
 
 Example:
@@ -156,14 +143,14 @@ await client.close();
 
 ### Store methods
 
-| Method | Purpose |
-|---|---|
-| `put(key, value)` | Write or update a local value |
-| `get(key)` | Read a local value |
-| `remove(key)` | Remove a local value |
-| `contains(key)` | Check whether a key exists |
-| `size()` | Return the number of local entries |
-| `empty()` | Check whether the local store is empty |
+| Method            | Purpose                                |
+| ----------------- | -------------------------------------- |
+| `put(key, value)` | Write or update a local value          |
+| `get(key)`        | Read a local value                     |
+| `remove(key)`     | Remove a local value                   |
+| `contains(key)`   | Check whether a key exists             |
+| `size()`          | Return the number of local entries     |
+| `empty()`         | Check whether the local store is empty |
 
 Example:
 
@@ -179,11 +166,11 @@ if (value.isOk()) {
 
 ### Sync methods
 
-| Method | Purpose |
-|---|---|
-| `syncStateInfo()` | Return current synchronization state |
-| `sync_state_info()` | Snake_case alias, if exposed |
-| `tick()` | Run one sync tick |
+| Method                  | Purpose                                                  |
+| ----------------------- | -------------------------------------------------------- |
+| `syncStateInfo()`       | Return current synchronization state                     |
+| `sync_state_info()`     | Snake_case alias, if exposed                             |
+| `tick()`                | Run one sync tick                                        |
 | `tick({ prune: true })` | Run one sync tick and prune completed work, if supported |
 
 Example:
@@ -204,24 +191,20 @@ if (tick.isOk()) {
 
 ### Transport methods
 
-| Method | Purpose |
-|---|---|
-| `startTransport()` | Start local transport |
-| `start_transport()` | Snake_case alias, if exposed |
-| `stopTransport()` | Stop transport, if exposed |
-| `stop_transport()` | Snake_case alias, if exposed |
-| `transportRunning()` | Check whether transport is running |
-| `transport_running()` | Snake_case alias, if exposed |
-| `connect(peer)` | Connect to a peer |
+| Method                | Purpose                            |
+| --------------------- | ---------------------------------- |
+| `startTransport()`    | Start local transport              |
+| `start_transport()`   | Snake_case alias, if exposed       |
+| `stopTransport()`     | Stop transport, if exposed         |
+| `stop_transport()`    | Snake_case alias, if exposed       |
+| `transportRunning()`  | Check whether transport is running |
+| `transport_running()` | Snake_case alias, if exposed       |
+| `connect(peer)`       | Connect to a peer                  |
 
 Example:
 
 ```js
-const peer = new Peer(
-  "node-b",
-  "127.0.0.1",
-  4042,
-);
+const peer = new Peer("node-b", "127.0.0.1", 4042);
 
 const connected = await client.connect(peer);
 
@@ -232,15 +215,15 @@ if (connected.isErr()) {
 
 ### Discovery methods
 
-| Method | Purpose |
-|---|---|
-| `startDiscovery()` | Start peer discovery |
-| `start_discovery()` | Snake_case alias, if exposed |
-| `stopDiscovery()` | Stop discovery, if exposed |
-| `stop_discovery()` | Snake_case alias, if exposed |
-| `discoveryRunning()` | Check whether discovery is running |
-| `discovery_running()` | Snake_case alias, if exposed |
-| `peers()` | List known peers |
+| Method                | Purpose                            |
+| --------------------- | ---------------------------------- |
+| `startDiscovery()`    | Start peer discovery               |
+| `start_discovery()`   | Snake_case alias, if exposed       |
+| `stopDiscovery()`     | Stop discovery, if exposed         |
+| `stop_discovery()`    | Snake_case alias, if exposed       |
+| `discoveryRunning()`  | Check whether discovery is running |
+| `discovery_running()` | Snake_case alias, if exposed       |
+| `peers()`             | List known peers                   |
 
 Example:
 
@@ -256,12 +239,12 @@ if (peers.isOk()) {
 
 ### Metadata methods
 
-| Method | Purpose |
-|---|---|
-| `refreshNodeInfo()` | Refresh and return local node metadata |
-| `refresh_node_info()` | Snake_case alias, if exposed |
-| `nodeInfo()` | Return cached node metadata, if exposed |
-| `node_info()` | Snake_case alias, if exposed |
+| Method                | Purpose                                 |
+| --------------------- | --------------------------------------- |
+| `refreshNodeInfo()`   | Refresh and return local node metadata  |
+| `refresh_node_info()` | Snake_case alias, if exposed            |
+| `nodeInfo()`          | Return cached node metadata, if exposed |
+| `node_info()`         | Snake_case alias, if exposed            |
 
 Example:
 
@@ -291,28 +274,25 @@ const client = new Client(options);
 
 ### Factory helpers
 
-| Helper | Purpose |
-|---|---|
-| `ClientOptions.local(nodeId)` | Create local options |
-| `ClientOptions.persistent(nodeId, walPath)` | Create WAL-backed persistent options |
-| `ClientOptions.memoryOnly(nodeId)` | Create memory-only options, if exposed |
+| Helper                                      | Purpose                                |
+| ------------------------------------------- | -------------------------------------- |
+| `ClientOptions.local(nodeId)`               | Create local options                   |
+| `ClientOptions.persistent(nodeId, walPath)` | Create WAL-backed persistent options   |
+| `ClientOptions.memoryOnly(nodeId)`          | Create memory-only options, if exposed |
 
 Example:
 
 ```js
-const options = ClientOptions.persistent(
-  "node-a",
-  "data/node-a.wal",
-);
+const options = ClientOptions.persistent("node-a", "data/node-a.wal");
 ```
 
 ### Identity fields
 
-| Field | Purpose |
-|---|---|
-| `nodeId` | Local node identifier |
-| `displayName` | Human-friendly node label |
-| `version` | Runtime or application version |
+| Field         | Purpose                        |
+| ------------- | ------------------------------ |
+| `nodeId`      | Local node identifier          |
+| `displayName` | Human-friendly node label      |
+| `version`     | Runtime or application version |
 
 Example:
 
@@ -323,10 +303,10 @@ options.version = "0.1.0";
 
 ### Persistence fields
 
-| Field | Purpose |
-|---|---|
-| `enableWal` | Enable WAL-backed persistence |
-| `walPath` | WAL file path |
+| Field       | Purpose                                        |
+| ----------- | ---------------------------------------------- |
+| `enableWal` | Enable WAL-backed persistence                  |
+| `walPath`   | WAL file path                                  |
 | `autoFlush` | Flush WAL writes automatically when configured |
 
 Example:
@@ -340,21 +320,18 @@ options.autoFlush = true;
 Persistent helper:
 
 ```js
-const options = ClientOptions.persistent(
-  "node-a",
-  "data/node-a.wal",
-);
+const options = ClientOptions.persistent("node-a", "data/node-a.wal");
 
 options.autoFlush = true;
 ```
 
 ### Transport fields
 
-| Field | Purpose |
-|---|---|
+| Field             | Purpose                        |
+| ----------------- | ------------------------------ |
 | `enableTransport` | Enable transport configuration |
-| `transportHost` | Local transport bind host |
-| `transportPort` | Local transport bind port |
+| `transportHost`   | Local transport bind host      |
+| `transportPort`   | Local transport bind port      |
 
 Example:
 
@@ -366,13 +343,13 @@ options.transportPort = 4041;
 
 ### Discovery fields
 
-| Field | Purpose |
-|---|---|
-| `enableDiscovery` | Enable discovery configuration |
-| `discoveryHost` | Local discovery bind host |
-| `discoveryPort` | Local discovery bind port |
-| `discoveryBroadcastHost` | Discovery target host |
-| `discoveryBroadcastPort` | Discovery target port |
+| Field                    | Purpose                        |
+| ------------------------ | ------------------------------ |
+| `enableDiscovery`        | Enable discovery configuration |
+| `discoveryHost`          | Local discovery bind host      |
+| `discoveryPort`          | Local discovery bind port      |
+| `discoveryBroadcastHost` | Discovery target host          |
+| `discoveryBroadcastPort` | Discovery target port          |
 
 Example:
 
@@ -420,10 +397,7 @@ Use when local writes should survive restart.
 ### Transport-enabled
 
 ```js
-const options = ClientOptions.persistent(
-  "node-a",
-  "data/node-a.wal",
-);
+const options = ClientOptions.persistent("node-a", "data/node-a.wal");
 
 options.autoFlush = true;
 
@@ -492,20 +466,16 @@ if (result.isOk()) {
 `Peer` describes another node.
 
 ```js
-const peer = new Peer(
-  "node-b",
-  "127.0.0.1",
-  4042,
-);
+const peer = new Peer("node-b", "127.0.0.1", 4042);
 ```
 
 Common fields:
 
-| Field | Purpose |
-|---|---|
+| Field    | Purpose                |
+| -------- | ---------------------- |
 | `nodeId` | Remote node identifier |
-| `host` | Remote host |
-| `port` | Remote transport port |
+| `host`   | Remote host            |
+| `port`   | Remote transport port  |
 
 Use with:
 
@@ -521,15 +491,15 @@ A failed peer connection should not invalidate local state.
 
 Common fields:
 
-| Field | Purpose |
-|---|---|
-| `nodeId` | Local node identifier |
-| `displayName` | Human-friendly label |
-| `hostname` | Machine hostname |
-| `osName` | Operating system |
-| `version` | Runtime or app version |
+| Field          | Purpose                        |
+| -------------- | ------------------------------ |
+| `nodeId`       | Local node identifier          |
+| `displayName`  | Human-friendly label           |
+| `hostname`     | Machine hostname               |
+| `osName`       | Operating system               |
+| `version`      | Runtime or app version         |
 | `capabilities` | Supported runtime capabilities |
-| `uptime_ms()` | Runtime uptime in milliseconds |
+| `uptime_ms()`  | Runtime uptime in milliseconds |
 
 Example:
 
@@ -562,12 +532,12 @@ Result
 
 Common methods:
 
-| Method | Purpose |
-|---|---|
-| `isOk()` | Check whether the result is successful |
-| `isErr()` | Check whether the result failed |
-| `value()` | Access success value |
-| `error()` | Access error |
+| Method    | Purpose                                |
+| --------- | -------------------------------------- |
+| `isOk()`  | Check whether the result is successful |
+| `isErr()` | Check whether the result failed        |
+| `value()` | Access success value                   |
+| `error()` | Access error                           |
 
 Correct pattern:
 
@@ -596,10 +566,10 @@ That assumes the operation succeeded.
 
 Common fields and methods:
 
-| Field or method | Purpose |
-|---|---|
-| `message` | Human-readable error message |
-| `codeString()` | Stable error code string, when exposed |
+| Field or method | Purpose                                |
+| --------------- | -------------------------------------- |
+| `message`       | Human-readable error message           |
+| `codeString()`  | Stable error code string, when exposed |
 
 Example:
 
@@ -625,16 +595,16 @@ message : key not found
 
 Common fields:
 
-| Field | Meaning |
-|---|---|
-| `outboxSize` | Local operations waiting for synchronization |
-| `queuedCount` | Operations ready to be selected for sending |
-| `inFlightCount` | Operations prepared or sent, possibly waiting for ACK |
-| `acknowledgedCount` | Operations confirmed by the remote side |
-| `failedCount` | Operations that exceeded retry policy or hit a sync error |
-| `totalRetries` | Total retry attempts |
-| `lastSubmittedVersion` | Last local submitted version, if exposed |
-| `lastAppliedRemoteVersion` | Last remote applied version, if exposed |
+| Field                      | Meaning                                                   |
+| -------------------------- | --------------------------------------------------------- |
+| `outboxSize`               | Local operations waiting for synchronization              |
+| `queuedCount`              | Operations ready to be selected for sending               |
+| `inFlightCount`            | Operations prepared or sent, possibly waiting for ACK     |
+| `acknowledgedCount`        | Operations confirmed by the remote side                   |
+| `failedCount`              | Operations that exceeded retry policy or hit a sync error |
+| `totalRetries`             | Total retry attempts                                      |
+| `lastSubmittedVersion`     | Last local submitted version, if exposed                  |
+| `lastAppliedRemoteVersion` | Last remote applied version, if exposed                   |
 
 Example:
 
@@ -662,11 +632,11 @@ if (state.isOk() && state.value().hasFailed()) {
 
 Common fields:
 
-| Field | Meaning |
-|---|---|
-| `retriedCount` | Operations retried during the tick |
-| `prunedCount` | Completed entries removed during the tick |
-| `batchSize` | Operations produced in the current batch |
+| Field          | Meaning                                   |
+| -------------- | ----------------------------------------- |
+| `retriedCount` | Operations retried during the tick        |
+| `prunedCount`  | Completed entries removed during the tick |
+| `batchSize`    | Operations produced in the current batch  |
 
 Example:
 
@@ -815,11 +785,7 @@ if (client.transportRunning()) {
 ### `connect`
 
 ```js
-const peer = new Peer(
-  "node-b",
-  "127.0.0.1",
-  4042,
-);
+const peer = new Peer("node-b", "127.0.0.1", 4042);
 
 const result = await client.connect(peer);
 ```
@@ -979,11 +945,7 @@ const client = new Client(options);
 await client.open();
 await client.startTransport();
 
-const peer = new Peer(
-  "node-b",
-  "127.0.0.1",
-  4042,
-);
+const peer = new Peer("node-b", "127.0.0.1", 4042);
 
 await client.connect(peer);
 await client.tick();

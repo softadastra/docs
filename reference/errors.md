@@ -1,499 +1,216 @@
 # Errors Reference
 
-This page is the compact reference for Softadastra error behavior.
+This page explains how Softadastra reports errors.
 
-Use it when you need to quickly check result handling, error shapes, common failure cases, CLI error output, SDK error patterns, and local-first failure rules.
-
-The core rule is:
+The main rule is simple:
 
 ```txt
-Check the result before using the value.
+check the result before using the value
 ```
 
-Softadastra APIs should make failure explicit.
+Softadastra makes failures explicit. A command or SDK call should tell you what failed instead of hiding the problem.
 
-## Why errors are explicit
+## Why errors matter
 
-Softadastra is designed for local-first and offline-first systems.
+Softadastra is local-first.
 
-In this kind of runtime, failure is normal:
+That means local work can succeed even when sync, peers, discovery, or transport are not available.
 
-- network unavailable
-- peer unavailable
-- transport failed
-- discovery found no peers
-- WAL path invalid
-- data directory missing
+These situations are normal:
+
 - key not found
-- sync work failed
-- runtime not open
+- client not open
+- missing argument
+- invalid key
+- sync has pending work
+- no connected peers
+- no discovery peers
+- transport is disabled
+- discovery is disabled
+- metadata is unavailable
 
-The system should not hide those states.
-
-Instead, operations should return clear success or failure results.
-
-## Error model
-
-The general model is:
-
-```txt
-operation
-  ↓
-Result
-  ↓
-success value
-or
-error value
-```
-
-C++:
-
-```cpp
-auto result = client.get("app/name");
-
-if (result.is_err())
-{
-    std::cerr << result.error().message() << "\n";
-    return 1;
-}
-
-std::cout << result.value().to_string() << "\n";
-```
-
-JavaScript:
-
-```js
-const result = await client.get("app/name");
-
-if (result.isErr()) {
-  console.error(result.error().message);
-  process.exit(1);
-}
-
-console.log(result.value().toString());
-```
-
-CLI:
-
-```bash
-softadastra store get app/name
-```
-
-If the key is missing:
-
-```txt
-error: key not found
-key: app/name
-```
-
-## Result rules
-
-Use the result object in this order:
-
-```txt
-call operation
-  ↓
-check success or failure
-  ↓
-handle error if needed
-  ↓
-use value only after success
-```
-
-Do not access the value before checking the result.
+An error should tell you what happened and what to check next.
 
 ## C++ result pattern
 
+Most C++ SDK operations return a `Result`.
+
 Correct:
 
 ```cpp
-auto result = client.get("settings/theme");
+const auto value =
+    client.get("settings/theme");
 
-if (result.is_err())
+if (value.is_err())
 {
-    std::cerr << "read failed: "
-              << result.error().message()
+    std::cerr << value.error().code_string()
+              << ": "
+              << value.error().message()
               << "\n";
 
     return 1;
 }
 
-std::cout << result.value().to_string() << "\n";
+std::cout << value.value().to_string()
+          << "\n";
 ```
 
-Wrong:
+Do not do this:
 
 ```cpp
-auto value = client.get("settings/theme").value();
+std::cout << client.get("settings/theme").value().to_string()
+          << "\n";
 ```
 
-The wrong version assumes the key exists and the operation succeeded.
-
-## JavaScript result pattern
-
-Correct:
-
-```js
-const result = await client.get("settings/theme");
-
-if (result.isErr()) {
-  console.error(`read failed: ${result.error().message}`);
-  process.exit(1);
-}
-
-console.log(result.value().toString());
-```
-
-Wrong:
-
-```js
-const value = (await client.get("settings/theme")).value();
-```
-
-The wrong version assumes success.
-
-## CLI error pattern
-
-CLI errors should be clear and actionable.
-
-Good shape:
-
-```txt
-error: failed to read key
-reason: key not found
-key: settings/theme
-```
-
-Another good shape:
-
-```txt
-error: missing value
-usage: softadastra store put <key> <value>
-```
-
-Unknown command:
-
-```txt
-error: unknown command: deploy
-hint: run `softadastra help` to list available commands
-```
-
-The CLI should explain what failed, why it failed, and what the user can do next.
+That assumes the operation succeeded.
 
 ## C++ Error
 
-In the C++ SDK, an error can expose:
+`Error` describes what failed.
 
-| Method | Purpose |
-|---|---|
-| `message()` | Human-readable error message |
-| `code_string()` | Stable error code string, if exposed |
+Useful methods:
+
+| Method          | Purpose                            |
+| --------------- | ---------------------------------- |
+| `code()`        | Return the error code              |
+| `code_string()` | Return the error code as text      |
+| `message()`     | Return the error message           |
+| `context()`     | Return optional diagnostic context |
+| `ok()`          | Check whether there is no error    |
+| `has_error()`   | Check whether there is an error    |
+| `has_context()` | Check whether context is available |
+| `clear()`       | Clear the error                    |
 
 Example:
 
 ```cpp
-auto result = client.get("missing/key");
+const auto value =
+    client.get("missing/key");
 
-if (result.is_err())
+if (value.is_err())
 {
     std::cout << "code    : "
-              << result.error().code_string()
+              << value.error().code_string()
               << "\n";
 
     std::cout << "message : "
-              << result.error().message()
+              << value.error().message()
               << "\n";
+
+    if (value.error().has_context())
+    {
+        std::cout << "context : "
+                  << value.error().context()
+                  << "\n";
+    }
 }
 ```
 
-Expected output style:
+## Error code strings
+
+The C++ SDK exposes these public error code strings:
 
 ```txt
-code    : not_found
-message : key not found
+none
+unknown
+invalid_argument
+invalid_state
+not_found
+already_exists
+io_error
+store_error
+sync_error
+transport_error
+discovery_error
+metadata_error
+internal_error
 ```
-
-## JavaScript SoftadastraError
-
-In the JavaScript SDK, an error can expose:
-
-| Field or method | Purpose |
-|---|---|
-| `message` | Human-readable error message |
-| `codeString()` | Stable error code string, if exposed |
-
-Example:
-
-```js
-const result = await client.get("missing/key");
-
-if (result.isErr()) {
-  console.log(`code    : ${result.error().codeString()}`);
-  console.log(`message : ${result.error().message}`);
-}
-```
-
-Expected output style:
-
-```txt
-code    : not_found
-message : key not found
-```
-
-## Error code versus message
 
 Use the code for program logic.
 
 Use the message for humans.
 
-```txt
-code    -> stable machine-readable category
-message -> human-readable explanation
-```
-
-Example JavaScript logic:
-
-```js
-const result = await client.get("settings/theme");
-
-if (result.isErr() && result.error().codeString() === "not_found") {
-  await client.put("settings/theme", "light");
-}
-```
-
-Example C++ logic:
+Example:
 
 ```cpp
-auto result = client.get("settings/theme");
+const auto value =
+    client.get("settings/theme");
 
-if (result.is_err() &&
-    result.error().code_string() == "not_found")
+if (value.is_err() &&
+    value.error().code_string() == "not_found")
 {
     client.put("settings/theme", "light");
 }
 ```
 
-## Common error categories
-
-Common Softadastra error categories can include:
-
-- `invalid_argument`
-- `not_found`
-- `already_exists`
-- `unavailable`
-- `permission_denied`
-- `io_error`
-- `transport_error`
-- `discovery_error`
-- `sync_error`
-- `wal_error`
-- `store_error`
-- `metadata_error`
-- `internal`
-- `unknown`
-
-The exact set depends on the current implementation.
-
-Only treat an error code as stable when it is documented and supported.
-
-## Store errors
-
-Store errors happen when reading, writing, or removing local values.
-
-### Key not found
-
-A missing key is a normal store error.
-
-C++:
-
-```cpp
-auto result = client.get("missing/key");
-
-if (result.is_err())
-{
-    std::cout << result.error().code_string() << "\n";
-}
-```
-
-JavaScript:
-
-```js
-const result = await client.get("missing/key");
-
-if (result.isErr()) {
-  console.log(result.error().codeString());
-}
-```
-
-CLI:
-
-```bash
-softadastra store get missing/key
-```
-
-Expected output style:
-
-```txt
-error: key not found
-key: missing/key
-```
-
-This should not crash the runtime.
-
-### Invalid key
-
-An empty key should fail clearly.
-
-C++:
-
-```cpp
-auto result = client.put("", "value");
-
-if (result.is_err())
-{
-    std::cerr << result.error().message() << "\n";
-}
-```
-
-JavaScript:
-
-```js
-const result = await client.put("", "value");
-
-if (result.isErr()) {
-  console.error(result.error().message);
-}
-```
-
-CLI:
-
-```bash
-softadastra store put "" value
-```
-
-Expected output style:
-
-```txt
-error: invalid key
-reason: key must not be empty
-```
-
-### Missing CLI value
-
-CLI:
-
-```bash
-softadastra store put app/name
-```
-
-Expected output style:
-
-```txt
-error: missing value
-usage: softadastra store put <key> <value>
-```
-
-This is an invalid usage error.
-
-Recommended exit code:
-
-```txt
-2
-```
-
-### Remove missing key
-
-Removing a missing key can be reported clearly.
-
-```bash
-softadastra store remove app/name
-```
-
-Expected output style:
-
-```txt
-Removed value
-
-  key     : app/name
-  removed : no
-  reason  : key not found
-```
-
-This is not the same as a runtime crash.
-
 ## Client lifecycle errors
 
-Some operations require an opened client.
+Most SDK operations require an open client.
 
-Wrong C++:
+Wrong:
 
 ```cpp
-Client client{options};
+Client client{
+    ClientOptions::memory_only("node-a")
+};
 
 client.put("app/name", "Softadastra");
 ```
 
-Correct C++:
+Correct:
 
 ```cpp
-Client client{options};
+Client client{
+    ClientOptions::memory_only("node-a")
+};
 
-auto opened = client.open();
+const auto opened =
+    client.open();
 
 if (opened.is_err())
 {
-    std::cerr << opened.error().message() << "\n";
+    std::cerr << opened.error().message()
+              << "\n";
+
     return 1;
 }
 
 client.put("app/name", "Softadastra");
+
+client.close();
 ```
 
-Wrong JavaScript:
+If the client is not open, operations can fail with an invalid state error.
 
-```js
-const client = new Client(options);
+Common message:
 
-await client.put("app/name", "Softadastra");
-```
-
-Correct JavaScript:
-
-```js
-const client = new Client(options);
-
-const opened = await client.open();
-
-if (opened.isErr()) {
-  console.error(opened.error().message);
-  process.exit(1);
-}
-
-await client.put("app/name", "Softadastra");
+```txt
+SDK client is not open
 ```
 
 ## Open errors
 
 `open()` can fail.
 
-Possible causes:
+Common causes:
 
-- invalid node id
+- invalid options
 - invalid WAL path
-- missing data directory
+- missing parent directory for a persistent store
 - permission denied
-- WAL open failed
-- store recovery failed
-- runtime configuration invalid
+- runtime initialization failure
 
-C++:
+Example:
 
 ```cpp
-auto opened = client.open();
+const auto opened =
+    client.open();
 
 if (opened.is_err())
 {
     std::cerr << "open failed: "
+              << opened.error().code_string()
+              << ": "
               << opened.error().message()
               << "\n";
 
@@ -501,744 +218,580 @@ if (opened.is_err())
 }
 ```
 
-JavaScript:
+If `open()` fails, do not continue as if the client is ready.
 
-```js
-const opened = await client.open();
+## Close after errors
 
-if (opened.isErr()) {
-  console.error(`open failed: ${opened.error().message}`);
-  process.exit(1);
-}
-```
-
-If `open()` fails, do not continue as if the runtime is healthy.
-
-## Cleanup after errors
-
-After the client is open, close it before returning.
-
-C++:
+If the client is already open and a later operation fails, close the client before returning.
 
 ```cpp
-auto written = client.put("app/name", "Softadastra");
+const auto stored =
+    client.put("app/name", "Softadastra");
 
-if (written.is_err())
+if (stored.is_err())
 {
-    std::cerr << written.error().message() << "\n";
+    std::cerr << stored.error().message()
+              << "\n";
+
     client.close();
     return 1;
 }
 ```
 
-JavaScript:
+## Store errors
 
-```js
-const written = await client.put("app/name", "Softadastra");
+Store errors happen when reading or writing local values.
 
-if (written.isErr()) {
-  console.error(written.error().message);
-  await client.close();
-  process.exit(1);
+## Key not found
+
+A missing key is a normal store error.
+
+```cpp
+const auto value =
+    client.get("missing/key");
+
+if (value.is_err())
+{
+    std::cout << value.error().code_string()
+              << "\n";
+
+    std::cout << value.error().message()
+              << "\n";
 }
 ```
 
-## WAL and persistence errors
+CLI:
 
-WAL errors happen when local operation history cannot be written or read.
+```sh
+softadastra store get missing/key
+```
 
-Common causes:
-
-- missing data directory
-- empty WAL path
-- permission denied
-- disk full
-- invalid WAL file
-- WAL append failed
-- WAL flush failed
-- WAL replay failed
-
-### Missing data directory
-
-Wrong:
+Output:
 
 ```txt
-wal path: data/node-a.wal
-data directory does not exist
+Key not found: missing/key
 ```
 
-Fix:
+This does not mean the runtime crashed.
 
-```bash
-mkdir -p data
+It only means the key does not exist in the local store.
+
+## Empty key
+
+An empty key is invalid.
+
+CLI:
+
+```sh
+softadastra store put "" value
 ```
 
-### Empty WAL path
-
-Wrong C++:
-
-```cpp
-options.enable_wal = true;
-options.wal_path = "";
-```
-
-Correct C++:
-
-```cpp
-options.enable_wal = true;
-options.wal_path = "data/node-a.wal";
-```
-
-Wrong JavaScript:
-
-```js
-options.enableWal = true;
-options.walPath = "";
-```
-
-Correct JavaScript:
-
-```js
-options.enableWal = true;
-options.walPath = "data/node-a.wal";
-```
-
-### WAL append failed
-
-If WAL append fails, the operation should not be treated as durably accepted.
-
-The correct model is:
+Output:
 
 ```txt
-local operation
-  ↓
-WAL append fails
-  ↓
-return error
-  ↓
-do not claim durable success
+Key cannot be empty.
 ```
-
-This keeps persistence honest.
-
-### WAL recovery failed
-
-If recovery fails during `open()`, the runtime should return an explicit error.
-
-Example output style:
-
-```txt
-error: failed to recover local store
-reason: WAL replay failed
-path: data/node-a.wal
-```
-
-The application should not silently ignore recovery failure.
-
-## Sync errors
-
-Sync errors happen when propagation tracking or delivery preparation fails.
-
-Sync does not mean local data is gone.
-
-```txt
-store failure -> local state problem
-sync failure  -> propagation problem
-```
-
-### Sync status error
 
 C++:
 
 ```cpp
-auto state = client.sync_state();
+const Key key{""};
+
+if (!key.is_valid())
+{
+    std::cerr << "key is invalid\n";
+}
+```
+
+## Missing store value
+
+This happens when `store put` does not receive both a key and a value.
+
+Command:
+
+```sh
+softadastra store put app/name
+```
+
+Output:
+
+```txt
+Missing key or value argument.
+Usage: store-put <key> <value>
+```
+
+Fix:
+
+```sh
+softadastra store put app/name Softadastra
+```
+
+## Missing store key
+
+This happens when `store get` does not receive a key.
+
+Command:
+
+```sh
+softadastra store get
+```
+
+Output:
+
+```txt
+Missing key argument.
+Usage: store-get <key>
+```
+
+Fix:
+
+```sh
+softadastra store get app/name
+```
+
+## Unknown store command
+
+The current store command supports:
+
+```txt
+put
+get
+```
+
+If you run another subcommand:
+
+```sh
+softadastra store remove app/name
+```
+
+Output:
+
+```txt
+Unknown store command: remove
+Usage: store <put|get>
+```
+
+Use:
+
+```sh
+softadastra store put <key> <value>
+softadastra store get <key>
+```
+
+## Sync errors
+
+Sync errors happen when the SDK cannot inspect or advance sync state.
+
+Read sync state:
+
+```cpp
+const auto state =
+    client.sync_state();
 
 if (state.is_err())
 {
-    std::cerr << "failed to read sync state: "
+    std::cerr << "sync_state failed: "
+              << state.error().code_string()
+              << ": "
               << state.error().message()
               << "\n";
 }
 ```
 
-JavaScript:
-
-```js
-const state = await client.syncStateInfo();
-
-if (state.isErr()) {
-  console.error(`failed to read sync state: ${state.error().message}`);
-}
-```
-
-CLI:
-
-```bash
-softadastra sync status
-```
-
-Expected error shape:
-
-```txt
-error: failed to read sync state
-reason: sync engine unavailable
-```
-
-### Tick error
-
-C++:
+Run one tick:
 
 ```cpp
-auto tick = client.tick();
+const auto tick =
+    client.tick();
 
 if (tick.is_err())
 {
-    std::cerr << "failed to tick sync pipeline: "
+    std::cerr << "tick failed: "
+              << tick.error().code_string()
+              << ": "
               << tick.error().message()
               << "\n";
 }
 ```
 
-JavaScript:
-
-```js
-const tick = await client.tick();
-
-if (tick.isErr()) {
-  console.error(`failed to tick sync pipeline: ${tick.error().message}`);
-}
-```
-
 CLI:
 
-```bash
+```sh
+softadastra sync status
 softadastra sync tick
 ```
 
-Expected error shape:
+## No sync work
+
+A sync tick can report:
 
 ```txt
-error: failed to tick sync pipeline
-reason: sync engine unavailable
+No sync operations ready for delivery.
 ```
 
-### Failed sync work
+This is not a crash.
 
-Failed sync work means propagation failed according to the current sync policy.
+It means there was no sync batch ready at that moment.
 
-Example:
+## No connected peers
+
+A sync tick can also report:
 
 ```txt
-Sync status
-
-  outbox       : 4
-  queued       : 0
-  in flight    : 0
-  acknowledged : 0
-  failed       : 4
-  retries      : 12
+No connected transport peers available.
 ```
 
-This does not mean local data disappeared.
+This is normal when no peer is connected.
 
-You should still be able to read the local value:
+Local data is still safe locally.
 
-```bash
-softadastra store get draft/1
-```
-
-The correct model is:
+The difference is important:
 
 ```txt
-local value remains readable
-sync work remains visible
-operator or app can retry later
+local data exists
+sync delivery waits for peers
+```
+
+## Unknown sync command
+
+The current sync command supports:
+
+```txt
+status
+tick
+```
+
+If you run another subcommand:
+
+```sh
+softadastra sync prune
+```
+
+Output:
+
+```txt
+Unknown sync command: prune
+Usage: sync <status|tick>
+```
+
+Use:
+
+```sh
+softadastra sync status
+softadastra sync tick
 ```
 
 ## Transport errors
 
-Transport errors happen when peer delivery fails.
+Transport errors happen when peer communication is not available or fails.
 
-Common causes:
+Common cases:
 
-- transport disabled
-- port already in use
-- peer unavailable
-- connection refused
-- timeout
-- socket closed
-- invalid frame
-- message delivery failed
-
-### Transport disabled
-
-Wrong JavaScript:
-
-```js
-options.enableTransport = false;
-
-await client.startTransport();
-```
-
-Correct JavaScript:
-
-```js
-options.enableTransport = true;
-options.transportHost = "127.0.0.1";
-options.transportPort = 4041;
-
-await client.startTransport();
-```
-
-Wrong C++:
-
-```cpp
-options.enable_transport = false;
-
-client.start_transport();
-```
-
-Correct C++:
-
-```cpp
-options.enable_transport = true;
-options.transport_host = "127.0.0.1";
-options.transport_port = 4041;
-
-client.start_transport();
-```
-
-### Port already in use
-
-Check:
-
-```bash
-ss -ltnp | grep 4041
-```
-
-Use another port:
-
-```txt
-node-a -> 4041
-node-b -> 4042
-```
-
-Expected error shape:
-
-```txt
-error: failed to start transport
-reason: port already in use
-address: 127.0.0.1:4041
-```
-
-### Peer unavailable
+- transport is disabled
+- transport is not initialized
+- transport is not running
+- peer is unavailable
+- connection fails
 
 C++:
 
 ```cpp
-Peer peer{
-    "node-b",
-    "127.0.0.1",
-    4042};
+const Peer peer =
+    Peer::local("node-b", 9101);
 
-auto connected = client.connect(peer);
+const auto connected =
+    client.connect(peer);
 
 if (connected.is_err())
 {
-    std::cout << "peer connection failed\n";
-    std::cout << "  error: "
+    std::cout << "connect failed: "
+              << connected.error().code_string()
+              << ": "
               << connected.error().message()
               << "\n";
 }
 ```
 
-JavaScript:
+A transport failure should not delete local data.
 
-```js
-const peer = new Peer(
-  "node-b",
-  "127.0.0.1",
-  4042,
-);
+This should still work:
 
-const connected = await client.connect(peer);
+```cpp
+client.put("draft/1", "hello");
+client.get("draft/1");
+```
 
-if (connected.isErr()) {
-  console.log("peer connection failed");
-  console.log(`  error: ${connected.error().message}`);
+## Transport disabled
+
+If transport is not enabled in `ClientOptions`, transport methods can fail.
+
+Use:
+
+```cpp
+ClientOptions options =
+    ClientOptions::memory_only("node-a")
+        .with_local_transport(9100);
+```
+
+Then:
+
+```cpp
+Client client{options};
+
+const auto opened =
+    client.open();
+
+if (opened.is_err())
+{
+    return 1;
 }
-```
 
-CLI expected output style:
-
-```txt
-peer connection failed
-  peer    : node-b
-  address : 127.0.0.1:4042
-  error   : connection refused
-```
-
-A peer connection failure should not invalidate local data.
-
-```txt
-transport failed
-  ↓
-local value remains readable
-  ↓
-sync work remains pending
+const auto started =
+    client.start_transport();
 ```
 
 ## Discovery errors
 
-Discovery errors happen when peer finding fails.
+Discovery errors happen when peer discovery is disabled, unavailable, or not running.
 
-Common causes:
+If discovery is not enabled, discovery methods can fail.
 
-- discovery disabled
-- discovery port already in use
-- invalid discovery target
-- no peers found
-- stale peers
-- expired peers
-
-### Discovery disabled
-
-Wrong JavaScript:
-
-```js
-options.enableDiscovery = false;
-
-await client.startDiscovery();
-```
-
-Correct JavaScript:
-
-```js
-options.enableDiscovery = true;
-options.discoveryHost = "127.0.0.1";
-options.discoveryPort = 5051;
-options.discoveryBroadcastHost = "127.0.0.1";
-options.discoveryBroadcastPort = 5052;
-
-await client.startDiscovery();
-```
-
-Wrong C++:
+Use:
 
 ```cpp
-options.enable_discovery = false;
-
-client.start_discovery();
+ClientOptions options =
+    ClientOptions::memory_only("node-a")
+        .with_local_discovery(5051);
 ```
 
-Correct C++:
+Then:
 
 ```cpp
-options.enable_discovery = true;
-options.discovery_host = "127.0.0.1";
-options.discovery_port = 5051;
-options.discovery_broadcast_host = "127.0.0.1";
-options.discovery_broadcast_port = 5052;
+Client client{options};
 
-client.start_discovery();
+const auto opened =
+    client.open();
+
+if (opened.is_err())
+{
+    return 1;
+}
+
+const auto started =
+    client.start_discovery();
 ```
 
-### No peers found
+## No peers found
 
-No peers found is usually not an error.
+No peers found is normally not an error.
 
 CLI:
 
-```bash
+```sh
 softadastra peers
 ```
 
-Expected output style:
+Output:
 
 ```txt
-Peers
+Discovery peers
+No discovery peers found.
 
-  no peers found
+Transport peers
+No transport peers found.
 ```
 
-This means the local runtime currently has no known peer.
+Local store commands can still work:
 
-Local store operations should still work:
-
-```bash
+```sh
 softadastra store put draft/1 hello
 softadastra store get draft/1
 ```
 
 ## Metadata errors
 
-Metadata errors happen when local node information cannot be created or refreshed.
-
-Possible causes:
-
-- invalid node id
-- metadata service unavailable
-- hostname unavailable
-- platform info unavailable
-- invalid version
+Metadata errors happen when local node information cannot be read or refreshed.
 
 C++:
 
 ```cpp
-auto info = client.refresh_node_info();
+const auto info =
+    client.refresh_node_info();
 
 if (info.is_err())
 {
-    std::cerr << "failed to refresh node info: "
+    std::cerr << "refresh_node_info failed: "
+              << info.error().code_string()
+              << ": "
               << info.error().message()
               << "\n";
 }
 ```
 
-JavaScript:
-
-```js
-const info = await client.refreshNodeInfo();
-
-if (info.isErr()) {
-  console.error(`failed to refresh node info: ${info.error().message}`);
-}
-```
-
 CLI:
 
-```bash
+```sh
 softadastra node info
 ```
 
-Expected error shape:
+If metadata is unavailable, the CLI can still show basic node information:
 
 ```txt
-error: failed to read node metadata
-reason: metadata service unavailable
+Softadastra node
+
+Field          Value
+node_id        node-1
+node_running   no
+metadata       unavailable
 ```
 
-## Configuration errors
-
-Configuration errors happen before or during runtime initialization.
-
-Common mistakes:
-
-- empty node id
-- empty WAL path
-- missing data directory
-- same WAL path reused by multiple nodes
-- same transport port reused by multiple nodes
-- invalid discovery target
-- transport enabled but invalid port
-- discovery enabled but invalid port
-
-A configuration error should fail early.
-
-Example CLI shape:
+In interactive mode, start node services first:
 
 ```txt
-error: invalid configuration
-reason: node id must not be empty
+softadastra> node start
+softadastra> node info
 ```
 
-## CLI invalid usage errors
+## Unknown node command
 
-Invalid usage means the command shape is wrong.
-
-Examples:
-
-```bash
-softadastra store put
-softadastra store put app/name
-softadastra sync unknown
-softadastra node
-```
-
-Expected output style:
+The current node command supports:
 
 ```txt
-error: missing arguments
-usage: softadastra store put <key> <value>
+info
+start
 ```
 
-Recommended exit code:
+If you run another subcommand:
+
+```sh
+softadastra node something
+```
+
+Output:
 
 ```txt
-2
+Unknown node command: something
+Usage: node <info|start>
 ```
 
-## CLI command failure errors
+Use:
 
-Command failure means the command shape was valid, but the operation failed.
-
-Example:
-
-```bash
-softadastra store get missing/key
+```sh
+softadastra node info
+softadastra node start
 ```
 
-Expected output:
+## Persistent store errors
+
+Persistent clients use a WAL path.
+
+```cpp
+Client client{
+    ClientOptions::persistent(
+        "node-a",
+        "data/node-a.wal"
+    )
+};
+```
+
+The parent directory must exist:
+
+```sh
+mkdir -p data
+```
+
+If the directory does not exist or is not writable, `open()` can fail.
+
+## Local-first failure rule
+
+Softadastra separates local work from network work.
+
+These are different:
 
 ```txt
-error: key not found
-key: missing/key
+local write accepted
+remote sync delivered
 ```
 
-Recommended exit code:
+A local write can succeed even when:
 
-```txt
-1
+- no peer exists
+- transport is stopped
+- discovery finds nothing
+- sync delivery cannot happen yet
+
+This should work without peers:
+
+```sh
+softadastra store put draft/1 hello
+softadastra store get draft/1
 ```
 
-## CLI exit codes
+## What failures mean
 
-Recommended exit code behavior:
+Use this simple model:
 
-| Exit code | Meaning |
-|---|---|
-| `0` | Command completed successfully |
-| `1` | Command failed |
-| `2` | Invalid usage or invalid arguments |
+| Area                   | Meaning                      |
+| ---------------------- | ---------------------------- |
+| Store error            | Local read or write problem  |
+| Persistent store error | Local durability problem     |
+| Sync error             | Propagation tracking problem |
+| Transport error        | Peer communication problem   |
+| Discovery error        | Peer finding problem         |
+| Metadata error         | Node information problem     |
+| CLI usage error        | Command shape problem        |
 
-Examples:
+A sync, transport, or discovery error does not automatically mean local data is gone.
 
-| Command | Recommended exit |
-|---|---|
-| `softadastra help` | `0` |
-| `softadastra status success` | `0` |
-| `softadastra store get missing/key` | `1` |
-| `softadastra store put app/name` | `2` |
-| `softadastra sync unknown` | `2` |
+## Common CLI errors
+
+| Error                            | Meaning                                |
+| -------------------------------- | -------------------------------------- |
+| `Missing key or value argument.` | `store put` needs both key and value   |
+| `Missing key argument.`          | `store get` needs a key                |
+| `Key cannot be empty.`           | The key is empty                       |
+| `Key not found: <key>`           | The key does not exist locally         |
+| `Unknown store command: <name>`  | Store supports only `put` and `get`    |
+| `Unknown sync command: <name>`   | Sync supports only `status` and `tick` |
+| `Unknown node command: <name>`   | Node supports only `info` and `start`  |
 
 ## Error handling checklist
 
-When handling errors, check:
+When an operation fails, ask:
 
-- Did the operation fail?
-- What is the error code?
-- What is the message?
-- Is local state still valid?
-- Is the failure retryable?
-- Should the runtime close?
-- Should the user or operator be notified?
+- Did I call `open()` first?
+- Did I check `is_err()` before using `value()`?
+- Is the key valid?
+- Does the key exist?
+- Does the WAL directory exist?
+- Is transport enabled before calling transport methods?
+- Is discovery enabled before calling discovery methods?
+- Are peers actually available?
+- Is the error about local data or only about sync delivery?
 
-## Local-first failure rules
+## Summary
 
-Softadastra should preserve these rules:
+Softadastra errors are explicit.
 
-- network failure should not delete local data
-- transport failure should not delete local data
-- discovery failure should not block local store access
-- sync failure should remain visible
-- WAL failure should not be hidden
-- store failure should return explicit errors
-- metadata failure should not pretend the node is healthy
+The most important rule is:
+
+```txt
+check the result before using the value
+```
 
 The most important distinction is:
 
 ```txt
-local acceptance
-  is different from
-remote synchronization
+local storage failure
+is different from
+network or sync delivery failure
 ```
 
-A local write can succeed while synchronization remains pending.
-
-A synchronization failure can happen while local data remains readable.
-
-## Retryable versus non-retryable failures
-
-Some failures are naturally retryable:
-
-- peer unavailable
-- transport timeout
-- ACK missing
-- network interruption
-- temporary discovery failure
-
-Some failures usually need configuration or operator action:
-
-- invalid node id
-- invalid WAL path
-- permission denied
-- disk full
-- port already in use
-- invalid command arguments
-
-Retry logic should not hide failures forever.
-
-Failed work should stay visible.
-
-## Production error behavior
-
-In production, errors should be:
-
-- explicit
-- logged
-- observable
-- actionable
-- associated with node id
-- associated with operation when possible
-- safe for local state
-- clear about retry behavior
-
-Good production error output should answer:
-
-- what failed?
-- where did it fail?
-- which node was affected?
-- is local data still valid?
-- can the operation be retried?
-- what should the operator check?
-
-## Stable versus experimental errors
-
-Only document error codes as stable when they are implemented and intended to remain supported.
-
-Recommended rule:
-
-```txt
-stable error code      -> document and use in program logic
-unstable error message -> do not depend on exact wording
-experimental error     -> mention carefully or keep out
-internal-only error    -> keep in engine documentation
-```
-
-Error messages can improve over time.
-
-Error codes should be more stable than messages when supported.
-
-## Summary
-
-Softadastra errors should be explicit and safe.
-
-The main rule is:
-
-```txt
-Check the result before using the value.
-```
-
-The main distinction is:
-
-```txt
-store error      -> local state problem
-WAL error        -> durability problem
-sync error       -> propagation problem
-transport error  -> delivery problem
-discovery error  -> peer finding problem
-metadata error   -> node identity problem
-CLI usage error  -> command shape problem
-```
-
-A good Softadastra application handles those failures directly instead of hiding them.
+Local data can still be readable even when peers, discovery, transport, or sync delivery are not ready.
 
 ## Related pages
 
-- [CLI Reference](/reference/cli)
+- [CLI Reference](/cli/reference)
 - [C++ API Reference](/reference/cpp-api)
-- [JavaScript API Reference](/reference/js-api)
 - [Configuration Reference](/reference/config)
-- [Errors C++](/sdk-cpp/errors)
-- [Errors JS](/sdk-js/errors)
-- [Production Guide](/guides/production)
+- [Results and Errors](/sdk-cpp/results-and-errors)

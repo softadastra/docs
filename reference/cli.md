@@ -1,634 +1,433 @@
 # CLI Reference
 
-This page is the compact reference for the Softadastra CLI.
+This is the compact reference for the Softadastra CLI.
 
-Use it when you already know what you want to do and need the exact command shape quickly.
+Use this page when you already know what you want to do and need the exact command quickly.
 
-For explanations, read the CLI section first:
+For explanations, read the CLI pages first:
 
 - [CLI Overview](/cli/)
 - [CLI Commands](/cli/commands)
 - [Interactive Mode](/cli/interactive-mode)
-- [Node Commands](/cli/node)
-- [Store Commands](/cli/store)
-- [Sync Commands](/cli/sync)
+- [Node](/cli/node)
+- [Store](/cli/store)
+- [Sync](/cli/sync)
 - [Peers](/cli/peers)
-
-The core rule is:
-
-```txt
-The CLI exposes Softadastra runtime behavior from the terminal.
-```
 
 ## Command shape
 
-```bash
-softadastra <command> [subcommand] [arguments] [options]
+```sh
+softadastra <command> [subcommand] [arguments]
 ```
 
 Examples:
 
-```bash
+```sh
 softadastra status
 softadastra node info
+softadastra node start
 softadastra store put app/name Softadastra
+softadastra store get app/name
+softadastra sync status
 softadastra sync tick
 softadastra peers
 ```
 
 ## Main commands
 
-| Command | Purpose |
-|---|---|
-| `softadastra help` | Show available commands |
-| `softadastra version` | Show CLI version |
-| `softadastra status` | Show local runtime status |
-| `softadastra node info` | Show local node metadata |
-| `softadastra node start` | Start a local node runtime, if available |
-| `softadastra store put <key> <value>` | Write a local value |
-| `softadastra store get <key>` | Read a local value |
-| `softadastra store remove <key>` | Remove a local value |
-| `softadastra store list` | List local values, if supported |
-| `softadastra sync status` | Show sync state |
-| `softadastra sync tick` | Run one sync tick |
-| `softadastra sync tick --prune` | Run one tick and prune completed work, if supported |
-| `softadastra peers` | List known peers |
-| `softadastra` | Start interactive mode, if enabled |
+| Command                               | Purpose                                         |
+| ------------------------------------- | ----------------------------------------------- |
+| `softadastra status`                  | Show local runtime status                       |
+| `softadastra node`                    | Show node command help                          |
+| `softadastra node info`               | Show local node information                     |
+| `softadastra node start`              | Start node services for the current CLI session |
+| `softadastra store`                   | Show store command help                         |
+| `softadastra store put <key> <value>` | Write a local value                             |
+| `softadastra store get <key>`         | Read one local value                            |
+| `softadastra sync`                    | Show sync command help                          |
+| `softadastra sync status`             | Show sync state                                 |
+| `softadastra sync tick`               | Run one manual sync cycle                       |
+| `softadastra peers`                   | List discovery and transport peers              |
+| `softadastra`                         | Start interactive mode                          |
 
-## Global commands
+## Status
 
-### `softadastra help`
+Show the current local runtime status.
 
-Shows available commands.
-
-```bash
-softadastra help
-```
-
-Show help for a command group:
-
-```bash
-softadastra help node
-softadastra help store
-softadastra help sync
-```
-
-Expected use:
-
-- show available commands
-- show command usage
-- show subcommands
-- show arguments
-- show options, if supported
-
-### `softadastra version`
-
-Shows the current Softadastra CLI version.
-
-```bash
-softadastra version
-```
-
-Example output style:
-
-```txt
-Softadastra 0.1.0
-```
-
-Use this for release verification, bug reports, and debugging.
-
-### `softadastra status`
-
-Shows local runtime status.
-
-```bash
+```sh
 softadastra status
 ```
 
-Expected output style:
+Example output:
 
 ```txt
 Softadastra status
 
-Node
-  id       : node-a
-  version  : 0.1.0
-  state    : healthy
-
-Store
-  entries  : 12
-
-Sync
-  outbox   : 3
-  queued   : 3
-  failed   : 0
-
-Transport
-  running  : no
-
-Discovery
-  running  : no
+Component   Metric        Value
+node        id            node-1
+node        running       no
+store       entries       0
+sync        outbox        0
+sync        queued        0
+sync        in_flight     0
+sync        acknowledged  0
+sync        failed        0
+transport   running       no
+transport   peers         0
+discovery   running       no
+discovery   peers         0
+metadata    running       no
 ```
 
-The exact fields can depend on the current runtime configuration.
+Use this first when you want to see what the local runtime looks like.
 
-Useful status sections:
+## Node
 
-```txt
-Node       -> local runtime identity
-Store      -> current local data state
-WAL        -> persistence state, if enabled
-Sync       -> pending synchronization work
-Transport  -> peer delivery state
-Discovery  -> peer discovery state
-Peers      -> known peer summary, if available
+Show node command help.
+
+```sh
+softadastra node
 ```
 
-Transport and discovery being stopped does not automatically mean the runtime is unhealthy.
-
-Local store operations can still work.
-
-## Node commands
-
-Node commands inspect or control the local Softadastra node.
-
-```bash
-softadastra node <subcommand>
-```
-
-| Command | Purpose |
-|---|---|
-| `softadastra node info` | Show local node metadata |
-| `softadastra node start` | Start a local node runtime, if available |
-
-### `softadastra node info`
-
-Shows metadata for the local node.
-
-```bash
-softadastra node info
-```
-
-Expected output style:
-
-```txt
-Node
-
-  id           : node-a
-  display name : Local Node
-  hostname     : softadastra-dev
-  os           : linux
-  version      : 0.1.0
-  uptime ms    : 18420
-  capabilities : core, store, sync, transport, discovery, metadata
-```
-
-Expected fields:
-
-- node id
-- display name
-- hostname
-- operating system
-- version
-- uptime
-- capabilities
-
-Node metadata describes the local runtime.
-
-It does not store application data.
-
-### `softadastra node start`
-
-Starts a local Softadastra node runtime if the node app is available in the current build.
-
-```bash
-softadastra node start
-```
-
-Example output style:
+Output:
 
 ```txt
 Softadastra node
 
-  id       : node-a
-  address  : 127.0.0.1:4041
-  state    : running
+Usage
+  softadastra node info
+  softadastra node start
+
+Commands
+  info     Show local node information
+  start    Start local node services for this CLI session
 ```
 
-If the node app is not available:
+## Node info
+
+Show information about the local node.
+
+```sh
+softadastra node info
+```
+
+Example output when metadata is available:
 
 ```txt
-error: node app is not available in this build
-hint: rebuild with SOFTADASTRA_BUILD_NODE_APP=ON
+Softadastra node
+
+Field          Value
+node_id        node-1
+display_name   Softadastra Node
+hostname       local-machine
+os             linux
+version        0.1.0
+started_at     1760000000000
+uptime_ms      1250
+capabilities   6
+node_running   no
 ```
 
-Build with the node app enabled:
+Example output when metadata is not available yet:
 
-```bash
-vix build -- \
-  -DSOFTADASTRA_BUILD_APPS=ON \
-  -DSOFTADASTRA_BUILD_CLI_APP=ON \
-  -DSOFTADASTRA_BUILD_NODE_APP=ON
+```txt
+Softadastra node
+
+Field          Value
+node_id        node-1
+node_running   no
+metadata       unavailable
 ```
 
-## Store commands
+## Node start
 
-Store commands read and write local key-value data.
+Start local node services for the current CLI session.
 
-```bash
-softadastra store <subcommand>
+```sh
+softadastra node start
 ```
 
-| Command | Purpose |
-|---|---|
-| `softadastra store put <key> <value>` | Write or update a local value |
-| `softadastra store get <key>` | Read a local value |
-| `softadastra store remove <key>` | Remove a local value |
-| `softadastra store list` | List local values, if supported |
+Example output:
 
-The store command is local-first.
+```txt
+Starting Softadastra node
 
-A store operation should not require a remote server, connected peer, transport, discovery, or cloud access.
+✓ Softadastra node services started for this CLI session.
+node_id    node-1
+transport  running
+discovery  running
+metadata   running
+```
 
-### `softadastra store put`
+If the node is already running:
 
-Writes a local value.
+```txt
+Softadastra node is already running.
+node_id  node-1
+```
 
-```bash
+`node start` starts services only for the current CLI runtime.
+
+It is especially useful in interactive mode, because the services stay available while you run the next commands.
+
+For a long-running node, use the Softadastra node app.
+
+## Store
+
+Show store command help.
+
+```sh
+softadastra store
+```
+
+Output:
+
+```txt
+Softadastra store
+
+Usage
+  softadastra store put <key> <value>
+  softadastra store get <key>
+
+Commands
+  put      Write a key/value pair
+  get      Read one key
+```
+
+## Store put
+
+Write a local value.
+
+```sh
 softadastra store put <key> <value>
 ```
 
 Example:
 
-```bash
+```sh
 softadastra store put app/name Softadastra
 ```
 
-With a value containing spaces:
-
-```bash
-softadastra store put app/title "Softadastra Runtime"
-```
-
-Example output style:
+Example output:
 
 ```txt
-Stored value
+✓ Stored value.
 
-  key     : app/name
-  value   : Softadastra
-  created : yes
+Field    Value
+key      app/name
+version  1
+status   created
 ```
 
-If the key already existed:
+If the key already exists, the status can be `updated`.
+
+```sh
+softadastra store put app/name "Softadastra Runtime"
+```
+
+Example output:
 
 ```txt
-Stored value
+✓ Stored value.
 
-  key     : app/name
-  value   : Softadastra Runtime
-  created : no
+Field    Value
+key      app/name
+version  2
+status   updated
 ```
 
-Conceptual flow:
+If the value did not change, the status can be `unchanged`.
 
-```txt
-store put
-  ↓
-local write
-  ↓
-WAL, if enabled
-  ↓
-store apply
-  ↓
-sync tracking, if enabled
-```
+## Store get
 
-Possible errors:
+Read one local value.
 
-```txt
-error: missing key
-error: missing value
-error: invalid key
-error: store unavailable
-error: WAL append failed
-```
-
-### `softadastra store get`
-
-Reads a local value.
-
-```bash
+```sh
 softadastra store get <key>
 ```
 
 Example:
 
-```bash
+```sh
 softadastra store get app/name
 ```
 
-Example output style:
+Example output:
 
 ```txt
-Value
+Store entry
 
-  key   : app/name
-  value : Softadastra
-```
-
-If the key is missing:
-
-```txt
-error: key not found
-key: app/name
-```
-
-A missing key is a normal store error.
-
-It should not crash the runtime.
-
-### `softadastra store remove`
-
-Removes a local value.
-
-```bash
-softadastra store remove <key>
-```
-
-Example:
-
-```bash
-softadastra store remove app/name
-```
-
-Example output style:
-
-```txt
-Removed value
-
-  key     : app/name
-  removed : yes
+Field      Value
+key        app/name
+value      Softadastra
+version    1
+timestamp  1760000000000
 ```
 
 If the key does not exist:
 
 ```txt
-Removed value
-
-  key     : app/name
-  removed : no
-  reason  : key not found
+Key not found: app/name
 ```
 
-A remove operation can also create sync work so another node can learn about the delete later.
+A missing key is a normal store result. It does not mean the runtime crashed.
 
-### `softadastra store list`
+## Sync
 
-Lists local values if supported by the current CLI implementation.
+Show sync command help.
 
-```bash
-softadastra store list
+```sh
+softadastra sync
 ```
 
-Example output style:
+Output:
 
 ```txt
-Store
+Softadastra sync
 
-Key             Value
-app/name        Softadastra
-settings/theme  dark
-message/1       hello
+Usage
+  softadastra sync status
+  softadastra sync tick
+
+Commands
+  status   Show sync engine state
+  tick     Run one manual sync cycle
 ```
 
-If the store is empty:
+## Sync status
 
-```txt
-Store
+Show the current sync state.
 
-  no values found
-```
-
-If `store list` is not implemented yet, do not expose it as stable behavior in product documentation.
-
-## Sync commands
-
-Sync commands inspect and move the synchronization pipeline.
-
-```bash
-softadastra sync <subcommand>
-```
-
-| Command | Purpose |
-|---|---|
-| `softadastra sync status` | Show current sync state |
-| `softadastra sync tick` | Run one manual sync tick |
-| `softadastra sync tick --prune` | Run one tick and prune completed work, if supported |
-
-Sync does not mean network.
-
-Sync means operation propagation tracking.
-
-```txt
-Store      -> current local state
-Sync       -> tracks work that should be propagated
-Transport  -> sends messages to peers
-Discovery  -> finds peers
-```
-
-### `softadastra sync status`
-
-Shows current synchronization state.
-
-```bash
+```sh
 softadastra sync status
 ```
 
-Expected output style:
+Example output:
 
 ```txt
-Sync status
+Softadastra sync status
 
-  outbox       : 3
-  queued       : 3
-  in flight    : 0
-  acknowledged : 0
-  failed       : 0
-  retries      : 0
+Metric                       Value
+node_id                      node-1
+outbox_size                  1
+queued_count                 1
+in_flight_count              0
+acknowledged_count           0
+failed_count                 0
+last_submitted_version       1
+last_applied_remote_version  0
+total_retries                0
 ```
 
-Expected fields:
+Use this when you want to know what sync is tracking locally.
 
-| Field | Meaning |
-|---|---|
-| `outbox` | Local operations waiting for synchronization |
-| `queued` | Operations ready to be selected for sending |
-| `in flight` | Operations prepared or sent, possibly waiting for ACK |
-| `acknowledged` | Operations confirmed by the remote side or sync layer |
-| `failed` | Operations that exceeded retry policy or hit a sync error |
-| `retries` | Total retry attempts |
+## Sync tick
 
-Failed sync work does not mean local data disappeared.
+Run one manual sync cycle.
 
-It means propagation failed according to the current sync policy.
-
-### `softadastra sync tick`
-
-Runs one synchronization tick.
-
-```bash
+```sh
 softadastra sync tick
 ```
 
-A tick can:
-
-- retry expired work
-- collect the next batch
-- prepare work for transport delivery
-- return batch information
-
-Example output style:
+Example output:
 
 ```txt
-Sync tick
+Softadastra sync tick
 
-  retried : 0
-  pruned  : 0
-  batch   : 1
+Metric           Value
+retried_count    0
+batch_size       1
+connected_peers  0
+sent_count       0
+pruned_count     0
+
+No connected transport peers available.
 ```
 
-Tick result fields:
+A tick can retry expired work, produce a sync batch, and try to send that batch to connected transport peers.
 
-| Field | Meaning |
-|---|---|
-| `retried` | Number of expired operations retried during this tick |
-| `pruned` | Number of completed entries removed during this tick |
-| `batch` | Number of operations produced in the current batch |
+If no peer is connected, local data is still safe locally.
 
-A batch greater than zero means sync found work ready for delivery.
+## Peers
 
-It does not always mean a remote peer has already applied the work.
+List discovery and transport peers.
 
-### `softadastra sync tick --prune`
-
-Runs one sync tick and prunes completed work if supported.
-
-```bash
-softadastra sync tick --prune
-```
-
-Example output style:
-
-```txt
-Sync tick
-
-  retried : 0
-  pruned  : 2
-  batch   : 0
-```
-
-Pruning should only remove work that is completed or safe to remove.
-
-It should not remove local store values.
-
-## Peers command
-
-The peers command lists peers known to the local runtime.
-
-```bash
+```sh
 softadastra peers
 ```
 
-Example output style:
+Example output when no peers are available:
 
 ```txt
-Peers
+Softadastra peers
 
-Node ID        Host        Port    State
-node-b         127.0.0.1   4042    available
-node-c         127.0.0.1   4043    stale
+discovery  no
+transport  no
+
+Discovery peers
+No discovery peers found.
+
+Transport peers
+No transport peers found.
 ```
 
-If no peers are known:
+Example discovery peer output:
 
 ```txt
-Peers
+Discovery peers
 
-  no peers found
+Node     Host        Port   Last seen
+node-2   127.0.0.1   9500   1760000000000
 ```
 
-This is not necessarily an error.
+Example transport peer output:
 
-A local Softadastra runtime can still write and read local data without peers.
+```txt
+Transport peers
 
-## Peer fields
+Node     Host        Port   State       Connected   Last seen       Errors
+node-2   127.0.0.1   9500   Connected   yes         1760000000000   0
+```
 
-A peer can expose:
+No peers is a valid state.
 
-- node id
-- host
-- port
-- state
-- last seen time, if available
-- capabilities, if available
-
-Common peer states:
-
-| State | Meaning |
-|---|---|
-| `available` | Peer is known and may be reachable |
-| `connected` | Transport has an active connection |
-| `stale` | Peer was seen before but not refreshed recently |
-| `expired` | Peer passed its time-to-live |
-| `faulted` | Peer is known but transport reported an error |
-| `unknown` | Peer state is not known |
-
-A faulted peer means delivery may be failing.
-
-It does not mean local data is gone.
+Local store commands can still work without peers.
 
 ## Interactive mode
 
-Start interactive mode by running the CLI without a command:
+Start the CLI without a command:
 
-```bash
+```sh
 softadastra
 ```
 
-Expected prompt style:
+Then run commands without repeating `softadastra`.
 
 ```txt
-softadastra>
-```
-
-Inside interactive mode, run commands without repeating the binary name.
-
-Normal mode:
-
-```bash
-softadastra store put app/name Softadastra
-```
-
-Interactive mode:
-
-```txt
+softadastra> status
+softadastra> node info
+softadastra> node start
 softadastra> store put app/name Softadastra
+softadastra> store get app/name
+softadastra> sync status
+softadastra> sync tick
+softadastra> peers
+softadastra> exit
 ```
 
-Wrong:
+Inside interactive mode, this is correct:
 
 ```txt
-softadastra> softadastra store put app/name Softadastra
+softadastra> status
 ```
 
-Correct:
+This is wrong:
 
 ```txt
-softadastra> store put app/name Softadastra
+softadastra> softadastra status
 ```
 
-Exit interactive mode:
+Exit with:
 
 ```txt
 exit
@@ -640,268 +439,259 @@ or:
 quit
 ```
 
-## Recommended interactive session
-
-```txt
-softadastra> status
-softadastra> node info
-softadastra> store put app/name Softadastra
-softadastra> store get app/name
-softadastra> sync status
-softadastra> sync tick
-softadastra> peers
-softadastra> exit
-```
-
-This verifies:
-
-- runtime status
-- node metadata
-- local store write
-- local store read
-- sync status
-- manual sync tick
-- peer visibility
-
-## Options
-
-The first stable CLI surface should keep options minimal.
-
-Common options can include:
-
-| Option | Purpose |
-|---|---|
-| `--help` | Show help for a command, if supported |
-| `--prune` | Used with sync tick, if supported |
-| `--json` | Output machine-readable JSON, if supported and stable |
-| `--verbose` | Show more details, if supported |
-| `--quiet` | Reduce output, if supported |
-
-Only document an option publicly when it is implemented and stable.
-
-### `--help`
-
-Show help for a command or command group, if supported.
-
-```bash
-softadastra store --help
-softadastra sync --help
-softadastra node --help
-```
-
-Equivalent command-group help can also be:
-
-```bash
-softadastra help store
-softadastra help sync
-softadastra help node
-```
-
-### `--prune`
-
-Used with sync tick, if supported.
-
-```bash
-softadastra sync tick --prune
-```
-
-Meaning:
-
-- run one sync tick
-- remove completed sync work when safe
-
-### `--json`
-
-If supported, output machine-readable JSON.
-
-```bash
-softadastra status --json
-softadastra sync status --json
-softadastra peers --json
-```
-
-Example shape:
-
-```json
-{
-  "sync": {
-    "outbox": 3,
-    "queued": 3,
-    "in_flight": 0,
-    "acknowledged": 0,
-    "failed": 0,
-    "retries": 0
-  }
-}
-```
-
-Do not treat JSON output as stable until the schema is documented and versioned.
-
-## Exit codes
-
-Recommended exit code behavior:
-
-| Exit code | Meaning |
-|---|---|
-| `0` | Command completed successfully |
-| `1` | Command failed |
-| `2` | Invalid usage or invalid arguments |
-
-Examples:
-
-```txt
-store get missing/key -> 1
-store put app/name    -> 2
-status failed         -> 1
-help                  -> 0
-```
-
-Scripts should check exit codes.
-
-```bash
-softadastra status
-
-if [ "$?" -ne 0 ]; then
-  echo "Softadastra status failed"
-  exit 1
-fi
-```
-
-## Error output
-
-CLI errors should be clear and actionable.
-
-Good error shape:
-
-```txt
-error: failed to read key
-reason: key not found
-key: settings/theme
-```
-
-Another example:
-
-```txt
-error: missing value
-usage: softadastra store put <key> <value>
-```
-
-For unknown commands:
-
-```txt
-error: unknown command: deploy
-hint: run `softadastra help` to list available commands
-```
-
-The CLI should avoid exposing raw low-level errors without context.
-
-## Output style
-
-For simple values, prefer aligned fields:
-
-```txt
-Value
-
-  key   : app/name
-  value : Softadastra
-```
-
-For lists, prefer tables:
-
-```txt
-Peers
-
-Node ID        Host        Port    State
-node-b         127.0.0.1   4042    available
-```
-
-For empty lists, print a clear empty state:
-
-```txt
-Peers
-
-  no peers found
-```
-
-For failed operations, explain what failed and why:
-
-```txt
-error: key not found
-key: missing/key
-```
-
 ## Local-first behavior
 
-The CLI should preserve Softadastra's local-first rules.
+Local store commands do not need a peer.
 
-This should work without a peer:
+This works even if transport is stopped, discovery is stopped, and no peer is available:
 
-```bash
+```sh
 softadastra store put draft/1 hello
 softadastra store get draft/1
 ```
 
-This should not require:
+Sync and peers matter when the local node needs to exchange data with another node.
 
-- remote server
-- connected peer
-- transport
-- discovery
-- cloud access
+They are not required for local reads and writes.
 
-A peer failure should affect delivery, not local state.
+## Common errors
 
-A discovery failure should affect peer finding, not local store access.
+## Unknown store command
 
-A sync failure should be visible, but local data should remain readable.
+Command:
 
-## Stable versus experimental behavior
-
-Only stable commands should be documented as reference behavior.
-
-Recommended rule:
-
-```txt
-implemented and stable       -> include in reference
-implemented but experimental -> mention carefully or keep out
-not implemented yet          -> do not present as stable
+```sh
+softadastra store remove app/name
 ```
 
-For example, if `store list`, `--json`, or `node start` is not stable yet, document it as conditional or keep it out of the stable reference.
+Output:
 
-## Quick workflow
+```txt
+Unknown store command: remove
+Usage: store <put|get>
+```
 
-A useful first workflow is:
+Use:
 
-```bash
+```sh
+softadastra store put <key> <value>
+softadastra store get <key>
+```
+
+## Unknown sync command
+
+Command:
+
+```sh
+softadastra sync prune
+```
+
+Output:
+
+```txt
+Unknown sync command: prune
+Usage: sync <status|tick>
+```
+
+Use:
+
+```sh
+softadastra sync status
+softadastra sync tick
+```
+
+## Unknown node command
+
+Command:
+
+```sh
+softadastra node something
+```
+
+Output:
+
+```txt
+Unknown node command: something
+Usage: node <info|start>
+```
+
+Use:
+
+```sh
+softadastra node info
+softadastra node start
+```
+
+## Missing store value
+
+Command:
+
+```sh
+softadastra store put app/name
+```
+
+Output:
+
+```txt
+Missing key or value argument.
+Usage: store-put <key> <value>
+```
+
+Fix:
+
+```sh
+softadastra store put app/name Softadastra
+```
+
+## Missing store key
+
+Command:
+
+```sh
+softadastra store get
+```
+
+Output:
+
+```txt
+Missing key argument.
+Usage: store-get <key>
+```
+
+Fix:
+
+```sh
+softadastra store get app/name
+```
+
+## Empty key
+
+Command:
+
+```sh
+softadastra store put "" value
+```
+
+Output:
+
+```txt
+Key cannot be empty.
+```
+
+Use a non-empty key:
+
+```sh
+softadastra store put app/name value
+```
+
+## Key not found
+
+Command:
+
+```sh
+softadastra store get missing/key
+```
+
+Output:
+
+```txt
+Key not found: missing/key
+```
+
+This is a normal store result. It only means that key is not in the local store.
+
+## Good first workflow
+
+Run this after installation:
+
+```sh
 softadastra status
 softadastra node info
-
 softadastra store put app/name Softadastra
 softadastra store get app/name
+softadastra sync status
+softadastra sync tick
+softadastra node start
+softadastra peers
+softadastra status
+```
 
+This checks status, node info, local write, local read, sync state, one manual tick, node services, peers, and status again.
+
+## Full quick reference
+
+```sh
+softadastra status
+
+softadastra node
+softadastra node info
+softadastra node start
+
+softadastra store
+softadastra store put <key> <value>
+softadastra store get <key>
+
+softadastra sync
 softadastra sync status
 softadastra sync tick
 
 softadastra peers
 ```
 
-This checks the full local runtime surface:
+Interactive mode:
 
-- status
-- metadata
-- local store
-- sync
-- peers
+```txt
+softadastra
+softadastra> status
+softadastra> node info
+softadastra> node start
+softadastra> store put <key> <value>
+softadastra> store get <key>
+softadastra> sync status
+softadastra> sync tick
+softadastra> peers
+softadastra> exit
+```
 
-## Related pages
+## Summary
 
-- [CLI Overview](/cli/)
-- [CLI Commands](/cli/commands)
-- [Interactive Mode](/cli/interactive-mode)
-- [Node Commands](/cli/node)
-- [Store Commands](/cli/store)
-- [Sync Commands](/cli/sync)
-- [Peers](/cli/peers)
-- [Configuration Reference](/reference/config)
-- [Errors Reference](/reference/errors)
+The CLI reference is the compact command map for Softadastra.
+
+Use:
+
+```sh
+softadastra status
+```
+
+to inspect the runtime.
+
+Use:
+
+```sh
+softadastra store put <key> <value>
+softadastra store get <key>
+```
+
+to test local data.
+
+Use:
+
+```sh
+softadastra sync status
+softadastra sync tick
+```
+
+to inspect and move sync.
+
+Use:
+
+```sh
+softadastra node start
+softadastra peers
+```
+
+to work with node services and peers.
+
+## Next step
+
+Continue with [SDKs](/sdks).

@@ -1882,7 +1882,44 @@ html:not(.dark) .vp-doc :not(pre) > code {
 }
 .vp-doc div[class*="language-"],
 .vp-doc [class*="language-"] {
-  box-shadow:
-    0 14px 35px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+  background: #0f151b !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+/* Remove shadows from all documentation code blocks */
+.vp-doc div[class*="language-"],
+.vp-doc [class*="language-"],
+.vp-doc pre,
+.cb {
+  box-shadow: none !important;
+}
+/* Native VitePress code blocks - Softadastra shape only */
+.vp-doc div[class*="language-"],
+.vp-doc [class*="language-"] {
+  background: #0f151b !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  margin: 18px 0 24px !important;
+  overflow: hidden !important;
+}
+
+.vp-doc div[class*="language-"] pre,
+.vp-doc [class*="language-"] pre {
+  background: #0f151b !important;
+  color: #d7e2ee !important;
+  padding: 15px 16px !important;
+  font-size: 0.875rem !important;
+  line-height: 1.68 !important;
+  box-shadow: none !important;
+}
+
+.vp-doc div[class*="language-"] code,
+.vp-doc [class*="language-"] code {
+  background: transparent !important;
+  border: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  font-style: normal !important;
 }

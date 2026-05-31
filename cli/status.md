@@ -1,87 +1,67 @@
-# Status Command
+# Status
 
 The `status` command shows the current state of the local Softadastra runtime.
-
-It is usually the first command to run when you want to know whether the local runtime is available, healthy, and ready to accept local work.
+Run it when you want a quick overview of what is happening locally.
 
 ```sh
 softadastra status
 ```
 
-## Why status exists
+## What status shows
 
-Softadastra is local-first and modular.
+`softadastra status` gives one view of the main runtime pieces:
 
-A local runtime can include several layers: store, WAL, sync, transport, discovery, and metadata.
+- node
+- store
+- sync
+- transport
+- discovery
+- metadata
 
-The status command gives a quick overview of these layers without requiring you to inspect each one manually.
-
-It helps answer: is the runtime initialized, is the local node healthy, is the store available, is sync enabled, is there pending sync work, is transport running, is discovery running, and are peers available?
+It is usually the first command to run when you want to know if the local runtime is ready, if the node is running, if the store has entries, or if sync has pending work.
 
 ## Basic usage
 
-Run:
-
 ```sh
 softadastra status
 ```
 
-Example output style:
+Example output:
 
 ```txt
 Softadastra status
 
-Node
-  id       : node-a
-  version  : 0.1.0
-  state    : healthy
-
-Store
-  entries  : 12
-
-Sync
-  outbox   : 3
-  queued   : 3
-  failed   : 0
-
-Transport
-  running  : no
-
-Discovery
-  running  : no
+Component   Metric       Value
+node        id           node-1
+node        running      no
+store       entries      0
+sync        outbox       0
+sync        queued       0
+sync        in_flight    0
+sync        acknowledged 0
+sync        failed       0
+transport   running      no
+transport   peers        0
+discovery   running      no
+discovery   peers        0
+metadata    running      no
 ```
 
-## What status should show
-
-The command should summarize the most important runtime areas.
-
-```txt
-Node       -> local identity and runtime state
-Store      -> local data state
-Sync       -> pending synchronization work
-Transport  -> peer message delivery state
-Discovery  -> peer discovery state
-Peers      -> known peers, if available
-```
-
-The goal is not to show every internal detail. The goal is to give a fast diagnostic overview.
+The exact values depend on your local runtime state.
 
 ## Node status
 
-The node section describes the local runtime identity.
-
-Example:
+The node fields tell you which local node the runtime is using.
 
 ```txt
-Node
-  id       : node-a
-  version  : 0.1.0
-  state    : healthy
+Component   Metric   Value
+node        id       node-1
+node        running  no
 ```
 
-Useful fields: id, display name, version, hostname, os, uptime, state, and capabilities.
-
-For deeper node details, use:
+`id` is the local node id.
+`running` tells you whether node services are running in the current CLI session.
+To see more node information, run:
 
 ```sh
 softadastra node info
@@ -89,55 +69,48 @@ softadastra node info
 
 ## Store status
 
-The store section describes local data state.
-
-Example:
+The store field shows how many local entries are currently stored.
 
 ```txt
-Store
-  entries  : 12
+Component   Metric   Value
+store       entries  2
 ```
 
-Useful fields: entries, empty, durable, and wal path.
+If entries is `0`, the local store is empty.
 
-The store should remain usable even when transport or discovery is disabled. A healthy store means local read and write operations can work.
+You can write and read values with:
 
-## WAL status
-
-If WAL is enabled, status can show persistence information.
-
-Example:
-
-```txt
-WAL
-  enabled  : yes
-  path     : data/softadastra.wal
-  durable  : yes
+```sh
+softadastra store put app/name Softadastra
+softadastra store get app/name
 ```
 
-Useful fields: enabled, path, auto flush, last sequence, and durable mode.
+Then run status again:
 
-The WAL is important because it makes accepted local operations recoverable after restart.
+```sh
+softadastra status
+```
 
 ## Sync status
 
-The sync section summarizes pending synchronization work.
-
-Example:
+The sync fields show what the synchronization pipeline is tracking.
 
 ```txt
-Sync
-  outbox       : 3
-  queued       : 3
-  in flight    : 0
-  acknowledged : 0
-  failed       : 0
-  retries      : 0
+Component   Metric        Value
+sync        outbox        1
+sync        queued        1
+sync        in_flight     0
+sync        acknowledged  0
+sync        failed        0
 ```
 
-Useful fields: outbox, queued, in flight, acknowledged, failed, last submitted version, last applied remote version, and total retries.
+`outbox` shows how much local work is tracked for sync.
+`queued` shows work waiting to be selected for delivery.
+`in_flight` shows work currently being processed or waiting for acknowledgement.
+`acknowledged` shows completed sync work.
+`failed` shows work that failed according to the sync policy.
 
-For deeper sync details, use:
+For more detail, run:
 
 ```sh
 softadastra sync status
@@ -145,259 +118,122 @@ softadastra sync status
 
 ## Transport status
 
-The transport section shows whether peer message delivery is running.
-
-Example:
+Transport is the network layer used to communicate with peers.
 
 ```txt
-Transport
-  running  : yes
-  bind     : 127.0.0.1:4041
+Component   Metric   Value
+transport   running  no
+transport   peers    0
 ```
 
-Useful fields: running, host, port, connected peers, and faulted peers.
-
-Transport is optional. If transport is not running, local store operations should still work.
-
-```sh
-softadastra store put draft/1 hello
-```
+`running` tells you whether transport is running.
+`peers` tells you how many transport peers are known.
+Transport can be stopped and local storage can still work. That is normal.
 
 ## Discovery status
 
-The discovery section shows whether peer discovery is running.
-
-Example:
+Discovery is used to find peers.
 
 ```txt
-Discovery
-  running  : yes
-  bind     : 127.0.0.1:5051
-  peers    : 2
+Component   Metric   Value
+discovery   running  no
+discovery   peers    0
 ```
 
-Useful fields: running, host, port, broadcast host, broadcast port, known peers, stale peers, and expired peers.
+`running` tells you whether discovery is running.
+`peers` tells you how many discovery peers are known.
+If discovery is not running or no peers are found, local store commands can still work.
 
-Discovery is optional. If discovery is not running, the local node can still write and read local data.
+## Metadata status
 
-## Peer status
-
-If peer data is available, status can show a short peer summary.
-
-Example:
+Metadata provides local node information such as hostname, operating system, version, and uptime.
 
 ```txt
-Peers
-  known     : 2
-  connected : 1
-  stale     : 1
-  faulted   : 0
+Component   Metric   Value
+metadata    running  yes
+metadata    hostname local-machine
+metadata    os       linux
+metadata    version  0.1.0
+metadata    uptime_ms 1250
 ```
 
-For a full peer list, use:
+If metadata is available, `status` can show extra metadata fields.
+
+For more detail, run:
 
 ```sh
-softadastra peers
+softadastra node info
 ```
 
-## Healthy status
+## Start node services
 
-A healthy local runtime might look like this:
-
-```txt
-Softadastra status
-
-Node
-  id       : node-a
-  version  : 0.1.0
-  state    : healthy
-
-Store
-  entries  : 4
-
-Sync
-  outbox   : 0
-  queued   : 0
-  failed   : 0
-
-Transport
-  running  : no
-
-Discovery
-  running  : no
-```
-
-This means node metadata is available, store is available, sync has no failed work, and transport and discovery are disabled or stopped.
-
-Transport and discovery being stopped does not automatically mean the runtime is unhealthy.
-
-## Pending sync status
-
-A runtime with pending sync work might show:
-
-```txt
-Softadastra status
-
-Node
-  id       : node-a
-  version  : 0.1.0
-  state    : healthy
-
-Store
-  entries  : 5
-
-Sync
-  outbox   : 2
-  queued   : 2
-  failed   : 0
-
-Transport
-  running  : no
-
-Discovery
-  running  : no
-```
-
-This means local work exists, but some operations still need synchronization.
-
-Run:
+If transport, discovery, and metadata are stopped, start node services for the current CLI session:
 
 ```sh
-softadastra sync tick
+softadastra node start
 ```
 
-Then inspect again:
+Then run:
 
 ```sh
 softadastra status
 ```
 
-## Failed sync status
-
-A runtime with failed sync work might show:
+You should see something closer to:
 
 ```txt
-Softadastra status
-
-Node
-  id       : node-a
-  version  : 0.1.0
-  state    : degraded
-
-Store
-  entries  : 5
-
-Sync
-  outbox   : 3
-  queued   : 0
-  failed   : 3
-  retries  : 9
-
-Transport
-  running  : yes
-
-Discovery
-  running  : yes
+Component   Metric   Value
+node        running  yes
+transport   running  yes
+discovery   running  yes
+metadata    running  yes
 ```
 
-This means local data may still be valid, but synchronization has failed according to the current retry policy.
+## A good first workflow
 
-Recommended next commands:
+Try this after installing Softadastra:
 
 ```sh
-softadastra sync status
-softadastra peers
+softadastra status
 softadastra node info
+softadastra store put app/name Softadastra
+softadastra store get app/name
+softadastra sync status
+softadastra sync tick
+softadastra status
 ```
 
-## No peers status
-
-If no peers are available:
-
-```txt
-Peers
-  known     : 0
-  connected : 0
-```
-
-This is not necessarily an error. It only means the local runtime currently does not know about another node.
-
-Local store commands should still work:
-
-```sh
-softadastra store put local/message hello
-softadastra store get local/message
-```
+This checks the runtime, node metadata, local write, local read, sync state, one manual sync cycle, and status again.
 
 ## Status and local-first behavior
 
-The status command should reflect Softadastra's local-first model.
-
-A runtime can be useful even when transport is not running, discovery is not running, no peer is connected, and sync has pending work.
-
-The most important question is: can the local node still accept and read local state? If yes, the local-first layer is still useful.
-
-## Status and sync
-
-If status shows pending sync work:
-
-```txt
-Sync
-  outbox   : 3
-  queued   : 3
-  failed   : 0
-```
-
-Run:
+No peers is not an error.
+Stopped transport is not always an error.
+Stopped discovery is not always an error.
+Softadastra can still accept local work:
 
 ```sh
-softadastra sync status
-softadastra sync tick
+softadastra store put draft/1 hello
+softadastra store get draft/1
 ```
 
-`status` gives the overview. `sync status` gives deeper sync details.
-
-## Status and node metadata
-
-If node metadata looks wrong, run:
-
-```sh
-softadastra node info
-```
-
-The node command should provide more detailed fields: node id, display name, hostname, os, version, uptime, and capabilities.
-
-## Status and peers
-
-If status shows no peers or faulted peers, run:
-
-```sh
-softadastra peers
-```
-
-Then inspect sync:
-
-```sh
-softadastra sync status
-```
-
-This helps separate peer availability from sync state.
+Peers and networking matter when you want to synchronize with another node. They are not required for local reads and writes.
 
 ## Interactive mode
 
-Inside interactive mode:
+Inside interactive mode, run:
 
 ```txt
 softadastra> status
+softadastra> node info
+softadastra> store put app/name Softadastra
 softadastra> sync status
-softadastra> peers
+softadastra> sync tick
+softadastra> status
+softadastra> exit
 ```
 
-Do not repeat the binary name:
-
-```txt
-softadastra> softadastra status
-```
+Do not repeat the binary name inside interactive mode.
 
 Use:
 
@@ -405,137 +241,73 @@ Use:
 softadastra> status
 ```
 
-## JSON output
+not:
 
-If supported, status can expose machine-readable output:
+```txt
+softadastra> softadastra status
+```
+
+## Common issues
+
+### Store entries stay at zero
+
+Write a value first:
 
 ```sh
-softadastra status --json
+softadastra store put app/name Softadastra
 ```
 
-Example shape:
+Then run:
 
-```json
-{
-  "node": {
-    "id": "node-a",
-    "version": "0.1.0",
-    "state": "healthy"
-  },
-  "store": {
-    "entries": 12
-  },
-  "sync": {
-    "outbox": 3,
-    "queued": 3,
-    "in_flight": 0,
-    "acknowledged": 0,
-    "failed": 0,
-    "retries": 0
-  },
-  "transport": {
-    "running": false
-  },
-  "discovery": {
-    "running": false
-  }
-}
+```sh
+softadastra status
 ```
 
-Only expose `--json` as stable when the JSON schema is stable.
+### Transport is not running
 
-## Exit codes
+Start node services:
 
-Recommended behavior:
-
-| Exit code | Meaning |
-|---|---|
-| `0` | Status was read successfully |
-| `1` | Failed to read runtime status |
-| `2` | Invalid usage or invalid options |
-
-No peers should not normally be an error. Pending sync work should not normally be an error. Failed sync work may still return `0` if the status command successfully reported it — the runtime state can be degraded while the command itself succeeds.
-
-## Error handling
-
-Errors should explain which part of status failed.
-
-### Runtime unavailable
-
-```txt
-error: failed to read status
-reason: runtime is not initialized
+```sh
+softadastra node start
 ```
 
-### Store unavailable
+Then check status again:
 
-```txt
-error: failed to read store status
-reason: store is not available
+```sh
+softadastra status
 ```
 
-### Sync unavailable
+### Discovery has no peers
 
-```txt
-error: failed to read sync status
-reason: sync is not initialized
+That can be normal. It usually means no other node is running or discoverable yet.
+
+Check:
+
+```sh
+softadastra peers
 ```
 
-### Metadata unavailable
+### Sync has failed work
 
-```txt
-error: failed to read node metadata
-reason: metadata service is not available
+If `sync failed` is greater than `0`, inspect sync and peers:
+
+```sh
+softadastra sync status
+softadastra peers
 ```
 
-## Output style
+Local data can still exist even when sync delivery fails.
 
-Status output should be grouped and readable.
+## Summary
 
-Recommended format:
+Use:
 
-```txt
-Softadastra status
-
-Node
-  id       : node-a
-  version  : 0.1.0
-  state    : healthy
-
-Store
-  entries  : 12
-
-Sync
-  outbox   : 3
-  queued   : 3
-  failed   : 0
-
-Transport
-  running  : no
-
-Discovery
-  running  : no
+```sh
+softadastra status
 ```
 
-Avoid dumping raw internal structs unless debug mode is enabled.
-
-## Common mistakes
-
-### Treating stopped transport as failure
-
-Transport can be stopped while local-first behavior still works.
-
-### Treating no peers as failure
-
-No peers is normal in local development.
-
-### Treating pending sync as failure
-
-Pending sync means work is waiting to be delivered. It does not mean local data is invalid.
-
-### Expecting status to replace detailed commands
-
-Use status for overview. Use these for detail:
+to get a quick overview of the local runtime.
+Use it first, then go deeper with:
 
 ```sh
 softadastra node info
@@ -543,71 +315,4 @@ softadastra sync status
 softadastra peers
 ```
 
-## Recommended first status workflow
-
-Run:
-
-```sh
-softadastra status
-softadastra node info
-softadastra store put app/name Softadastra
-softadastra sync status
-softadastra sync tick
-softadastra status
-```
-
-This tests runtime overview, node metadata, local write, sync state, manual tick, and status refresh.
-
-## How status maps to the SDK
-
-CLI:
-
-```sh
-softadastra status
-```
-
-C++ SDK equivalents:
-
-```cpp
-auto node = client.refresh_node_info();
-auto sync = client.sync_state();
-auto peers = client.peers();
-```
-
-JavaScript SDK equivalents:
-
-```js
-const node = await client.refreshNodeInfo();
-const sync = await client.syncStateInfo();
-const peers = await client.peers();
-```
-
-The CLI combines these ideas into one overview.
-
-## How status maps to the engine
-
-```txt
-status
-  -> metadata
-  -> store
-  -> sync
-  -> transport
-  -> discovery
-  -> peer registries
-```
-
-The command should summarize the engine without exposing unnecessary internal complexity.
-
-## Summary
-
-The status command is the main diagnostic overview command.
-
-It helps you see node identity, store state, sync state, transport state, discovery state, and peer summary.
-
-The key idea is: status tells you what the local runtime looks like right now.
-
-## Next step
-
-Continue with node commands:
-
-[Go to Node Commands](/cli/node)
+Next, continue with [Node](./node).

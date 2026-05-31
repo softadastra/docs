@@ -588,6 +588,21 @@ html:not(.dark) .cb-body {
 .cb * {
   font-style: normal !important;
 }
+.cb {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0d1117;
+  box-shadow: none;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html:not(.dark) .cb {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: #0d1117;
+  box-shadow: none;
+}
 /* ════════════════════════════════════════════════
    RESPONSIVE
    ════════════════════════════════════════════════ */

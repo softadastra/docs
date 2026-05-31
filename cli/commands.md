@@ -469,19 +469,19 @@ value : Softadastra
 
 ## Command reference table
 
-| Command | Purpose |
-|---|---|
-| `softadastra help` | Show available commands |
-| `softadastra version` | Show CLI version |
-| `softadastra status` | Show runtime status |
-| `softadastra node info` | Show local node metadata |
-| `softadastra node start` | Start a local node |
-| `softadastra store put <key> <value>` | Write a local value |
-| `softadastra store get <key>` | Read a local value |
-| `softadastra store remove <key>` | Remove a local value |
-| `softadastra sync status` | Show sync state |
-| `softadastra sync tick` | Run one sync tick |
-| `softadastra peers` | List known peers |
+| Command                               | Purpose                  |
+| ------------------------------------- | ------------------------ |
+| `softadastra help`                    | Show available commands  |
+| `softadastra version`                 | Show CLI version         |
+| `softadastra status`                  | Show runtime status      |
+| `softadastra node info`               | Show local node metadata |
+| `softadastra node start`              | Start a local node       |
+| `softadastra store put <key> <value>` | Write a local value      |
+| `softadastra store get <key>`         | Read a local value       |
+| `softadastra store remove <key>`      | Remove a local value     |
+| `softadastra sync status`             | Show sync state          |
+| `softadastra sync tick`               | Run one sync tick        |
+| `softadastra peers`                   | List known peers         |
 
 ## Recommended first workflow
 

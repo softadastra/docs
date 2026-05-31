@@ -1,480 +1,394 @@
 # Changelog
 
-This page documents notable changes in Softadastra releases.
+This page tracks important Softadastra releases.
 
-The changelog should help users understand what changed, why it matters, and whether they need to update code, configuration, commands, or deployment behavior.
+It is written for developers who want to quickly understand what changed, what was added, what was fixed, and what needs attention before upgrading.
 
-The core rule is:
+## Versioning
+
+Softadastra uses semantic versioning:
 
 ```txt
-A changelog entry should be specific, useful, and verifiable.
+MAJOR.MINOR.PATCH
 ```
 
-## Format
+Meaning:
 
-Use one section per version.
+```txt
+MAJOR -> breaking changes
+MINOR -> new features without breaking existing usage
+PATCH -> fixes and small improvements
+```
 
-Recommended shape:
+Example:
 
-```md
+```txt
+v0.1.0
+```
+
+## Latest release
+
 ## v0.1.0
 
-Release summary.
+Initial public release of Softadastra.
 
-### Added
-- ...
+This release introduces the first stable developer surface for:
 
-### Changed
-- ...
-
-### Fixed
-- ...
-
-### Removed
-- ...
-
-### Known limitations
-- ...
-```
-
-Use only the categories that apply to the release.
-
-## Categories
-
-Recommended changelog categories:
-
-- Added
-- Changed
-- Fixed
-- Removed
-- Deprecated
-- Security
-- Migration notes
-- Known limitations
+- Softadastra CLI
+- C++ SDK
+- local store
+- WAL-backed persistence
+- restart recovery
+- sync state inspection
+- manual sync tick
+- optional transport
+- optional discovery
+- node metadata
+- official installer
+- documentation structure
 
 ## Added
 
-Use `Added` for new features, commands, APIs, modules, examples, or documentation.
+### Installer
 
-Good examples:
+Added the official installer for Linux, macOS, and Windows.
 
-- Added `softadastra status`.
-- Added WAL-backed persistent store examples.
-- Added JavaScript `syncStateInfo()`.
-- Added C++ `ClientOptions::persistent`.
+Linux and macOS:
 
-Avoid vague entries:
-
-- Added stuff.
-- Added many things.
-
-## Changed
-
-Use `Changed` when existing behavior changed.
-
-Good examples:
-
-- Changed sync status output to include retry count.
-- Changed persistent examples to use `data/<node-id>.wal`.
-- Changed CLI errors to include the failing key when possible.
-
-## Fixed
-
-Use `Fixed` for bug fixes.
-
-Good examples:
-
-- Fixed missing key handling in local store reads.
-- Fixed WAL path validation when the data directory does not exist.
-- Fixed discovery output when no peers are available.
-
-## Removed
-
-Use `Removed` when behavior, commands, fields, or APIs are no longer available.
-
-Good examples:
-
-- Removed unstable CLI alias.
-- Removed deprecated SDK option name.
-
-## Deprecated
-
-Use `Deprecated` when something still exists but should no longer be used.
-
-Good examples:
-
-- Deprecated old sync status field names.
-- Deprecated experimental transport option names.
-
-## Security
-
-Use `Security` for security-relevant changes.
-
-Good examples:
-
-- Improved validation for WAL paths.
-- Improved peer input validation.
-- Improved error handling for invalid transport messages.
-
-## Migration notes
-
-Use `Migration notes` when users need to change something.
-
-Examples:
-
-- Create the `data/` directory before using WAL-backed examples.
-- Use one WAL path per node.
-- Rename JavaScript `sync_state_info()` to `syncStateInfo()` when using the preferred public API.
-
-## Known limitations
-
-Use `Known limitations` when a feature exists but is not fully production-ready.
-
-Examples:
-
-- Discovery is intended for local development in this release.
-- JSON CLI output is not yet a stable automation API.
-- Conflict resolution behavior is still evolving.
-
-## v0.1.0
-
-Initial Softadastra foundation release.
-
-This release introduces the first documented Softadastra local-first runtime foundation, including the engine structure, product CLI surface, C++ SDK documentation, JavaScript SDK documentation, guides, reference pages, and release documentation.
-
-The focus of this release is the core model:
-
-```txt
-write locally
-persist locally
-track operation
-sync when possible
-retry when needed
-converge later
+```sh
+curl -fsSL https://softadastra.com/install.sh | sh
 ```
 
-### Added
+Windows PowerShell:
 
-- Added the main documentation structure for Softadastra.
-- Added top-level pages for introduction, installation, quick start, and project overview.
-- Added concept documentation for offline-first behavior.
-- Added concept documentation for local-first behavior.
-- Added concept documentation for the failure model.
-- Added concept documentation for WAL.
-- Added concept documentation for outbox.
-- Added concept documentation for sync engine behavior.
-- Added concept documentation for convergence.
-- Added product CLI documentation.
-- Added CLI installation documentation.
-- Added CLI command overview.
-- Added CLI interactive mode documentation.
-- Added CLI node command documentation.
-- Added CLI store command documentation.
-- Added CLI sync command documentation.
-- Added CLI peers command documentation.
-- Added CLI reference documentation.
-- Added C++ SDK overview.
-- Added C++ SDK installation documentation.
-- Added C++ SDK first app documentation.
-- Added C++ SDK Client documentation.
-- Added C++ SDK ClientOptions documentation.
-- Added C++ SDK local store documentation.
-- Added C++ SDK persistent store documentation.
-- Added C++ SDK sync documentation.
-- Added C++ SDK transport documentation.
-- Added C++ SDK discovery documentation.
-- Added C++ SDK metadata documentation.
-- Added C++ SDK errors documentation.
-- Added C++ SDK examples documentation.
-- Added JavaScript SDK overview.
-- Added JavaScript SDK installation documentation.
-- Added JavaScript SDK first app documentation.
-- Added JavaScript SDK Client documentation.
-- Added JavaScript SDK ClientOptions documentation.
-- Added JavaScript SDK local store documentation.
-- Added JavaScript SDK persistent store documentation.
-- Added JavaScript SDK sync documentation.
-- Added JavaScript SDK transport documentation.
-- Added JavaScript SDK discovery documentation.
-- Added JavaScript SDK metadata documentation.
-- Added JavaScript SDK errors documentation.
-- Added JavaScript SDK examples documentation.
-- Added engine overview documentation.
-- Added engine architecture documentation.
-- Added engine runtime flow documentation.
-- Added engine modules documentation.
-- Added engine core module documentation.
-- Added engine fs module documentation.
-- Added engine wal module documentation.
-- Added engine store module documentation.
-- Added engine sync module documentation.
-- Added engine transport module documentation.
-- Added engine discovery module documentation.
-- Added engine metadata module documentation.
-- Added engine internal CLI module documentation.
-- Added practical guide for building an offline-first app.
-- Added practical guide for running a local node.
-- Added practical guide for persisting data locally.
-- Added practical guide for syncing between nodes.
-- Added practical guide for using the C++ SDK with the engine.
-- Added practical guide for using the JavaScript SDK with the engine.
-- Added production guide.
-- Added reference index.
-- Added CLI reference.
-- Added C++ API reference.
-- Added JavaScript API reference.
-- Added configuration reference.
-- Added errors reference.
-- Added releases index.
-- Added changelog page.
-- Added builds page.
+```powershell
+irm https://softadastra.com/install.ps1 | iex
+```
 
-### Added: CLI
+The default installation installs:
 
-- Added documentation for `softadastra help`.
-- Added documentation for `softadastra version`.
-- Added documentation for `softadastra status`.
-- Added documentation for `softadastra node info`.
-- Added documentation for `softadastra node start`, when the node app is available.
-- Added documentation for `softadastra store put <key> <value>`.
-- Added documentation for `softadastra store get <key>`.
-- Added documentation for `softadastra store remove <key>`.
-- Added documentation for `softadastra store list`, when supported.
-- Added documentation for `softadastra sync status`.
-- Added documentation for `softadastra sync tick`.
-- Added documentation for `softadastra sync tick --prune`, when supported.
-- Added documentation for `softadastra peers`.
-- Added documentation for interactive mode through `softadastra`.
+- Softadastra CLI
+- Softadastra C++ SDK
 
-### Added: C++ SDK
+The installer also supports:
 
-- Added documentation for the main C++ SDK header:
+```txt
+CLI only
+SDK only
+specific versions
+custom install directories
+checksum verification
+optional minisign verification
+```
+
+### CLI
+
+Added the first stable Softadastra CLI surface.
+
+Available commands:
+
+```sh
+softadastra status
+
+softadastra node
+softadastra node info
+softadastra node start
+
+softadastra store
+softadastra store put <key> <value>
+softadastra store get <key>
+
+softadastra sync
+softadastra sync status
+softadastra sync tick
+
+softadastra peers
+```
+
+Also added interactive mode:
+
+```sh
+softadastra
+```
+
+Inside interactive mode:
+
+```txt
+softadastra> status
+softadastra> node info
+softadastra> store put app/name Softadastra
+softadastra> store get app/name
+softadastra> sync status
+softadastra> sync tick
+softadastra> peers
+softadastra> exit
+```
+
+### C++ SDK
+
+Added the first official C++ SDK.
+
+Main include:
 
 ```cpp
 #include <softadastra/sdk.hpp>
 ```
 
-- Added documentation for `Client`.
-- Added documentation for `ClientOptions`.
-- Added documentation for `ClientOptions::local`.
-- Added documentation for `ClientOptions::persistent`.
-- Added documentation for `ClientOptions::memory_only`, when exposed.
-- Added documentation for `client.open()`.
-- Added documentation for `client.close()`.
-- Added documentation for `client.put()`.
-- Added documentation for `client.get()`.
-- Added documentation for `client.remove()`.
-- Added documentation for `client.contains()`.
-- Added documentation for `client.size()`.
-- Added documentation for `client.empty()`.
-- Added documentation for `client.sync_state()`.
-- Added documentation for `client.tick()`.
-- Added documentation for `client.start_transport()`.
-- Added documentation for `client.connect(peer)`.
-- Added documentation for `client.start_discovery()`.
-- Added documentation for `client.peers()`.
-- Added documentation for `client.refresh_node_info()`.
-- Added documentation for explicit `Result` handling.
-- Added documentation for `Value`, `Peer`, `NodeInfo`, `SyncResult`, and `TickResult`.
-
-### Added: JavaScript SDK
-
-- Added documentation for the main JavaScript package:
+Main public types:
 
 ```txt
-@softadastra/sdk
+Client
+ClientOptions
+Result
+Error
+Key
+Value
+Peer
+NodeInfo
+SyncState
+TickResult
 ```
 
-- Added documentation for the main JavaScript import:
+The SDK supports:
 
-```js
-import { Client, ClientOptions } from "@softadastra/sdk";
+```txt
+memory-only local store
+persistent local store
+restart recovery
+sync state inspection
+manual sync tick
+transport
+discovery
+metadata
+explicit result/error handling
 ```
 
-- Added documentation for ESM usage.
-- Added documentation for `Client`.
-- Added documentation for `ClientOptions`.
-- Added documentation for `ClientOptions.local`.
-- Added documentation for `ClientOptions.persistent`.
-- Added documentation for `ClientOptions.memoryOnly`, when exposed.
-- Added documentation for `await client.open()`.
-- Added documentation for `await client.close()`.
-- Added documentation for `await client.put()`.
-- Added documentation for `await client.get()`.
-- Added documentation for `await client.remove()`.
-- Added documentation for `client.contains()`.
-- Added documentation for `client.size()`.
-- Added documentation for `client.empty()`.
-- Added documentation for `await client.syncStateInfo()`.
-- Added documentation for `await client.tick()`.
-- Added documentation for `await client.startTransport()`.
-- Added documentation for `await client.connect(peer)`.
-- Added documentation for `await client.startDiscovery()`.
-- Added documentation for `await client.peers()`.
-- Added documentation for `await client.refreshNodeInfo()`.
-- Added documentation for explicit `Result` handling.
-- Added documentation for `Value`, `Peer`, `NodeInfo`, `SoftadastraError`, `SyncResult`, and `TickResult`.
+### Local store
 
-### Added: Engine
+Added local key/value storage.
 
-- Added documentation for the modular engine layout.
-- Added documentation for the core module.
-- Added documentation for the fs module.
-- Added documentation for the wal module.
-- Added documentation for the store module.
-- Added documentation for the sync module.
-- Added documentation for the transport module.
-- Added documentation for the discovery module.
-- Added documentation for the metadata module.
-- Added documentation for the internal cli module.
-- Added module responsibility boundaries.
-- Added module dependency direction guidance.
-- Added runtime flow explanations for local-only, persistent, sync-aware, and peer-aware flows.
+CLI example:
 
-### Added: Guides
+```sh
+softadastra store put app/name Softadastra
+softadastra store get app/name
+```
 
-- Added a guide for building an offline-first app.
-- Added a guide for running a local node.
-- Added a guide for persisting data locally.
-- Added a guide for syncing between nodes.
-- Added a guide for mapping the C++ SDK to the engine.
-- Added a guide for mapping the JavaScript SDK to the engine.
-- Added a production guide with operational checks.
+C++ SDK example:
 
-### Added: Reference
+```cpp
+client.put("app/name", "Softadastra");
+client.get("app/name");
+```
 
-- Added compact CLI reference.
-- Added compact C++ API reference.
-- Added compact JavaScript API reference.
-- Added configuration reference.
-- Added errors reference.
-- Added release reference pages.
+### Persistence
 
-### Changed
+Added WAL-backed persistence through the C++ SDK.
 
-- Organized the documentation around a clear learning path:
-  - concepts
-  - CLI
-  - SDK C++
-  - SDK JS
-  - engine
-  - guides
-  - reference
-  - releases
-- Standardized the documentation style around a simple structure:
-  - definition
-  - core rule
-  - why it exists
-  - usage
-  - examples
-  - expected output
-  - common mistakes
-  - summary
-  - next step
-- Standardized local-first wording across concepts, SDKs, engine, CLI, guides, and reference.
-- Standardized the separation between store, WAL, sync, transport, discovery, metadata, SDK, and CLI.
-- Standardized C++ examples around `is_ok()`, `is_err()`, `value()`, and `error()`.
-- Standardized JavaScript examples around `isOk()`, `isErr()`, `value()`, and `error()`.
-- Standardized JavaScript public naming around `camelCase`.
-- Standardized C++ public naming around `snake_case`.
-- Standardized CLI examples around space-separated commands.
+Persistent clients can reopen the same WAL path and recover previously written values.
 
-### Fixed
+### Sync visibility
 
-- Clarified that local store operations should not require a server, peer, transport, discovery, or cloud access.
-- Clarified that persistence and synchronization are different responsibilities.
-- Clarified that a successful local write does not mean remote delivery has completed.
-- Clarified that a sync failure does not mean local data disappeared.
-- Clarified that no peers found is a valid local-first state.
-- Clarified that transport failure is a delivery problem, not a local state problem.
-- Clarified that discovery failure should not block local store access.
-- Clarified that WAL append failure should not be treated as durable success.
-- Clarified that missing keys are normal store errors, not runtime crashes.
-- Clarified that `data/` should exist before using WAL paths under `data/`.
-- Clarified that each node should use a separate WAL path.
-- Clarified that each local node should use a separate transport port.
+Added sync state inspection.
 
-### Migration notes
+CLI:
 
-This is the initial documented release, so there is no previous public documentation version to migrate from.
+```sh
+softadastra sync status
+```
 
-For new users:
+C++ SDK:
 
-1. Start with [What is Softadastra?](../what-is-softadastra.md).
-2. Read [Quick Start](../quick-start.md).
-3. Follow [Build an Offline-first App](../guides/build-offline-first-app.md).
-4. Use [Configuration Reference](../reference/config.md) before persistent or multi-node examples.
-5. Use [Errors Reference](../reference/errors.md) when handling failures.
+```cpp
+client.sync_state();
+```
 
-### Known limitations
+### Manual tick
 
-- Some CLI commands may depend on the current product CLI implementation.
-- `softadastra store list` should only be treated as stable if implemented in the current CLI.
-- `softadastra node start` should only be treated as stable if the node app is built and available.
-- `--json` output should not be treated as stable until the JSON schema is documented and versioned.
-- Some SDK aliases may be conditional depending on the current SDK version.
-- Multi-node sync behavior may depend on the current transport, ACK, and remote apply implementation.
-- Discovery behavior may be intended primarily for local development until production discovery rules are finalized.
-- Conflict resolution behavior is still expected to evolve as the runtime matures.
+Added manual sync tick support.
 
-## Unreleased
+CLI:
 
-Use this section for changes that are planned or already merged but not released yet.
+```sh
+softadastra sync tick
+```
 
-### Added
+C++ SDK:
 
-### Changed
+```cpp
+client.tick();
+```
 
-### Fixed
+A tick can retry work, produce a batch, and expose sync progress.
 
-### Removed
+### Node services
 
-### Known limitations
+Added node inspection and session-level node startup.
 
-## Changelog maintenance rules
+```sh
+softadastra node info
+softadastra node start
+```
 
-When adding a new release, keep entries specific.
+`node start` starts local services for the current CLI runtime.
 
-Good:
+For a long-running node, use the Softadastra node app.
 
-- Added `client.sync_state()` to inspect pending sync work.
-- Fixed missing WAL directory error handling.
-- Changed CLI sync status output to include failed count.
+### Peers
 
-Avoid:
+Added peer inspection.
 
-- Updated docs.
-- Improved runtime.
-- Fixed bugs.
+```sh
+softadastra peers
+```
 
-## Release note checklist
+The command shows discovery peers and transport peers.
 
-Before publishing a release, check whether the changelog mentions changes to:
+No peers is a valid state. Local store commands still work without peers.
 
-- CLI commands
-- C++ SDK methods
-- JavaScript SDK methods
-- configuration fields
-- WAL behavior
-- store behavior
-- sync behavior
-- transport behavior
-- discovery behavior
-- metadata fields
-- error codes
-- data recovery behavior
-- build commands
-- known limitations
+### Documentation
 
-If a change can affect local data, sync behavior, recovery, or deployment, document it clearly.
+Added documentation sections for:
+
+```txt
+Installation
+Quick Start
+SDKs
+CLI
+C++ SDK
+Reference
+Releases
+```
+
+Added C++ SDK pages:
+
+```txt
+Overview
+Installation
+Quick Start
+Client
+Client Options
+Results and Errors
+Local Store
+Persistent Store
+Restart Recovery
+Sync State
+Manual Tick
+Transport
+Discovery
+Metadata
+Examples
+```
+
+Added CLI pages:
+
+```txt
+Overview
+Commands
+Interactive Mode
+Node
+Store
+Sync
+Peers
+Reference
+```
+
+Added reference pages:
+
+```txt
+CLI Reference
+C++ API Reference
+Configuration Reference
+Errors Reference
+```
+
+## Fixed
+
+This is the first public release, so there are no previous public fixes to list.
+
+## Changed
+
+This is the first public release, so there are no previous public behavior changes to list.
+
+## Removed
+
+Nothing removed in this release.
+
+## Upgrade notes
+
+No upgrade action is needed for `v0.1.0`.
+
+For a clean install, use:
+
+```sh
+curl -fsSL https://softadastra.com/install.sh | sh
+```
+
+On Windows:
+
+```powershell
+irm https://softadastra.com/install.ps1 | iex
+```
+
+## Known limitations
+
+The current stable CLI store surface supports:
+
+```txt
+put
+get
+```
+
+Commands such as `store remove` or `store list` are not part of the stable CLI surface yet.
+
+The current stable sync CLI surface supports:
+
+```txt
+status
+tick
+```
+
+Options such as `sync tick --prune` are not part of the stable CLI surface yet.
+
+The C++ SDK is the first official SDK.
+
+Other SDKs can be added later when they are ready.
+
+## Release verification
+
+Before publishing this release, verify:
+
+```sh
+softadastra version
+softadastra status
+
+softadastra store put app/name Softadastra
+softadastra store get app/name
+
+softadastra sync status
+softadastra sync tick
+
+softadastra node info
+softadastra peers
+```
+
+Also verify the C++ SDK with:
+
+```sh
+vix build -- -DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
+```
+
+On Windows:
+
+```powershell
+vix build -- -DCMAKE_PREFIX_PATH="$env:LOCALAPPDATA\Softadastra\sdk"
+```
 
 ## Related pages
 
-- [Releases](./index.md)
-- [Builds](./builds.md)
-- [Production Guide](../guides/production.md)
-- [CLI Reference](../reference/cli.md)
-- [C++ API Reference](../reference/cpp-api.md)
-- [JavaScript API Reference](../reference/js-api.md)
-- [Configuration Reference](../reference/config.md)
-- [Errors Reference](../reference/errors.md)
+- [Installation](../installation)
+- [Quick Start](../quick-start)
+- [SDKs](../sdks)
+- [CLI Reference](../cli/reference)
+- [C++ API Reference](../reference/cpp-api)
+- [Builds](./builds)

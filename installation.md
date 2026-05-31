@@ -1,468 +1,327 @@
 # Installation
 
-This page explains how to install and prepare Softadastra for local development.
+This is the official installation page for Softadastra.
 
-Softadastra is split into three main developer entry points:
+By default, the installer installs:
 
-```txt
-Softadastra CLI
-Softadastra SDK C++
-Softadastra SDK JS
+- the Softadastra CLI
+- the Softadastra C++ SDK
+
+The CLI gives you the `softadastra` command in your terminal.
+The C++ SDK lets C++ applications use Softadastra with:
+
+```cpp
+#include <softadastra/sdk.hpp>
 ```
 
-The CLI is used from the terminal. The C++ SDK is used from native C++ applications. The JavaScript SDK is used from Node.js or JavaScript applications.
+## Linux and macOS
 
-## Requirements
-
-Softadastra is designed around modern C++ and JavaScript tooling.
-
-For the engine and C++ SDK, you need:
-
-- C++20 compiler
-- CMake
-- Ninja
-- Git
-- Vix, recommended for building Softadastra projects
-
-For the JavaScript SDK, you need:
-
-- Node.js
-- npm
-
-## Repository layout
-
-A typical local Softadastra workspace can look like this:
-
-```txt
-softadastra/
-├── softadastra/   # engine, modules, CLI, node app
-├── sdk/           # C++ SDK
-├── sdk-js/        # JavaScript SDK
-└── docs/          # documentation site
-```
-
-The engine contains the runtime modules:
-
-```txt
-softadastra/
-├── apps/
-│   ├── cli/
-│   └── node/
-└── modules/
-    ├── cli
-    ├── core
-    ├── discovery
-    ├── fs
-    ├── metadata
-    ├── store
-    ├── sync
-    ├── transport
-    └── wal
-```
-
-The C++ SDK exposes a smaller public API over the engine:
-
-```txt
-sdk/
-├── include/
-│   └── softadastra/
-│       ├── sdk.hpp
-│       └── sdk/
-└── examples/
-```
-
-The JavaScript SDK exposes the same model for JavaScript applications:
-
-```txt
-sdk-js/
-├── src/
-├── docs/
-├── examples/
-└── package.json
-```
-
-## Install the CLI
-
-The Softadastra CLI is built from the engine repository.
-
-From the engine directory:
+Install Softadastra with:
 
 ```sh
-cd ~/softadastra/softadastra
+curl -fsSL https://softadastra.com/install.sh | sh
 ```
 
-Build the project:
+This installs the CLI and the C++ SDK.
+
+After installation, open a new terminal if `softadastra` is not found immediately.
+
+Then verify:
 
 ```sh
-vix build
-```
-
-Build with the CLI application enabled:
-
-```sh
-vix build -- \
-  -DSOFTADASTRA_BUILD_APPS=ON \
-  -DSOFTADASTRA_BUILD_CLI_APP=ON
-```
-
-Build the node daemon too:
-
-```sh
-vix build -- \
-  -DSOFTADASTRA_BUILD_APPS=ON \
-  -DSOFTADASTRA_BUILD_CLI_APP=ON \
-  -DSOFTADASTRA_BUILD_NODE_APP=ON
-```
-
-Build in release mode:
-
-```sh
-vix build --preset release
-```
-
-Build and export the final executable to the project root:
-
-```sh
-vix build --bin
-```
-
-After building, the final CLI binary is:
-
-```txt
-softadastra
-```
-
-You can test it with:
-
-```sh
-softadastra help
 softadastra version
 softadastra status
 ```
 
-## Install the C++ SDK
+## Windows
 
-The C++ SDK is used from C++ applications.
+Install Softadastra from PowerShell:
 
-From the SDK directory:
-
-```sh
-cd ~/softadastra/sdk
+```powershell
+irm https://softadastra.com/install.ps1 | iex
 ```
 
-Build it with Vix:
+This installs the CLI and the C++ SDK.
 
-```sh
-vix build
-```
+After installation, open a new PowerShell window if `softadastra` is not found immediately.
 
-Or with CMake:
+Then verify:
 
-```sh
-cmake --preset dev-ninja
-cmake --build --preset build-ninja
-```
-
-Use the SDK through the umbrella header:
-
-```cpp
-#include <softadastra/sdk.hpp>
-```
-
-Minimal example:
-
-```cpp
-#include <iostream>
-#include <softadastra/sdk.hpp>
-
-int main()
-{
-    using namespace softadastra::sdk;
-
-    Client client{
-        ClientOptions::memory_only("node-local")};
-
-    auto opened = client.open();
-
-    if (opened.is_err())
-    {
-        std::cerr << opened.error().message() << "\n";
-        return 1;
-    }
-
-    client.put("hello", "world");
-
-    auto value = client.get("hello");
-
-    if (value.is_ok())
-    {
-        std::cout << value.value().to_string() << "\n";
-    }
-
-    client.close();
-
-    return 0;
-}
-```
-
-Run SDK examples after building:
-
-```sh
-./build-ninja/examples/01_local_store
-./build-ninja/examples/02_persistent_store
-./build-ninja/examples/03_remove_value
-./build-ninja/examples/04_basic_sync
-./build-ninja/examples/05_tcp_peer_sync
-./build-ninja/examples/06_discovery
-./build-ninja/examples/07_node_metadata
-```
-
-## Install the JavaScript SDK
-
-The JavaScript SDK is distributed as:
-
-```txt
-@softadastra/sdk
-```
-
-Install it with npm:
-
-```sh
-npm install @softadastra/sdk
-```
-
-Use it in JavaScript:
-
-```js
-import { Client, ClientOptions } from "@softadastra/sdk";
-```
-
-Minimal example:
-
-```js
-import { Client, ClientOptions } from "@softadastra/sdk";
-
-const client = new Client(
-  ClientOptions.local("node-local")
-);
-
-const opened = await client.open();
-
-if (opened.isErr()) {
-  console.error(opened.error().message);
-  process.exit(1);
-}
-
-await client.put("hello", "world");
-
-const value = await client.get("hello");
-
-if (value.isOk()) {
-  console.log(value.value().toString());
-}
-
-await client.close();
-```
-
-For local development inside the SDK repository:
-
-```sh
-cd ~/softadastra/sdk-js
-npm install
-npm test
-```
-
-Run examples:
-
-```sh
-npm run examples:local-store
-npm run examples:persistent-store
-npm run examples:remove-value
-npm run examples:basic-sync
-npm run examples:tcp-peer-sync
-npm run examples:discovery
-npm run examples:node-metadata
-```
-
-## Install documentation dependencies
-
-The documentation site uses VitePress.
-
-From the documentation directory:
-
-```sh
-cd ~/softadastra/docs
-```
-
-Install dependencies:
-
-```sh
-npm install
-```
-
-If the project does not have a `package.json` yet, create one:
-
-```sh
-npm init -y
-npm install -D vitepress
-```
-
-Add these scripts to `package.json`:
-
-```json
-{
-  "scripts": {
-    "dev": "vitepress dev",
-    "build": "vitepress build",
-    "preview": "vitepress preview"
-  }
-}
-```
-
-Run the docs locally:
-
-```sh
-npm run dev
-```
-
-Build the docs:
-
-```sh
-npm run build
-```
-
-Preview the production build:
-
-```sh
-npm run preview
-```
-
-## Recommended local development flow
-
-When working on the documentation:
-
-```sh
-cd ~/softadastra/docs
-npm run dev
-```
-
-When working on the engine:
-
-```sh
-cd ~/softadastra/softadastra
-vix build
-```
-
-When working on the C++ SDK:
-
-```sh
-cd ~/softadastra/sdk
-vix build
-```
-
-When working on the JavaScript SDK:
-
-```sh
-cd ~/softadastra/sdk-js
-npm test
-```
-
-## Verify installation
-
-### Verify CLI
-
-```sh
-softadastra help
+```powershell
+softadastra version
 softadastra status
 ```
 
-Expected behavior: The CLI should print help output or runtime status.
+## What gets installed
 
-### Verify C++ SDK
+The default installation installs both the CLI and the C++ SDK.
+On Linux and macOS, the default locations are:
 
-Build and run:
-
-```sh
-cd ~/softadastra/sdk
-vix build
-./build-ninja/examples/01_local_store
+```txt
+CLI binary : ~/.local/bin/softadastra
+SDK        : ~/.softadastra/sdk
+Home       : ~/.softadastra
 ```
 
-Expected behavior: The example should open a local client, write a value, read it back, and print it.
+On Windows, the default locations are:
 
-### Verify JavaScript SDK
+```txt
+CLI binary : %LOCALAPPDATA%\Softadastra\bin\softadastra.exe
+SDK        : %LOCALAPPDATA%\Softadastra\sdk
+Home       : %LOCALAPPDATA%\Softadastra
+```
+
+The installer also updates your user environment so the `softadastra` command can be used from the terminal.
+
+## Install only the CLI
+
+Use this when you only want the terminal command.
+Linux and macOS:
+
+```sh
+curl -fsSL https://softadastra.com/install.sh | sh -s -- --cli-only
+```
+
+Windows PowerShell:
+
+```powershell
+$env:SOFTADASTRA_INSTALL_KIND="cli"
+irm https://softadastra.com/install.ps1 | iex
+```
+
+Verify:
+
+```sh
+softadastra version
+softadastra status
+```
+
+## Install only the C++ SDK
+
+Use this when you only want the C++ SDK files.
+
+Linux and macOS:
+
+```sh
+curl -fsSL https://softadastra.com/install.sh | sh -s -- --sdk-only
+```
+
+Windows PowerShell:
+
+```powershell
+$env:SOFTADASTRA_INSTALL_KIND="sdk"
+irm https://softadastra.com/install.ps1 | iex
+```
+
+The SDK is installed in:
+
+```txt
+~/.softadastra/sdk
+```
+
+on Linux and macOS, and in:
+
+```txt
+%LOCALAPPDATA%\Softadastra\sdk
+```
+
+on Windows.
+
+## Install a specific version
+
+By default, the installer uses the latest release.
+
+To install a specific version on Linux or macOS:
+
+```sh
+SOFTADASTRA_VERSION=v0.1.0 \
+SOFTADASTRA_SDK_VERSION=v0.1.0 \
+curl -fsSL https://softadastra.com/install.sh | sh
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:SOFTADASTRA_VERSION="v0.1.0"
+$env:SOFTADASTRA_SDK_VERSION="v0.1.0"
+irm https://softadastra.com/install.ps1 | iex
+```
+
+Use the same version for the CLI and SDK unless you know you need a different SDK version.
+
+## Custom install directory
+
+Linux and macOS:
+
+```sh
+SOFTADASTRA_HOME="$HOME/.softadastra" \
+SOFTADASTRA_BIN_DIR="$HOME/.local/bin" \
+SOFTADASTRA_SDK_DIR="$HOME/.softadastra/sdk" \
+curl -fsSL https://softadastra.com/install.sh | sh
+```
+
+Windows PowerShell:
+
+```powershell
+$env:SOFTADASTRA_HOME="$env:LOCALAPPDATA\Softadastra"
+$env:SOFTADASTRA_BIN_DIR="$env:LOCALAPPDATA\Softadastra\bin"
+$env:SOFTADASTRA_SDK_DIR="$env:LOCALAPPDATA\Softadastra\sdk"
+irm https://softadastra.com/install.ps1 | iex
+```
+
+## Use the C++ SDK in a project
+
+After installing the SDK, include the main header:
+
+```cpp
+#include <softadastra/sdk.hpp>
+```
+
+With CMake:
+
+```cmake
+find_package(sdk-cpp REQUIRED)
+
+target_link_libraries(my_app PRIVATE softadastra::sdk)
+```
+
+If CMake cannot find the SDK, pass the SDK install path:
+
+```sh
+cmake -S . -B build \
+  -DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
+```
+
+With Vix:
+
+```sh
+vix build -- -DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
+```
+
+On Windows PowerShell:
+
+```powershell
+vix build -- -DCMAKE_PREFIX_PATH="$env:LOCALAPPDATA\Softadastra\sdk"
+```
+
+## Verify the CLI
 
 Run:
 
 ```sh
-cd ~/softadastra/sdk-js
-npm run examples:local-store
+softadastra version
+softadastra status
 ```
 
-Expected behavior: The example should open a local client, write a value, read it back, and print it.
+Then try a local write:
+
+```sh
+softadastra store put app/name Softadastra
+softadastra store get app/name
+```
+
+If this works, the CLI is ready.
+
+## Verify the C++ SDK
+
+Create a small C++ project and make sure it can include:
+
+```cpp
+#include <softadastra/sdk.hpp>
+```
+
+Then configure with the SDK path:
+
+```sh
+vix build -- -DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
+```
+
+On Windows:
+
+```powershell
+vix build -- -DCMAKE_PREFIX_PATH="$env:LOCALAPPDATA\Softadastra\sdk"
+```
+
+If the project builds, the SDK is ready.
+
+## Security checks
+
+The installer downloads release archives from the official Softadastra GitHub releases.
+It verifies the SHA256 checksum before installing.
+If `minisign` is available on your machine, the installer also verifies the release signature.
+If checksum verification fails, installation stops.
 
 ## Common issues
 
-### `softadastra` command not found
+## `softadastra` command not found
 
-The CLI binary may not be in your PATH.
+Open a new terminal first.
+If it still does not work, check that the binary directory is in your PATH.
 
-Run it directly from the build output, or export it after build:
-
-```sh
-vix build --bin
-```
-
-Then run:
+Linux and macOS:
 
 ```sh
-./softadastra help
+echo "$PATH"
+ls "$HOME/.local/bin/softadastra"
 ```
 
-### C++ compiler errors
+Windows PowerShell:
 
-Make sure your compiler supports C++20.
+```powershell
+$env:Path
+Test-Path "$env:LOCALAPPDATA\Softadastra\bin\softadastra.exe"
+```
 
-Check your compiler version:
+## Latest version cannot be resolved
+
+Set the version explicitly.
+Linux and macOS:
 
 ```sh
-g++ --version
-clang++ --version
+SOFTADASTRA_VERSION=v0.1.0 curl -fsSL https://softadastra.com/install.sh | sh
 ```
 
-### CMake preset not found
+Windows PowerShell:
 
-Make sure you are in the correct repository:
+```powershell
+$env:SOFTADASTRA_VERSION="v0.1.0"
+irm https://softadastra.com/install.ps1 | iex
+```
+
+## CMake cannot find the SDK
+
+Pass the SDK path with `CMAKE_PREFIX_PATH`.
+Linux and macOS:
 
 ```sh
-pwd
-ls
+-DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
 ```
 
-You should see files like:
+Windows PowerShell:
+
+```powershell
+-DCMAKE_PREFIX_PATH="$env:LOCALAPPDATA\Softadastra\sdk"
+```
+
+## Unsupported platform
+
+The Linux and macOS installer supports:
 
 ```txt
-CMakeLists.txt
-CMakePresets.json
-vix.json
+linux-x86_64
+linux-aarch64
+macos-x86_64
+macos-aarch64
 ```
 
-### npm package not found locally
+The Windows installer supports:
 
-If you are inside the `sdk-js` repository, examples may import from local source:
-
-```js
-import { Client, ClientOptions } from "../src/index.js";
+```txt
+windows-x86_64
 ```
 
-If you are using the package from another project, import from npm:
-
-```js
-import { Client, ClientOptions } from "@softadastra/sdk";
-```
+Windows ARM64 is not supported yet.
 
 ## Next step
 
-Continue with the quick start:
-
-[Go to Quick Start](/quick-start)
+Continue with [Quick Start](./quick-start).

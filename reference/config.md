@@ -1,1152 +1,459 @@
 # Configuration Reference
 
-This page is the compact reference for Softadastra configuration.
+This page explains the public configuration model of Softadastra.
 
-Use it when you need to quickly check runtime option names, SDK field names, CLI-related settings, WAL paths, transport ports, discovery ports, metadata fields, or production configuration rules.
+Use it when you need to understand how Softadastra chooses:
 
-The core rule is:
+- the local node id
+- where the SDK is installed
+- where the CLI is installed
+- where the C++ SDK is installed
+- which version is installed
+- whether the installer installs the CLI, the SDK, or both
 
-```txt
-Configuration decides how the local runtime starts.
+For SDK runtime options, read the SDK-specific pages:
+
+- [C++ Client Options](/sdk-cpp/client-options)
+- [SDKs](/sdks)
+
+## Installation configuration
+
+The official installer supports a few environment variables.
+
+Most users do not need them.
+
+The default install is enough:
+
+```sh
+curl -fsSL https://softadastra.com/install.sh | sh
 ```
 
-Softadastra configuration should be explicit, readable, stable, and easy to inspect.
+On Windows:
 
-## What configuration controls
-
-Configuration can control:
-
-- node identity
-- local persistence
-- WAL path
-- auto flush behavior
-- local store mode
-- sync behavior
-- transport host and port
-- discovery host and port
-- discovery target
-- metadata fields
-- runtime version
-- CLI behavior
-- production paths
-
-The same model appears across the C++ SDK, JavaScript SDK, CLI, and engine.
-
-## Configuration layers
-
-Softadastra has several configuration surfaces:
-
-- SDK C++ `ClientOptions`
-- SDK JS `ClientOptions`
-- CLI runtime configuration
-- Engine module configuration
-- Production deployment configuration
-
-The SDKs expose the easiest public configuration surface.
-
-The engine exposes lower-level module configuration.
-
-The CLI uses configuration to decide which runtime behavior to expose.
-
-## Core configuration model
-
-The most important configuration groups are:
-
-```txt
-Identity
-  node id
-  display name
-  version
-
-Persistence
-  WAL enabled
-  WAL path
-  auto flush
-
-Transport
-  enabled
-  host
-  port
-
-Discovery
-  enabled
-  host
-  port
-  broadcast host
-  broadcast port
-
-Sync
-  retry policy
-  ACK behavior
-  batch behavior
-
-Metadata
-  node info
-  capabilities
-  runtime fields
+```powershell
+irm https://softadastra.com/install.ps1 | iex
 ```
 
-## Identity configuration
+By default, this installs:
 
-Identity tells Softadastra which local node is running.
+- Softadastra CLI
+- Softadastra C++ SDK
 
-### Node id
+## Install kind
 
-The node id identifies the local runtime.
+Use `SOFTADASTRA_INSTALL_KIND` when you only want part of Softadastra.
 
-C++:
+Supported values:
 
-```cpp
-ClientOptions options =
-    ClientOptions::local("node-a");
-```
+| Value | Meaning                  |
+| ----- | ------------------------ |
+| `all` | Install CLI and C++ SDK  |
+| `cli` | Install only the CLI     |
+| `sdk` | Install only the C++ SDK |
 
-JavaScript:
-
-```js
-const options = ClientOptions.local("node-a");
-```
-
-Good node ids:
+Default:
 
 ```txt
-node-a
-node-b
-node-local
-drive-client
-edge-store-kampala-01
-sync-agent-prod-01
+all
 ```
 
-A node id should be:
+Linux and macOS:
 
-- non-empty
-- stable
-- unique enough for the deployment
-- human-readable when possible
-- consistent across restarts when persistence or sync depends on it
-
-Avoid:
-
-- empty node id
-- random id every start
-- shared id for unrelated nodes
-
-### Display name
-
-The display name is a human-friendly node label.
-
-C++:
-
-```cpp
-options.display_name = "Node A";
+```sh
+SOFTADASTRA_INSTALL_KIND=cli \
+curl -fsSL https://softadastra.com/install.sh | sh
 ```
 
-JavaScript:
+Windows PowerShell:
 
-```js
-options.displayName = "Node A";
+```powershell
+$env:SOFTADASTRA_INSTALL_KIND="cli"
+irm https://softadastra.com/install.ps1 | iex
 ```
 
-Use it for:
+## Version
 
-- CLI output
-- dashboards
-- logs
-- peer inspection
-- debugging
+Use `SOFTADASTRA_VERSION` to install a specific CLI version.
 
-If no display name is configured, the node id can be used as the fallback label.
-
-### Version
-
-The version describes the runtime, SDK, node, or application version.
-
-C++:
-
-```cpp
-options.version = "0.1.0";
-```
-
-JavaScript:
-
-```js
-options.version = "0.1.0";
-```
-
-Use version for:
-
-- debugging
-- compatibility checks
-- release diagnostics
-- peer inspection
-- production support
-
-## Persistence configuration
-
-Persistence controls whether local operations can survive restart.
-
-The main persistence fields are:
-
-- enable WAL
-- WAL path
-- auto flush
-
-### WAL enabled
-
-C++:
-
-```cpp
-options.enable_wal = true;
-```
-
-JavaScript:
-
-```js
-options.enableWal = true;
-```
-
-When WAL is enabled:
+Default:
 
 ```txt
-local write
-  ↓
-WAL append
-  ↓
-store apply
-  ↓
-sync tracking
+latest
 ```
 
-When WAL is disabled, local state may be memory-only.
+Linux and macOS:
 
-Use WAL when accepted local operations must be recoverable after restart.
-
-### WAL path
-
-C++:
-
-```cpp
-options.wal_path = "data/node-a.wal";
+```sh
+SOFTADASTRA_VERSION=v0.1.0 \
+curl -fsSL https://softadastra.com/install.sh | sh
 ```
 
-JavaScript:
+Windows PowerShell:
 
-```js
-options.walPath = "data/node-a.wal";
+```powershell
+$env:SOFTADASTRA_VERSION="v0.1.0"
+irm https://softadastra.com/install.ps1 | iex
 ```
 
-Good WAL paths:
+## SDK version
+
+Use `SOFTADASTRA_SDK_VERSION` to install a specific C++ SDK version.
+
+If this value is not set, it uses the same version as `SOFTADASTRA_VERSION`.
+
+Linux and macOS:
+
+```sh
+SOFTADASTRA_VERSION=v0.1.0 \
+SOFTADASTRA_SDK_VERSION=v0.1.0 \
+curl -fsSL https://softadastra.com/install.sh | sh
+```
+
+Windows PowerShell:
+
+```powershell
+$env:SOFTADASTRA_VERSION="v0.1.0"
+$env:SOFTADASTRA_SDK_VERSION="v0.1.0"
+irm https://softadastra.com/install.ps1 | iex
+```
+
+Use the same version for the CLI and SDK unless you know you need a different SDK version.
+
+## Install root
+
+Use `SOFTADASTRA_HOME` to change the Softadastra install root.
+
+Linux and macOS default:
 
 ```txt
-data/node-a.wal
-data/node-b.wal
-data/sdk-persistent-store.wal
-/var/lib/softadastra/node-a/node.wal
+~/.softadastra
 ```
 
-A WAL path should be:
-
-- non-empty
-- inside an existing directory
-- writable by the runtime process
-- stable across restarts
-- unique per node
-- not manually edited
-
-Create the directory first:
-
-```bash
-mkdir -p data
-```
-
-Avoid:
-
-- empty path
-- same WAL path for multiple nodes
-- temporary path for important data
-- unwritable directory
-
-### Auto flush
-
-C++:
-
-```cpp
-options.auto_flush = true;
-```
-
-JavaScript:
-
-```js
-options.autoFlush = true;
-```
-
-Recommended for normal persistent examples:
+Windows default:
 
 ```txt
-auto flush = true
+%LOCALAPPDATA%\Softadastra
 ```
 
-Auto flush favors safer durability behavior.
+Linux and macOS:
 
-If auto flush is disabled, performance may improve, but durability can become weaker depending on implementation and operating system behavior.
-
-## C++ ClientOptions reference
-
-The C++ SDK uses `snake_case`.
-
-### C++ identity fields
-
-| Field | Purpose |
-|---|---|
-| `node_id` | Local node identifier |
-| `display_name` | Human-friendly node label |
-| `version` | Runtime or application version |
-
-Example:
-
-```cpp
-ClientOptions options =
-    ClientOptions::local("node-a");
-
-options.display_name = "Node A";
-options.version = "0.1.0";
+```sh
+SOFTADASTRA_HOME="$HOME/.softadastra" \
+curl -fsSL https://softadastra.com/install.sh | sh
 ```
 
-### C++ WAL fields
+Windows PowerShell:
 
-| Field | Purpose |
-|---|---|
-| `enable_wal` | Enable WAL-backed persistence |
-| `wal_path` | WAL file path |
-| `auto_flush` | Flush WAL writes automatically when configured |
-
-Example:
-
-```cpp
-options.enable_wal = true;
-options.wal_path = "data/node-a.wal";
-options.auto_flush = true;
+```powershell
+$env:SOFTADASTRA_HOME="$env:LOCALAPPDATA\Softadastra"
+irm https://softadastra.com/install.ps1 | iex
 ```
 
-### C++ transport fields
+## CLI binary directory
 
-| Field | Purpose |
-|---|---|
-| `enable_transport` | Enable transport configuration |
-| `transport_host` | Local transport bind host |
-| `transport_port` | Local transport bind port |
+Use `SOFTADASTRA_BIN_DIR` to change where the CLI binary is installed.
 
-Example:
-
-```cpp
-options.enable_transport = true;
-options.transport_host = "127.0.0.1";
-options.transport_port = 4041;
-```
-
-### C++ discovery fields
-
-| Field | Purpose |
-|---|---|
-| `enable_discovery` | Enable discovery configuration |
-| `discovery_host` | Local discovery bind host |
-| `discovery_port` | Local discovery bind port |
-| `discovery_broadcast_host` | Discovery target host |
-| `discovery_broadcast_port` | Discovery target port |
-
-Example:
-
-```cpp
-options.enable_discovery = true;
-options.discovery_host = "127.0.0.1";
-options.discovery_port = 5051;
-options.discovery_broadcast_host = "127.0.0.1";
-options.discovery_broadcast_port = 5052;
-```
-
-## JavaScript ClientOptions reference
-
-The JavaScript SDK uses `camelCase`.
-
-### JavaScript identity fields
-
-| Field | Purpose |
-|---|---|
-| `nodeId` | Local node identifier |
-| `displayName` | Human-friendly node label |
-| `version` | Runtime or application version |
-
-Example:
-
-```js
-const options = ClientOptions.local("node-a");
-
-options.displayName = "Node A";
-options.version = "0.1.0";
-```
-
-### JavaScript persistence fields
-
-| Field | Purpose |
-|---|---|
-| `enableWal` | Enable WAL-backed persistence |
-| `walPath` | WAL file path |
-| `autoFlush` | Flush WAL writes automatically when configured |
-
-Example:
-
-```js
-options.enableWal = true;
-options.walPath = "data/node-a.wal";
-options.autoFlush = true;
-```
-
-### JavaScript transport fields
-
-| Field | Purpose |
-|---|---|
-| `enableTransport` | Enable transport configuration |
-| `transportHost` | Local transport bind host |
-| `transportPort` | Local transport bind port |
-
-Example:
-
-```js
-options.enableTransport = true;
-options.transportHost = "127.0.0.1";
-options.transportPort = 4041;
-```
-
-### JavaScript discovery fields
-
-| Field | Purpose |
-|---|---|
-| `enableDiscovery` | Enable discovery configuration |
-| `discoveryHost` | Local discovery bind host |
-| `discoveryPort` | Local discovery bind port |
-| `discoveryBroadcastHost` | Discovery target host |
-| `discoveryBroadcastPort` | Discovery target port |
-
-Example:
-
-```js
-options.enableDiscovery = true;
-options.discoveryHost = "127.0.0.1";
-options.discoveryPort = 5051;
-options.discoveryBroadcastHost = "127.0.0.1";
-options.discoveryBroadcastPort = 5052;
-```
-
-## Factory helpers
-
-Factory helpers create common configurations.
-
-### Local configuration
-
-C++:
-
-```cpp
-ClientOptions options =
-    ClientOptions::local("node-local");
-```
-
-JavaScript:
-
-```js
-const options = ClientOptions.local("node-local");
-```
-
-Use local configuration as a flexible starting point.
-
-Then enable features manually.
-
-### Persistent configuration
-
-C++:
-
-```cpp
-ClientOptions options =
-    ClientOptions::persistent(
-        "node-persistent",
-        "data/node-persistent.wal");
-
-options.auto_flush = true;
-```
-
-JavaScript:
-
-```js
-const options = ClientOptions.persistent(
-  "node-persistent",
-  "data/node-persistent.wal",
-);
-
-options.autoFlush = true;
-```
-
-Use persistent configuration when local operations should survive restart.
-
-### Memory-only configuration
-
-If exposed:
-
-C++:
-
-```cpp
-ClientOptions options =
-    ClientOptions::memory_only("node-memory");
-```
-
-JavaScript:
-
-```js
-const options = ClientOptions.memoryOnly("node-memory");
-```
-
-Use memory-only configuration for:
-
-- tests
-- demos
-- temporary local state
-- short-lived tools
-- first examples
-
-Do not use memory-only mode when data must survive restart.
-
-## Common configuration recipes
-
-### Local-only
-
-No WAL, no transport, no discovery.
-
-C++:
-
-```cpp
-ClientOptions options =
-    ClientOptions::local("node-local");
-
-options.enable_wal = false;
-options.enable_transport = false;
-options.enable_discovery = false;
-```
-
-JavaScript:
-
-```js
-const options = ClientOptions.local("node-local");
-
-options.enableWal = false;
-options.enableTransport = false;
-options.enableDiscovery = false;
-```
-
-Use for:
-
-- first app
-- tests
-- temporary state
-- simple demos
-- local-only tools
-
-### Persistent local
-
-WAL enabled, no transport, no discovery.
-
-C++:
-
-```cpp
-ClientOptions options =
-    ClientOptions::persistent(
-        "node-persistent",
-        "data/node-persistent.wal");
-
-options.auto_flush = true;
-options.enable_transport = false;
-options.enable_discovery = false;
-```
-
-JavaScript:
-
-```js
-const options = ClientOptions.persistent(
-  "node-persistent",
-  "data/node-persistent.wal",
-);
-
-options.autoFlush = true;
-options.enableTransport = false;
-options.enableDiscovery = false;
-```
-
-Use when local data must survive restart.
-
-### Transport-enabled node
-
-Transport enabled, discovery disabled.
-
-C++:
-
-```cpp
-ClientOptions options =
-    ClientOptions::persistent(
-        "node-a",
-        "data/node-a.wal");
-
-options.auto_flush = true;
-
-options.enable_transport = true;
-options.transport_host = "127.0.0.1";
-options.transport_port = 4041;
-
-options.enable_discovery = false;
-```
-
-JavaScript:
-
-```js
-const options = ClientOptions.persistent(
-  "node-a",
-  "data/node-a.wal",
-);
-
-options.autoFlush = true;
-
-options.enableTransport = true;
-options.transportHost = "127.0.0.1";
-options.transportPort = 4041;
-
-options.enableDiscovery = false;
-```
-
-Use when peers are configured manually.
-
-### Discovery-enabled node
-
-Transport and discovery enabled.
-
-C++:
-
-```cpp
-ClientOptions options =
-    ClientOptions::persistent(
-        "node-discovery-a",
-        "data/node-discovery-a.wal");
-
-options.auto_flush = true;
-
-options.enable_transport = true;
-options.transport_host = "127.0.0.1";
-options.transport_port = 4051;
-
-options.enable_discovery = true;
-options.discovery_host = "127.0.0.1";
-options.discovery_port = 5051;
-options.discovery_broadcast_host = "127.0.0.1";
-options.discovery_broadcast_port = 5052;
-```
-
-JavaScript:
-
-```js
-const options = ClientOptions.persistent(
-  "node-discovery-a",
-  "data/node-discovery-a.wal",
-);
-
-options.autoFlush = true;
-
-options.enableTransport = true;
-options.transportHost = "127.0.0.1";
-options.transportPort = 4051;
-
-options.enableDiscovery = true;
-options.discoveryHost = "127.0.0.1";
-options.discoveryPort = 5051;
-options.discoveryBroadcastHost = "127.0.0.1";
-options.discoveryBroadcastPort = 5052;
-```
-
-Use when the node should find peers automatically.
-
-### Two-node local configuration
-
-Use separate node ids, WAL paths, and transport ports.
+Linux and macOS default:
 
 ```txt
-node-a
-  WAL       : data/node-a.wal
-  transport : 127.0.0.1:4041
-
-node-b
-  WAL       : data/node-b.wal
-  transport : 127.0.0.1:4042
+~/.local/bin
 ```
 
-C++ Node A:
-
-```cpp
-ClientOptions node_a =
-    ClientOptions::persistent(
-        "node-a",
-        "data/node-a.wal");
-
-node_a.auto_flush = true;
-node_a.enable_transport = true;
-node_a.transport_host = "127.0.0.1";
-node_a.transport_port = 4041;
-node_a.enable_discovery = false;
-```
-
-C++ Node B:
-
-```cpp
-ClientOptions node_b =
-    ClientOptions::persistent(
-        "node-b",
-        "data/node-b.wal");
-
-node_b.auto_flush = true;
-node_b.enable_transport = true;
-node_b.transport_host = "127.0.0.1";
-node_b.transport_port = 4042;
-node_b.enable_discovery = false;
-```
-
-JavaScript Node A:
-
-```js
-const nodeA = ClientOptions.persistent(
-  "node-a",
-  "data/node-a.wal",
-);
-
-nodeA.autoFlush = true;
-nodeA.enableTransport = true;
-nodeA.transportHost = "127.0.0.1";
-nodeA.transportPort = 4041;
-nodeA.enableDiscovery = false;
-```
-
-JavaScript Node B:
-
-```js
-const nodeB = ClientOptions.persistent(
-  "node-b",
-  "data/node-b.wal",
-);
-
-nodeB.autoFlush = true;
-nodeB.enableTransport = true;
-nodeB.transportHost = "127.0.0.1";
-nodeB.transportPort = 4042;
-nodeB.enableDiscovery = false;
-```
-
-## Transport configuration
-
-Transport is the peer delivery layer.
-
-It should be enabled only when the node needs to connect to peers or send sync messages.
-
-### Transport host
-
-For local development:
+Windows default:
 
 ```txt
-127.0.0.1
+%LOCALAPPDATA%\Softadastra\bin
 ```
 
-For a node that should listen on all interfaces:
+Linux and macOS:
+
+```sh
+SOFTADASTRA_BIN_DIR="$HOME/.local/bin" \
+curl -fsSL https://softadastra.com/install.sh | sh
+```
+
+Windows PowerShell:
+
+```powershell
+$env:SOFTADASTRA_BIN_DIR="$env:LOCALAPPDATA\Softadastra\bin"
+irm https://softadastra.com/install.ps1 | iex
+```
+
+After installation, the CLI should be available as:
+
+```sh
+softadastra
+```
+
+If it is not available immediately, open a new terminal.
+
+## C++ SDK directory
+
+Use `SOFTADASTRA_SDK_DIR` to change where the C++ SDK is installed.
+
+Linux and macOS default:
 
 ```txt
-0.0.0.0
+~/.softadastra/sdk
 ```
 
-Be careful with public bind addresses. Production exposure should be protected by firewall rules, authentication, and deployment policy when those layers exist.
-
-### Transport port
-
-Each local node needs a unique transport port.
-
-Good:
+Windows default:
 
 ```txt
-node-a -> 4041
-node-b -> 4042
+%LOCALAPPDATA%\Softadastra\sdk
 ```
 
-Bad:
+Linux and macOS:
+
+```sh
+SOFTADASTRA_SDK_DIR="$HOME/.softadastra/sdk" \
+curl -fsSL https://softadastra.com/install.sh | sh
+```
+
+Windows PowerShell:
+
+```powershell
+$env:SOFTADASTRA_SDK_DIR="$env:LOCALAPPDATA\Softadastra\sdk"
+irm https://softadastra.com/install.ps1 | iex
+```
+
+Use this path with CMake:
+
+```sh
+-DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
+```
+
+On Windows:
+
+```powershell
+-DCMAKE_PREFIX_PATH="$env:LOCALAPPDATA\Softadastra\sdk"
+```
+
+## Repository variables
+
+The installer downloads release archives from GitHub.
+
+The default repositories are:
+
+| Variable               | Default                   |
+| ---------------------- | ------------------------- |
+| `SOFTADASTRA_REPO`     | `softadastra/softadastra` |
+| `SOFTADASTRA_SDK_REPO` | `softadastra/sdk`         |
+
+Most users should not change these.
+
+They are useful for testing forks or release pipelines.
+
+Linux and macOS:
+
+```sh
+SOFTADASTRA_REPO="softadastra/softadastra" \
+SOFTADASTRA_SDK_REPO="softadastra/sdk" \
+curl -fsSL https://softadastra.com/install.sh | sh
+```
+
+Windows PowerShell:
+
+```powershell
+$env:SOFTADASTRA_REPO="softadastra/softadastra"
+$env:SOFTADASTRA_SDK_REPO="softadastra/sdk"
+irm https://softadastra.com/install.ps1 | iex
+```
+
+## Full Linux/macOS example
+
+Install CLI and SDK into custom paths:
+
+```sh
+SOFTADASTRA_VERSION=v0.1.0 \
+SOFTADASTRA_SDK_VERSION=v0.1.0 \
+SOFTADASTRA_INSTALL_KIND=all \
+SOFTADASTRA_HOME="$HOME/.softadastra" \
+SOFTADASTRA_BIN_DIR="$HOME/.local/bin" \
+SOFTADASTRA_SDK_DIR="$HOME/.softadastra/sdk" \
+curl -fsSL https://softadastra.com/install.sh | sh
+```
+
+## Full Windows example
+
+Install CLI and SDK into custom paths:
+
+```powershell
+$env:SOFTADASTRA_VERSION="v0.1.0"
+$env:SOFTADASTRA_SDK_VERSION="v0.1.0"
+$env:SOFTADASTRA_INSTALL_KIND="all"
+$env:SOFTADASTRA_HOME="$env:LOCALAPPDATA\Softadastra"
+$env:SOFTADASTRA_BIN_DIR="$env:LOCALAPPDATA\Softadastra\bin"
+$env:SOFTADASTRA_SDK_DIR="$env:LOCALAPPDATA\Softadastra\sdk"
+
+irm https://softadastra.com/install.ps1 | iex
+```
+
+## Verify configuration
+
+After installation, verify the CLI:
+
+```sh
+softadastra version
+softadastra status
+```
+
+Verify the C++ SDK path:
+
+Linux and macOS:
+
+```sh
+ls "$HOME/.softadastra/sdk"
+```
+
+Windows PowerShell:
+
+```powershell
+Test-Path "$env:LOCALAPPDATA\Softadastra\sdk"
+```
+
+## Use the SDK path with Vix
+
+Linux and macOS:
+
+```sh
+vix build -- -DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
+```
+
+Windows PowerShell:
+
+```powershell
+vix build -- -DCMAKE_PREFIX_PATH="$env:LOCALAPPDATA\Softadastra\sdk"
+```
+
+## Use the SDK path with CMake
+
+Linux and macOS:
+
+```sh
+cmake -S . -B build \
+  -DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
+```
+
+Windows PowerShell:
+
+```powershell
+cmake -S . -B build `
+  -DCMAKE_PREFIX_PATH="$env:LOCALAPPDATA\Softadastra\sdk"
+```
+
+## Supported install targets
+
+Linux and macOS installer:
 
 ```txt
-node-a -> 4041
-node-b -> 4041
+linux-x86_64
+linux-aarch64
+macos-x86_64
+macos-aarch64
 ```
 
-Check whether a port is already in use:
-
-```bash
-ss -ltnp | grep 4041
-```
-
-## Discovery configuration
-
-Discovery finds peers.
-
-Discovery is optional.
-
-It should be enabled only when the node should discover peers automatically.
-
-### Discovery bind host and port
-
-The bind host and port define where the local discovery listener runs.
-
-Example:
+Windows installer:
 
 ```txt
-127.0.0.1:5051
+windows-x86_64
 ```
 
-### Discovery broadcast host and port
+Windows ARM64 is not supported yet.
 
-The broadcast host and port define where discovery messages are sent.
+## Security checks
 
-Example:
+The installer verifies the downloaded release archive before installing it.
+
+Required check:
 
 ```txt
-127.0.0.1:5052
+SHA256 checksum
 ```
 
-For two local nodes:
+Optional check when `minisign` is installed:
 
 ```txt
-node-a discovery bind       : 127.0.0.1:5051
-node-a discovery target     : 127.0.0.1:5052
-
-node-b discovery bind       : 127.0.0.1:5052
-node-b discovery target     : 127.0.0.1:5051
+minisign signature
 ```
 
-Each node targets the other node's discovery listener.
+If checksum verification fails, installation stops.
 
-## Sync configuration
+## Common issues
 
-The SDK exposes sync through `sync_state` / `syncStateInfo` and `tick`.
+## `softadastra` command not found
 
-Lower-level engine configuration can include:
+Open a new terminal.
 
-- node id
-- auto queue behavior
-- ACK requirement
-- ACK timeout
-- retry interval
-- maximum retries
-- conflict policy
-- batch size
+If it still does not work, check the binary path.
 
-These fields may belong to engine-level configuration rather than the public SDK surface.
+Linux and macOS:
 
-The important reference model is:
-
-```txt
-sync config decides how propagation is tracked
-transport config decides how messages are delivered
-discovery config decides how peers are found
+```sh
+ls "$HOME/.local/bin/softadastra"
 ```
 
-## Metadata configuration
+Windows PowerShell:
 
-Metadata describes the local node.
-
-Common metadata inputs:
-
-- node id
-- display name
-- hostname
-- operating system
-- version
-- capabilities
-- uptime
-
-Configured by user:
-
-- node id
-- display name
-- version
-
-Detected by runtime:
-
-- hostname
-- operating system
-- uptime
-- capabilities
-
-C++:
-
-```cpp
-options.display_name = "Softadastra Node";
-options.version = "0.1.0";
+```powershell
+Test-Path "$env:LOCALAPPDATA\Softadastra\bin\softadastra.exe"
 ```
 
-JavaScript:
+## Latest version cannot be resolved
 
-```js
-options.displayName = "Softadastra Node";
-options.version = "0.1.0";
+Set the version explicitly.
+
+Linux and macOS:
+
+```sh
+SOFTADASTRA_VERSION=v0.1.0 \
+curl -fsSL https://softadastra.com/install.sh | sh
 ```
 
-Read metadata through:
+Windows PowerShell:
 
-C++:
-
-```cpp
-auto info = client.refresh_node_info();
+```powershell
+$env:SOFTADASTRA_VERSION="v0.1.0"
+irm https://softadastra.com/install.ps1 | iex
 ```
 
-JavaScript:
+## SDK cannot be found by CMake
 
-```js
-const info = await client.refreshNodeInfo();
+Pass `CMAKE_PREFIX_PATH`.
+
+Linux and macOS:
+
+```sh
+-DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
 ```
 
-CLI:
+Windows PowerShell:
 
-```bash
-softadastra node info
-```
-
-## CLI configuration
-
-The CLI can be configured through build options, runtime defaults, environment variables, or config files depending on the implementation.
-
-Common CLI-related configuration areas:
-
-- binary path
-- working directory
-- data directory
-- node id
-- WAL path
-- transport port
-- discovery port
-- log level
-- output format
-
-Stable CLI behavior should not depend on hidden configuration when production use is expected.
-
-Operators should be able to answer:
-
-- which node id is running?
-- where is the data directory?
-- which WAL file is used?
-- which transport port is used?
-- is discovery enabled?
-- which version is running?
-
-## Build configuration
-
-The engine repository can be built with Vix:
-
-```bash
-vix build
-```
-
-For release:
-
-```bash
-vix build --preset release
-```
-
-If apps are behind CMake options:
-
-```bash
-vix build -- \
-  -DSOFTADASTRA_BUILD_APPS=ON \
-  -DSOFTADASTRA_BUILD_CLI_APP=ON
-```
-
-If the node app is needed:
-
-```bash
-vix build -- \
-  -DSOFTADASTRA_BUILD_APPS=ON \
-  -DSOFTADASTRA_BUILD_CLI_APP=ON \
-  -DSOFTADASTRA_BUILD_NODE_APP=ON
-```
-
-CMake directly:
-
-```bash
-cmake --preset dev-ninja
-cmake --build --preset build-ninja
-```
-
-## Production configuration checklist
-
-Before production, verify:
-
-- node id is stable
-- WAL is enabled for important data
-- WAL path is unique per node
-- data directory exists
-- data directory is writable
-- auto flush is enabled when durability matters
-- transport host and port are explicit
-- discovery behavior is intentional
-- sync failure is observable
-- runtime version is known
-- logs can identify the node
-- backups include the data directory
-- restart recovery is tested
-
-## Environment variables
-
-If your application supports environment variables, keep names explicit.
-
-Possible shapes:
-
-```txt
-SOFTADASTRA_NODE_ID
-SOFTADASTRA_DATA_DIR
-SOFTADASTRA_WAL_PATH
-SOFTADASTRA_TRANSPORT_HOST
-SOFTADASTRA_TRANSPORT_PORT
-SOFTADASTRA_DISCOVERY_HOST
-SOFTADASTRA_DISCOVERY_PORT
-SOFTADASTRA_LOG_LEVEL
-```
-
-Only document environment variables as stable when they are implemented and supported.
-
-## Config files
-
-If a config file is supported later, a possible shape can be:
-
-```json
-{
-  "node": {
-    "id": "node-a",
-    "display_name": "Node A",
-    "version": "0.1.0"
-  },
-  "persistence": {
-    "enable_wal": true,
-    "wal_path": "data/node-a.wal",
-    "auto_flush": true
-  },
-  "transport": {
-    "enabled": true,
-    "host": "127.0.0.1",
-    "port": 4041
-  },
-  "discovery": {
-    "enabled": false,
-    "host": "127.0.0.1",
-    "port": 5051,
-    "broadcast_host": "127.0.0.1",
-    "broadcast_port": 5052
-  }
-}
-```
-
-Do not present a config file schema as stable until it is implemented and versioned.
-
-## Configuration errors
-
-Common configuration errors:
-
-- empty node id
-- empty WAL path
-- missing data directory
-- permission denied
-- port already in use
-- invalid port
-- discovery target wrong
-- same WAL path reused by multiple nodes
-- same transport port reused by multiple nodes
-- transport enabled but `start_transport` not called
-- discovery enabled but `start_discovery` not called
-
-Configuration errors should return explicit errors.
-
-They should not be hidden.
-
-## Local-first configuration rule
-
-Configuration should preserve local-first behavior.
-
-This should work without transport or discovery:
-
-C++:
-
-```cpp
-options.enable_transport = false;
-options.enable_discovery = false;
-
-client.put("draft/1", "hello");
-client.get("draft/1");
-```
-
-JavaScript:
-
-```js
-options.enableTransport = false;
-options.enableDiscovery = false;
-
-await client.put("draft/1", "hello");
-await client.get("draft/1");
-```
-
-A local store operation should not require:
-
-- remote server
-- connected peer
-- transport
-- discovery
-- cloud access
-
-## Stable versus experimental configuration
-
-Only document configuration as stable when it is implemented and intended to remain supported.
-
-Recommended rule:
-
-```txt
-stable SDK field       -> include here
-stable CLI option      -> include here
-stable environment var -> include here
-experimental setting   -> mention carefully or keep out
-internal-only setting  -> document in engine docs, not public reference
+```powershell
+-DCMAKE_PREFIX_PATH="$env:LOCALAPPDATA\Softadastra\sdk"
 ```
 
 ## Summary
 
-Softadastra configuration controls how the local runtime starts.
+Softadastra configuration is mainly controlled through installer environment variables.
 
-The main configuration groups are:
+Most users only need:
 
-- identity
-- persistence
-- transport
-- discovery
-- sync
-- metadata
-- CLI
-- production deployment
-
-The most important rule is:
-
-```txt
-make local-first behavior explicit
+```sh
+curl -fsSL https://softadastra.com/install.sh | sh
 ```
 
-A good configuration makes it clear which node is running, where local data is persisted, how sync is tracked, and how peers are reached.
+or on Windows:
+
+```powershell
+irm https://softadastra.com/install.ps1 | iex
+```
+
+Use custom variables only when you need a specific version, a custom install directory, or CLI-only / SDK-only installation.
 
 ## Related pages
 
-- [CLI Reference](/reference/cli)
-- [C++ API Reference](/reference/cpp-api)
-- [JavaScript API Reference](/reference/js-api)
-- [Errors Reference](/reference/errors)
-- [Production Guide](/guides/production)
-- [Client Options C++](/sdk-cpp/client-options)
-- [Client Options JS](/sdk-js/client-options)
+- [Installation](/installation)
+- [Quick Start](/quick-start)
+- [SDKs](/sdks)
+- [CLI Reference](/cli/reference)

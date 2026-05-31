@@ -2,91 +2,79 @@
 
 The reference section gives compact technical information for Softadastra.
 
-Use this section when you already understand the concepts and want to quickly check command shapes, API names, configuration fields, or error behavior.
+Use it when you already understand the basics and want to quickly check commands, API names, configuration variables, or error behavior.
 
-The core rule is:
+The rule is simple:
 
 ```txt
-Reference pages are for quick lookup.
-Guides are for learning workflows.
+Guides teach workflows.
+Reference pages give exact names.
 ```
-
-## What the reference is for
-
-The reference section answers practical lookup questions:
-
-- What is the CLI command shape?
-- What methods exist in the C++ SDK?
-- What methods exist in the JavaScript SDK?
-- Which configuration fields matter?
-- How should errors be handled?
-- Which output or result shape should I expect?
-
-It is intentionally more compact than the concepts, SDK, engine, and guides sections.
 
 ## Reference pages
 
-The reference section contains:
+Start here:
 
-- CLI reference
-- C++ API reference
-- JavaScript API reference
-- Configuration reference
-- Error reference
-
-## Recommended order
-
-Read the reference pages in this order:
-
-1. [CLI Reference](./cli.md)
-2. [C++ API Reference](./cpp-api.md)
-3. [JavaScript API Reference](./js-api.md)
-4. [Configuration Reference](./config.md)
-5. [Errors Reference](./errors.md)
+1. [CLI Reference](./cli)
+2. [C++ API Reference](./cpp-api)
+3. [Configuration Reference](./config)
+4. [Errors Reference](./errors)
 
 ## CLI Reference
 
-Use the CLI reference when you need the exact command shape.
+Use the CLI reference when you need the exact terminal command.
 
-It covers commands like:
+It covers the current Softadastra CLI surface:
 
-```bash
-softadastra help
-softadastra version
+```sh
 softadastra status
 
+softadastra node
 softadastra node info
 softadastra node start
 
-softadastra store put app/name Softadastra
-softadastra store get app/name
-softadastra store remove app/name
+softadastra store
+softadastra store put <key> <value>
+softadastra store get <key>
 
+softadastra sync
 softadastra sync status
 softadastra sync tick
-softadastra sync tick --prune
 
 softadastra peers
 ```
 
-The CLI reference is useful for terminal usage, scripts, local debugging, demos, and operational checks.
+It also covers interactive mode:
 
-Read: [CLI Reference](./cli.md)
+```txt
+softadastra
+softadastra> status
+softadastra> node info
+softadastra> store put app/name Softadastra
+softadastra> store get app/name
+softadastra> sync status
+softadastra> sync tick
+softadastra> peers
+softadastra> exit
+```
+
+Read: [CLI Reference](./cli)
 
 ## C++ API Reference
 
 Use the C++ API reference when you need the public C++ SDK surface.
 
-It covers types and methods such as:
+It covers public types such as:
 
 - `Client`
 - `ClientOptions`
+- `Result`
+- `Error`
+- `Key`
 - `Value`
 - `Peer`
 - `NodeInfo`
-- `Result`
-- `Error`
-- `SyncResult`
+- `SyncState`
 - `TickResult`
 
 Common C++ SDK calls:
@@ -97,9 +85,7 @@ client.close();
 
 client.put("key", "value");
 client.get("key");
-client.remove("key");
 
-client.contains("key");
 client.size();
 client.empty();
 
@@ -107,306 +93,152 @@ client.sync_state();
 client.tick();
 
 client.start_transport();
+client.stop_transport();
+client.transport_running();
 client.connect(peer);
 
 client.start_discovery();
+client.stop_discovery();
+client.discovery_running();
 client.peers();
 
+client.node_info();
 client.refresh_node_info();
 ```
 
-The C++ API reference is for quick lookup. For step-by-step usage, read the SDK C++ section first.
-
-Read: [C++ API Reference](./cpp-api.md)
-
-## JavaScript API Reference
-
-Use the JavaScript API reference when you need the public JavaScript SDK surface.
-
-It covers types and methods such as:
-
-- `Client`
-- `ClientOptions`
-- `Value`
-- `Peer`
-- `NodeInfo`
-- `Result`
-- `SoftadastraError`
-- `SyncResult`
-- `TickResult`
-
-Common JavaScript SDK calls:
-
-```js
-await client.open();
-await client.close();
-
-await client.put("key", "value");
-await client.get("key");
-await client.remove("key");
-
-client.contains("key");
-client.size();
-client.empty();
-
-await client.syncStateInfo();
-await client.tick();
-
-await client.startTransport();
-await client.connect(peer);
-
-await client.startDiscovery();
-await client.peers();
-
-await client.refreshNodeInfo();
-```
-
-The JavaScript API reference uses `camelCase` names because that is the public JavaScript style.
-
-Read: [JavaScript API Reference](./js-api.md)
+Read: [C++ API Reference](./cpp-api)
 
 ## Configuration Reference
 
-Use the configuration reference when you need to check runtime options.
+Use the configuration reference when you need installer and SDK path configuration.
 
-It covers common fields such as:
+It covers variables such as:
 
-- node id
-- display name
-- version
-- WAL enabled
-- WAL path
-- auto flush
-- transport enabled
-- transport host
-- transport port
-- discovery enabled
-- discovery host
-- discovery port
-- discovery broadcast host
-- discovery broadcast port
-- sync retry behavior
-- ACK timeout
+- `SOFTADASTRA_VERSION`
+- `SOFTADASTRA_SDK_VERSION`
+- `SOFTADASTRA_INSTALL_KIND`
+- `SOFTADASTRA_HOME`
+- `SOFTADASTRA_BIN_DIR`
+- `SOFTADASTRA_SDK_DIR`
+- `SOFTADASTRA_REPO`
+- `SOFTADASTRA_SDK_REPO`
 
-Configuration controls how the local runtime starts.
+It also explains the default install locations for the CLI and C++ SDK.
 
-The most important production rule is:
-
-```txt
-make configuration explicit
-```
-
-Read: [Configuration Reference](./config.md)
+Read: [Configuration Reference](./config)
 
 ## Errors Reference
 
 Use the errors reference when you need to understand result handling and failure behavior.
 
-Softadastra APIs should make failures explicit.
+The most important SDK rule is:
 
-C++:
+```txt
+check the result before using the value
+```
+
+C++ example:
 
 ```cpp
-auto result = client.get("app/name");
+const auto value =
+    client.get("app/name");
 
-if (result.is_err())
+if (value.is_err())
 {
-    std::cerr << result.error().message() << "\n";
+    std::cerr << value.error().code_string()
+              << ": "
+              << value.error().message()
+              << "\n";
+
     return 1;
 }
 
-std::cout << result.value().to_string() << "\n";
+std::cout << value.value().to_string()
+          << "\n";
 ```
 
-JavaScript:
+The errors reference also explains common CLI errors, store errors, sync errors, transport errors, discovery errors, and metadata errors.
 
-```js
-const result = await client.get("app/name");
-
-if (result.isErr()) {
-  console.error(result.error().message);
-  process.exit(1);
-}
-
-console.log(result.value().toString());
-```
-
-The main rule is:
-
-```txt
-Check the result before using the value.
-```
-
-Read: [Errors Reference](./errors.md)
-
-## Reference versus concepts
-
-Concepts explain why Softadastra exists.
-
-Reference pages give quick lookup information.
-
-Example:
-
-```txt
-concepts/wal.md       -> explains why WAL matters
-reference/config.md   -> lists WAL-related configuration fields
-reference/errors.md   -> explains what happens when WAL fails
-```
-
-Use concepts when you need understanding.
-
-Use reference when you need exact names.
+Read: [Errors Reference](./errors)
 
 ## Reference versus guides
 
-Guides show complete workflows.
+Use guides when you want a complete workflow.
 
-Reference pages show compact details.
+Use reference pages when you only need the exact command, type, method, or variable.
 
 Example:
 
 ```txt
-guides/persist-data-locally.md -> step-by-step persistence workflow
-reference/config.md            -> WAL path and auto flush fields
-reference/errors.md            -> persistence error behavior
+Quick Start          -> shows the first working flow
+CLI Reference        -> lists the exact CLI commands
+C++ API Reference    -> lists the public C++ SDK methods
+Configuration        -> lists installer variables and paths
+Errors               -> explains failure handling
 ```
-
-Use guides when building something.
-
-Use reference when checking details.
 
 ## Reference versus SDK pages
 
-SDK pages explain each API area with examples.
+SDK pages explain how to use each SDK area.
 
-Reference pages summarize the public API surface.
+Reference pages summarize the public surface.
 
 Example:
 
 ```txt
-sdk-cpp/client.md       -> explains Client in detail
-reference/cpp-api.md    -> compact Client method list
+sdk-cpp/client.md        -> explains Client
+reference/cpp-api.md     -> lists Client methods
 
-sdk-js/client.md        -> explains Client in detail
-reference/js-api.md     -> compact Client method list
+sdk-cpp/client-options.md -> explains options
+reference/config.md       -> lists installer and path configuration
 ```
 
 Use SDK pages to learn.
 
-Use reference pages to verify.
-
-## Reference versus engine pages
-
-Engine pages explain internal modules.
-
-Reference pages focus on stable user-facing surfaces.
-
-Example:
-
-```txt
-engine/sync.md          -> explains SyncEngine internals
-reference/cpp-api.md    -> lists client.sync_state() and client.tick()
-reference/js-api.md     -> lists client.syncStateInfo() and client.tick()
-reference/cli.md        -> lists softadastra sync status and sync tick
-```
-
-The reference should not expose unstable internal details as stable user-facing behavior.
+Use reference pages to verify names quickly.
 
 ## Stability rule
 
-Only document behavior as stable when it is implemented and intended to remain stable.
+Only stable behavior should appear in reference pages.
 
-For example:
+The reference should not present future commands, experimental options, or internal engine details as public behavior.
 
-```txt
-stable command       -> include in reference
-experimental command -> mention carefully or keep out
-unstable JSON shape  -> do not present as final API
-internal class       -> keep in engine docs, not public reference
-```
-
-The reference should be accurate and conservative.
-
-## Naming differences
-
-Softadastra uses different naming styles depending on the interface.
-
-C++ SDK:
+Good rule:
 
 ```txt
-snake_case fields and methods
+implemented and stable       -> reference page
+experimental or future work   -> roadmap or repo notes
+internal implementation       -> engine or repository docs
 ```
-
-Examples:
-
-```cpp
-options.enable_wal = true;
-options.wal_path = "data/node-a.wal";
-client.sync_state();
-client.start_transport();
-client.refresh_node_info();
-```
-
-JavaScript SDK:
-
-```txt
-camelCase fields and methods
-```
-
-Examples:
-
-```js
-options.enableWal = true;
-options.walPath = "data/node-a.wal";
-await client.syncStateInfo();
-await client.startTransport();
-await client.refreshNodeInfo();
-```
-
-CLI:
-
-```txt
-space-separated commands
-```
-
-Examples:
-
-```bash
-softadastra sync status
-softadastra sync tick
-softadastra node info
-```
-
-The model is the same. Only the interface style changes.
 
 ## Core model reminder
 
-All reference pages still follow the same Softadastra model:
+The reference section still follows the Softadastra model:
 
 ```txt
 write locally
-persist locally
-track operation
-sync when possible
-retry when needed
-converge later
+read locally
+persist when needed
+track sync work
+move sync explicitly
+connect with peers when available
 ```
 
-When checking any API or command, keep the separation clear:
+Keep this separation clear:
 
 ```txt
-store      -> current local state
-WAL        -> durable operation history
+store      -> current local data
+WAL        -> durable local history
 sync       -> propagation tracking
-transport  -> peer delivery
+transport  -> peer communication
 discovery  -> peer finding
-metadata   -> node identity
+metadata   -> node information
 CLI        -> terminal interface
 SDK        -> application API
 ```
 
 ## What to read next
 
-Start with the CLI reference:
+Start with:
 
-[CLI Reference](./cli.md)
+[CLI Reference](./cli)

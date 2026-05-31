@@ -1,62 +1,53 @@
 # Interactive Mode
 
-Interactive mode lets you run multiple Softadastra CLI commands inside one session.
-
-Instead of typing:
-
-```sh
-softadastra status
-softadastra node info
-softadastra store put app/name Softadastra
-softadastra store get app/name
-softadastra sync tick
-```
-
-You can start one interactive session:
+Interactive mode lets you run several Softadastra CLI commands inside one session.
+Instead of typing `softadastra` before every command, you start the CLI once:
 
 ```sh
 softadastra
 ```
 
-Then run commands directly:
+Then you run commands directly:
 
 ```txt
 softadastra> status
 softadastra> node info
 softadastra> store put app/name Softadastra
 softadastra> store get app/name
+softadastra> sync status
 softadastra> sync tick
+softadastra> peers
 softadastra> exit
 ```
 
-## Why interactive mode exists
-
-Interactive mode is useful when you want to inspect or test a local Softadastra runtime without restarting the CLI process for every command.
-
-It is especially useful for local demos, debugging, manual testing, store experiments, sync inspection, peer inspection, and learning the command model.
-
-The goal is simple: start the CLI once, run many commands.
+This is useful when you are testing the local runtime, checking sync state, starting node services, or trying store commands step by step.
 
 ## Start interactive mode
 
-Run the CLI without a command:
+Run:
 
 ```sh
 softadastra
 ```
 
-Expected prompt style:
+You should see the interactive prompt:
 
 ```txt
 softadastra>
 ```
 
-Then enter commands:
+From there, type commands without repeating the binary name.
+
+Correct:
 
 ```txt
-softadastra> help
 softadastra> status
-softadastra> node info
+```
+
+Wrong:
+
+```txt
+softadastra> softadastra status
 ```
 
 ## Exit interactive mode
@@ -79,11 +70,9 @@ Example:
 softadastra> exit
 ```
 
-The session should stop cleanly.
-
 ## Basic session
 
-A basic interactive session can look like this:
+Start with a small session like this:
 
 ```txt
 softadastra> help
@@ -92,31 +81,36 @@ softadastra> status
 softadastra> exit
 ```
 
-This is the simplest way to verify that the CLI is working.
+This checks that the CLI starts correctly and that the runtime can be inspected.
 
 ## Store session
 
-Use interactive mode to test the local store.
+Use interactive mode to write and read local values.
 
 ```txt
 softadastra> store put app/name Softadastra
 softadastra> store get app/name
-softadastra> store remove app/name
-softadastra> store get app/name
 ```
 
-Expected behavior:
+Expected idea:
 
-- `store put` writes the local value
-- `store get` reads the local value
-- `store remove` removes the local value
-- `store get` after remove reports that the key was not found
+```txt
+store put writes the value locally
+store get reads the value back from the local store
+```
 
-The store remains local-first. It should not require a connected peer.
+A store write does not need a remote server, a peer, transport, or discovery.
+
+If the value contains spaces, quote it:
+
+```txt
+softadastra> store put app/title "Softadastra Runtime"
+softadastra> store get app/title
+```
 
 ## Sync session
 
-Use interactive mode to inspect synchronization.
+Use sync commands to inspect and move the sync pipeline.
 
 ```txt
 softadastra> store put message/1 hello
@@ -125,246 +119,278 @@ softadastra> sync tick
 softadastra> sync status
 ```
 
-The flow is:
+This flow shows what happens after a local write:
 
 ```txt
-local write
-  ↓
-sync state changes
-  ↓
-tick moves sync forward
-  ↓
-status shows the result
+write local value
+inspect sync state
+run one sync tick
+inspect sync state again
 ```
 
-A sync tick can retry expired work, produce the next batch, and prune completed work.
+A tick can produce a batch and try to send it to connected peers. If no peer is connected, that is fine. Local data still stays local.
 
 ## Node session
 
-Use node commands to inspect the local node.
+Use node commands to inspect or start local node services.
 
 ```txt
 softadastra> node info
 ```
 
-This should show metadata such as node id, display name, hostname, operating system, version, uptime, and capabilities.
-
-Example output style:
+If metadata is not available yet, start node services for this interactive session:
 
 ```txt
-Node
-
-  id           : node-a
-  display name : Local Node
-  hostname     : softadastra-dev
-  os           : linux
-  version      : 0.1.0
-  uptime ms    : 18420
-  capabilities : core, store, sync, metadata
+softadastra> node start
+softadastra> node info
 ```
+
+`node start` starts transport, discovery, and metadata for the current CLI session.
+
+This is one of the main reasons interactive mode is useful: services stay available while you run the next commands.
 
 ## Peers session
 
-Use peers to inspect known peers.
+Use `peers` to inspect known discovery and transport peers.
 
 ```txt
+softadastra> node start
 softadastra> peers
 ```
 
-If no peers are known yet:
+If no peers are found, that is not automatically an error.
+
+It can simply mean no other node is running or discoverable yet.
+
+You can still use local store commands:
 
 ```txt
-Peers
-
-  no peers found
+softadastra> store put draft/1 hello
+softadastra> store get draft/1
 ```
-
-That is not necessarily an error. A local Softadastra node can still write and read local data without discovered peers.
 
 ## Help inside interactive mode
 
 Use:
 
 ```txt
-help
+softadastra> help
 ```
 
-To inspect a command group:
+To inspect a command group, use the group name:
 
 ```txt
-help store
-help sync
-help node
+softadastra> node
+softadastra> store
+softadastra> sync
 ```
 
-The help output should show available subcommands and expected arguments.
-
-Example:
+For example:
 
 ```txt
-softadastra> help store
+softadastra> store
 ```
 
-Expected output style:
+prints:
 
 ```txt
-Store commands
+Softadastra store
 
-  store put <key> <value>     Write a local value
-  store get <key>             Read a local value
-  store remove <key>          Remove a local value
+Usage
+  softadastra store put <key> <value>
+  softadastra store get <key>
+
+Commands
+  put      Write a key/value pair
+  get      Read one key
 ```
 
-## Commands are the same
-
-Interactive mode should use the same command model as normal CLI mode.
-
-Normal mode:
-
-```sh
-softadastra store put app/name Softadastra
-```
-
-Interactive mode:
+Inside interactive mode, you still type:
 
 ```txt
 softadastra> store put app/name Softadastra
+softadastra> store get app/name
 ```
 
-The only difference is that you do not repeat `softadastra`.
+## Recommended first interactive workflow
 
-## Recommended interactive workflow
-
-For a first test, run:
+Use this as your first full test:
 
 ```txt
 softadastra> status
+softadastra> node info
+softadastra> node start
 softadastra> node info
 softadastra> store put app/name Softadastra
 softadastra> store get app/name
 softadastra> sync status
 softadastra> sync tick
 softadastra> peers
+softadastra> status
 softadastra> exit
 ```
 
-This tests runtime status, node metadata, local store, sync state, manual sync tick, and peer visibility.
+This checks:
+
+1. runtime status
+2. node information
+3. node services startup
+4. local write
+5. local read
+6. sync state
+7. one manual sync cycle
+8. peer visibility
+9. final runtime status
 
 ## Local-first behavior
 
 Interactive mode follows the same local-first model as the rest of Softadastra.
 
-A command like this:
+This command should work locally:
 
 ```txt
 softadastra> store put draft/1 hello
 ```
 
-should not depend on a remote server, a connected peer, discovery, transport, or cloud availability.
+And this should read the local value back:
 
-The write is local work. Sync can happen later.
+```txt
+softadastra> store get draft/1
+```
 
-## Error behavior
+The network is not required for local work.
 
-Interactive errors should be clear and should not crash the session when possible.
+Sync and peers matter when the node needs to exchange data with another node.
+
+## Errors inside interactive mode
+
+Interactive mode should show the error and keep the session alive.
 
 Example:
 
 ```txt
 softadastra> store get missing/key
-error: key not found
-key: missing/key
+Key not found: missing/key
 
 softadastra> status
 ```
 
-The session should continue after the error.
+The failed command should not close the session.
 
-### Invalid command
+## Common errors
 
-If the user enters an unknown command:
+### Unknown command
+
+If you type a command that does not exist:
 
 ```txt
 softadastra> unknown
 ```
 
-The CLI should explain the problem:
+The CLI should report that the command is unknown.
+
+Run:
 
 ```txt
-error: unknown command: unknown
-hint: run `help` to list available commands
+softadastra> help
 ```
 
-### Invalid arguments
+to see available commands.
 
-If the user enters an incomplete command:
+### Missing store value
+
+If you run:
 
 ```txt
 softadastra> store put app/name
 ```
 
-The CLI should show what is missing:
+The CLI reports:
 
 ```txt
-error: missing value
-usage: store put <key> <value>
+Missing key or value argument.
+Usage: store-put <key> <value>
 ```
 
-### Empty input
-
-If the user presses Enter on an empty line, the CLI should do nothing and show the prompt again.
+Fix it by passing both key and value:
 
 ```txt
-softadastra>
-softadastra>
+softadastra> store put app/name Softadastra
 ```
 
-This keeps the session smooth.
+### Missing store key
 
-## Comments and whitespace
-
-If supported, interactive mode can ignore extra whitespace:
+If you run:
 
 ```txt
-softadastra>    status
-softadastra> store   get   app/name
+softadastra> store get
 ```
 
-The command parser should normalize input before execution.
-
-## Quoted values
-
-Interactive mode should support quoted values when a value contains spaces.
+The CLI reports:
 
 ```txt
-softadastra> store put app/title "Softadastra Runtime"
+Missing key argument.
+Usage: store-get <key>
 ```
 
-The value should be parsed as:
+Fix it by passing a key:
 
 ```txt
-Softadastra Runtime
+softadastra> store get app/name
 ```
 
-This relies on the CLI parser and tokenizer.
+### Empty key
 
-## Parser behavior
-
-The internal CLI framework can tokenize and parse commands like:
+If you pass an empty key:
 
 ```txt
-deploy app --host=localhost --port 8080 --verbose --ratio=0.75
+softadastra> store put "" value
 ```
 
-This allows interactive commands to support positional arguments, boolean flags, string options, integer options, floating-point options, and quoted strings.
+The CLI reports:
 
-The product CLI can use this parser to keep command behavior consistent.
+```txt
+Key cannot be empty.
+```
 
-## Scriptability
+Use a real key:
 
-Interactive mode is for humans.
+```txt
+softadastra> store put app/name value
+```
 
-For scripts, prefer normal one-command mode:
+### No peers found
+
+This is normal when no other node is running.
+
+Check:
+
+```txt
+softadastra> node start
+softadastra> peers
+```
+
+If there are still no peers, local store commands can still work.
+
+### Sync tick sends nothing
+
+A tick can produce no delivery when there are no connected peers.
+
+Check:
+
+```txt
+softadastra> sync status
+softadastra> peers
+softadastra> status
+```
+
+Local data is still valid even if delivery did not happen yet.
+
+## Use normal mode for scripts
+
+Interactive mode is made for humans.
+
+For scripts, use one command at a time:
 
 ```sh
 softadastra status
@@ -372,122 +398,19 @@ softadastra store get app/name
 softadastra sync tick
 ```
 
-Normal command mode is easier to automate because each command has a clear process exit code.
-
-## Exit codes
-
-In interactive mode, individual commands should report errors visibly.
-
-The final process exit code should usually indicate whether the interactive session itself ended cleanly.
-
-For scripts, use non-interactive commands when exit codes matter.
-
-## Output style
-
-Interactive output should stay readable.
-
-Good output:
-
-```txt
-Value
-
-  key   : app/name
-  value : Softadastra
-```
-
-Good status output:
-
-```txt
-Sync status
-
-  outbox       : 1
-  queued       : 1
-  in flight    : 0
-  acknowledged : 0
-  failed       : 0
-```
-
-Avoid noisy internal output unless debug mode is enabled.
-
-## Debugging with interactive mode
-
-Interactive mode is a good way to debug a local workflow:
-
-```txt
-softadastra> status
-softadastra> store put message/1 hello
-softadastra> sync status
-softadastra> sync tick
-softadastra> sync status
-```
-
-If sync does not move forward, inspect outbox size, queued count, failed count, transport state, and peer list.
-
-Then check peers:
-
-```txt
-softadastra> peers
-```
-
-And node metadata:
-
-```txt
-softadastra> node info
-```
-
-## Common mistakes
-
-### Running full commands inside interactive mode
-
-Inside interactive mode, do not repeat the binary name.
-
-Wrong:
-
-```txt
-softadastra> softadastra status
-```
-
-Correct:
-
-```txt
-softadastra> status
-```
-
-### Expecting peers immediately
-
-If no peer appears, it may be normal. Discovery may be disabled, no peer may be running, or the local network may not have another node. Local store commands should still work.
-
-### Expecting sync to mean network delivery
-
-`sync tick` moves the sync pipeline. Transport and peer connection are separate concerns. A tick can produce work even when no peer is connected.
-
-### Using interactive mode for automation
-
-For scripts, use one command per process.
-
-```sh
-softadastra sync tick
-```
-
-This makes exit codes and logs easier to manage.
+This is better for automation because each command has its own process result and output.
 
 ## Summary
 
-Interactive mode lets you run multiple Softadastra commands in one CLI session.
+Interactive mode lets you keep one Softadastra CLI session open while you run multiple commands.
 
-It is useful for local testing, demos, debugging, inspecting runtime state, trying store and sync commands, and learning the command model.
+Use it for local testing, demos, store experiments, sync checks, node startup, and peer inspection.
 
-The mental model is:
+The rule is simple:
 
 ```txt
-start session
-run commands
-inspect output
-exit cleanly
+outside interactive mode: softadastra status
+inside interactive mode:  status
 ```
 
-## Next step
-
-Continue with node commands:
-
-[Go to Node Commands](/cli/node)
+Next, continue with [Node](./node).

@@ -3,37 +3,37 @@ const cards = [
   {
     icon: "cpp",
     title: "C++ SDK",
-    desc: "Build native local-first applications with durable WAL, persistent store, and sync primitives.",
+    desc: "Add Softadastra to native C++ applications with a simple developer API.",
     href: "/sdk-cpp/",
   },
   {
     icon: "js",
     title: "JavaScript SDK",
-    desc: "Use the same Softadastra model from Node.js or browser apps with a friendly async API.",
+    desc: "Use Softadastra from JavaScript and TypeScript applications.",
     href: "/sdk-js/",
   },
   {
     icon: "terminal",
     title: "CLI",
-    desc: "Inspect nodes, read and write local data, trigger sync, and debug runtime state from the terminal.",
+    desc: "Install, inspect, and control Softadastra from the terminal.",
     href: "/cli/",
   },
   {
     icon: "engine",
     title: "Engine internals",
-    desc: "Understand WAL, store, sync, transport, discovery, metadata, and the full runtime flow.",
+    desc: "Understand how Softadastra works under the hood.",
     href: "/engine/",
   },
   {
     icon: "guide",
     title: "Guides",
-    desc: "Build offline-first apps, persist data locally, run local nodes, and sync between peers.",
+    desc: "Follow practical steps to install, use, and build with Softadastra.",
     href: "/guides/",
   },
   {
     icon: "reference",
     title: "Reference",
-    desc: "Compact technical reference for the CLI, C++ API, JavaScript API, config, and errors.",
+    desc: "Find command details, API pages, configuration, and errors.",
     href: "/reference/",
   },
 ];
@@ -73,19 +73,17 @@ const engineLayers = [
         <h1>Softadastra Documentation</h1>
 
         <p>
-          Softadastra is a local-first and offline-first foundation for
-          applications that must keep working when the network becomes slow,
-          unstable, or unavailable.
+          Softadastra helps applications keep working in places where internet
+          access is slow, unstable, expensive, or sometimes unavailable.
         </p>
 
         <p>
-          Write locally, persist every operation to a WAL, then sync when the
-          network allows it. The system is designed to protect correctness
-          before convenience.
+          It gives teams a way to save work locally, continue operating, and
+          update everything when the connection comes back.
         </p>
 
         <div class="sd-hero__actions">
-          <a class="sd-button sd-button--primary" href="/quick-start">
+          <a class="sd-button sd-button--primary" href="/welcome">
             Get started
             <span aria-hidden="true">→</span>
           </a>
@@ -96,58 +94,58 @@ const engineLayers = [
         </div>
       </div>
 
-     <div class="sd-hero__system" aria-label="Softadastra engine layers">
-  <a
-    v-for="(layer, index) in engineLayers"
-    :key="layer.name"
-    :href="layer.href"
-    class="sd-system-row"
-  >
-    <span
-      class="sd-system-plate"
-      :class="`sd-system-plate--${index + 1}`"
-      aria-hidden="true"
-    ></span>
+      <div class="sd-hero__system" aria-label="Softadastra engine layers">
+        <a
+          v-for="(layer, index) in engineLayers"
+          :key="layer.name"
+          :href="layer.href"
+          class="sd-system-row"
+        >
+          <span
+            class="sd-system-plate"
+            :class="`sd-system-plate--${index + 1}`"
+            aria-hidden="true"
+          ></span>
 
-    <span class="sd-system-copy">
-      <span class="sd-layer__icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none">
-          <template v-if="layer.icon === 'wal'">
-            <path d="M12 3 20 7.5 12 12 4 7.5 12 3Z" />
-            <path d="M20 12 12 16.5 4 12" />
-            <path d="M20 16.5 12 21 4 16.5" />
-          </template>
+          <span class="sd-system-copy">
+            <span class="sd-layer__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <template v-if="layer.icon === 'wal'">
+                  <path d="M12 3 20 7.5 12 12 4 7.5 12 3Z" />
+                  <path d="M20 12 12 16.5 4 12" />
+                  <path d="M20 16.5 12 21 4 16.5" />
+                </template>
 
-          <template v-else-if="layer.icon === 'store'">
-            <rect x="4" y="5" width="16" height="14" rx="2" />
-            <path d="M4 9h16" />
-            <path d="M8 13h4" />
-          </template>
+                <template v-else-if="layer.icon === 'store'">
+                  <rect x="4" y="5" width="16" height="14" rx="2" />
+                  <path d="M4 9h16" />
+                  <path d="M8 13h4" />
+                </template>
 
-          <template v-else-if="layer.icon === 'sync'">
-            <path d="M17 3 21 7 17 11" />
-            <path d="M3 7h18" />
-            <path d="M7 21 3 17 7 13" />
-            <path d="M21 17H3" />
-          </template>
+                <template v-else-if="layer.icon === 'sync'">
+                  <path d="M17 3 21 7 17 11" />
+                  <path d="M3 7h18" />
+                  <path d="M7 21 3 17 7 13" />
+                  <path d="M21 17H3" />
+                </template>
 
-          <template v-else>
-            <path d="M12 4v4" />
-            <path d="M12 16v4" />
-            <path d="M4 12h4" />
-            <path d="M16 12h4" />
-            <circle cx="12" cy="12" r="4" />
-          </template>
-        </svg>
-      </span>
+                <template v-else>
+                  <path d="M12 4v4" />
+                  <path d="M12 16v4" />
+                  <path d="M4 12h4" />
+                  <path d="M16 12h4" />
+                  <circle cx="12" cy="12" r="4" />
+                </template>
+              </svg>
+            </span>
 
-      <span class="sd-layer__body">
-        <strong>{{ layer.name }}</strong>
-        <small>{{ layer.desc }}</small>
-      </span>
-    </span>
-  </a>
-</div>
+            <span class="sd-layer__body">
+              <strong>{{ layer.name }}</strong>
+              <small>{{ layer.desc }}</small>
+            </span>
+          </span>
+        </a>
+      </div>
     </div>
 
     <div class="sd-card-grid">
@@ -169,7 +167,9 @@ const engineLayers = [
             <template v-else-if="card.icon === 'js'">
               <rect x="4" y="4" width="16" height="16" rx="2" />
               <path d="M9 16.5c1.4 0 2-.7 2-2V10" />
-              <path d="M15.5 10H14a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-1.8" />
+              <path
+                d="M15.5 10H14a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-1.8"
+              />
             </template>
 
             <template v-else-if="card.icon === 'terminal'">
@@ -235,7 +235,7 @@ const engineLayers = [
   gap: clamp(56px, 7vw, 118px);
   align-items: center;
   width: 100%;
-  max-width:1280px ;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -358,10 +358,7 @@ const engineLayers = [
   width: 150px;
   height: 150px;
   border-radius: 8px;
-  transform:
-    rotateX(62deg)
-    rotateZ(45deg)
-    scaleY(0.52);
+  transform: rotateX(62deg) rotateZ(45deg) scaleY(0.52);
   transform-origin: center;
   box-shadow:
     0 16px 22px rgba(0, 0, 0, 0.24),
@@ -568,10 +565,10 @@ const engineLayers = [
     padding: 0 20px;
   }
 
- .sd-hero__copy h1 {
-  font-size: 36px;
-  line-height: 1.04;
-}
+  .sd-hero__copy h1 {
+    font-size: 36px;
+    line-height: 1.04;
+  }
 
   .sd-hero__copy p {
     font-size: 16px;
@@ -588,10 +585,7 @@ const engineLayers = [
   .sd-system-plate {
     width: 105px;
     height: 105px;
-    transform:
-      rotateX(62deg)
-      rotateZ(45deg)
-      scaleY(0.52);
+    transform: rotateX(62deg) rotateZ(45deg) scaleY(0.52);
   }
 
   .sd-card-grid {
@@ -614,5 +608,4 @@ const engineLayers = [
     padding-bottom: 48px !important;
   }
 }
-
 </style>

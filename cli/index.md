@@ -1,372 +1,264 @@
 # CLI
 
-The Softadastra CLI is the command-line entry point for working with a local Softadastra runtime.
-It lets you inspect local state, control node behavior, read and write local store values, check sync status, run sync ticks, and inspect peers.
-The CLI is designed for humans, scripts, local development, diagnostics, and operational workflows.
+The Softadastra CLI is the terminal interface for working with a local Softadastra runtime.
 
-## What the CLI is for
+Use it when you want to check the runtime, inspect the local node, write and read local values, look at sync state, run a manual sync tick, or see known peers.
 
-Use the CLI when you want to interact with Softadastra from the terminal.
+It is the fastest way to try Softadastra without writing application code.
 
-Typical use cases:
+## What you can do with the CLI
 
-```txt
-check runtime status
-inspect local node information
-write local values
-read local values
-run sync manually
-inspect sync state
-list known peers
-debug local runtime behavior
-```
+With the CLI, you can:
 
-The CLI gives a simple product-level interface over the engine.
+- check the local runtime status
+- inspect node information
+- start node services for the current CLI session
+- write values into the local store
+- read values from the local store
+- inspect sync state
+- run one sync tick
+- list discovery and transport peers
 
-## Basic commands
+## Main commands
+
+Start with these commands:
 
 ```sh
-softadastra help
-softadastra version
 softadastra status
-```
-
-Store commands:
-
-```sh
-softadastra store put app/name "Softadastra"
+softadastra node info
+softadastra store put app/name Softadastra
 softadastra store get app/name
-softadastra store remove app/name
-```
-
-Sync commands:
-
-```sh
 softadastra sync status
 softadastra sync tick
-```
-
-Node and peer commands:
-
-```sh
-softadastra node info
-softadastra node start
 softadastra peers
 ```
 
-## CLI mental model
+## Status
 
-The CLI follows the same Softadastra model:
-
-```txt
-write locally
-persist locally
-track operation
-sync when possible
-retry when needed
-converge later
-```
-
-A CLI store write should be local-first.
-
-```sh
-softadastra store put profile/name Ada
-```
-
-That operation should not require a remote server to be useful locally.
-
-Synchronization can happen later:
-
-```sh
-softadastra sync tick
-```
-
-## Product CLI versus internal CLI module
-
-Softadastra has two CLI-related layers.
-
-```txt
-apps/cli
-  -> product-level softadastra command
-
-modules/cli
-  -> reusable internal CLI framework
-```
-
-The product CLI is what users run:
-
-```sh
-softadastra status
-softadastra node info
-softadastra sync tick
-```
-
-The internal CLI module provides reusable building blocks such as `Tokenizer`, `ArgParser`, `CommandRegistry`, `CliCommand`, `ICommandHandler`, `CliService`, `CliEngine`, `TableFormatter`, and UI style helpers.
-
-This section documents the product CLI. The internal CLI framework is documented in the engine section.
-
-[Read: Engine CLI Framework](/engine/cli)
-
-## How the CLI fits into the engine
-
-The CLI is an interaction layer above the runtime modules.
-
-```txt
-CLI
-  ↓
-store
-sync
-transport
-discovery
-metadata
-```
-
-It can expose operations from the engine without forcing the user to manually write C++ code.
-
-For example:
-
-```txt
-softadastra store put
-  ↓
-store operation
-  ↓
-WAL, if enabled
-  ↓
-sync tracking
-```
-
-And:
-
-```txt
-softadastra sync tick
-  ↓
-sync scheduler
-  ↓
-retry expired work
-  ↓
-produce next batch
-```
-
-## Status command
-
-The status command gives a quick overview of the local runtime.
+Use `status` when you want a quick view of the local runtime.
 
 ```sh
 softadastra status
 ```
 
-It should answer: is the runtime available, is the local node healthy, is sync enabled, is transport running, is discovery running, and is there pending sync work?
+It shows the current state of the main runtime pieces:
 
-Status is usually the first command to run when debugging.
+- node
+- store
+- sync
+- transport
+- discovery
+- metadata
 
-## Node commands
+This is usually the first command to run when something does not look right.
 
-Node commands inspect or control the local Softadastra node.
+## Node
+
+Use `node info` to inspect the local node.
 
 ```sh
 softadastra node info
+```
+
+It shows information such as:
+
+- node id
+- display name
+- hostname
+- operating system
+- version
+- uptime
+- capabilities
+- whether the node services are running
+
+Use `node start` when you want to start local node services for the current CLI session.
+
+```sh
 softadastra node start
 ```
 
-`node info` should show metadata such as node id, display name, hostname, operating system, version, uptime, and capabilities.
+This starts transport, discovery, and metadata for the current CLI runtime.
 
-This maps to the metadata layer.
+For a long-running node, use the Softadastra node app instead.
 
-## Store commands
+## Store
 
-Store commands interact with local key-value state.
+Use `store put` to write a local key/value pair.
 
 ```sh
-softadastra store put settings/theme dark
-softadastra store get settings/theme
-softadastra store remove settings/theme
+softadastra store put app/name Softadastra
 ```
 
-The store command is useful for quick local tests and demos.
+Use `store get` to read a value.
 
-Conceptually:
-
-```txt
-store put
-  ↓
-local write
-  ↓
-local state
-  ↓
-sync tracking
+```sh
+softadastra store get app/name
 ```
 
-If persistence is enabled, the write can also pass through the WAL.
+The store command is useful for quick local tests.
 
-## Sync commands
+A write is local first. You do not need a remote server just to store and read a local value.
 
-Sync commands inspect and move the sync pipeline.
+## Sync
+
+Use `sync status` to inspect the sync pipeline.
 
 ```sh
 softadastra sync status
+```
+
+It shows values such as:
+
+- outbox size
+- queued count
+- in-flight count
+- acknowledged count
+- failed count
+- last submitted version
+- last applied remote version
+- total retries
+
+Use `sync tick` to move sync forward once.
+
+```sh
 softadastra sync tick
 ```
 
-`sync status` should expose fields like outbox size, queued count, in-flight count, acknowledged count, failed count, and total retries.
+A tick can retry expired work, produce a batch, and attempt delivery to connected peers.
 
-`sync tick` moves the sync pipeline forward once. A tick can retry expired work, produce the next batch, and prune completed work.
+## Peers
 
-Manual ticks are useful because they make sync explicit and debuggable.
-
-## Peers command
-
-The peers command lists peers known to the local runtime.
+Use `peers` to list known peers.
 
 ```sh
 softadastra peers
 ```
 
-Peers can come from discovery or manual configuration.
+The command shows peers from discovery and transport.
 
-The peer flow is:
+If no peers are shown, it does not always mean something is broken. It can simply mean no other node is running or connected yet.
 
-```txt
-discovery finds peers
-transport connects peers
-sync sends operations
+## A simple first session
+
+Try this flow after installing Softadastra:
+
+```sh
+softadastra status
+softadastra node info
+softadastra store put app/name Softadastra
+softadastra store get app/name
+softadastra sync status
+softadastra sync tick
+softadastra peers
 ```
+
+This gives you a quick feel for the CLI without needing a full application.
 
 ## Interactive mode
 
-The CLI can also support an interactive session.
+You can also run Softadastra interactively.
 
 ```sh
 softadastra
 ```
 
-In interactive mode, the user can run multiple commands without restarting the CLI process.
-
-Example session:
+Then run commands inside the session:
 
 ```txt
 softadastra> status
 softadastra> node info
 softadastra> store put app/name Softadastra
 softadastra> store get app/name
+softadastra> sync status
 softadastra> sync tick
 softadastra> peers
 softadastra> exit
 ```
 
-Interactive mode is useful for local testing and debugging.
+Interactive mode is useful when you want to test several commands without restarting the CLI each time.
 
-## Error handling
+## How to think about it
 
-CLI errors should be clear and actionable. Good CLI errors should explain what failed, why it failed, what command or argument caused it, and what the user can do next.
-
-Example:
+The CLI follows the same idea as the SDK:
 
 ```txt
-error: failed to read key
-reason: key not found
-key: settings/theme
+write locally
+read locally
+keep state locally
+inspect sync
+move sync forward when needed
+connect with peers when available
 ```
 
-This is better than exposing raw internal errors without context.
+Softadastra does not need the network to make local work useful.
 
-## Output style
-
-The CLI should prefer readable output.
-
-For simple values:
-
-```txt
-key   : app/name
-value : Softadastra
-```
-
-For lists, use tables:
-
-```txt
-Command      Type      Description
-status       info      Show runtime status
-version      info      Show CLI version
-node         admin     Manage local node
-store        data      Read and write local values
-sync         sync      Inspect and tick sync pipeline
-peers        net       List known peers
-```
-
-For status output, use grouped sections:
-
-```txt
-Softadastra status
-
-Node
-  id       : node-a
-  version  : 0.1.0
-
-Store
-  entries  : 12
-
-Sync
-  outbox   : 3
-  queued   : 3
-  failed   : 0
-```
-
-## Recommended first commands
-
-After installing Softadastra, start with:
+You can write a value locally:
 
 ```sh
-softadastra help
-softadastra version
-softadastra status
+softadastra store put profile/name Ada
 ```
 
-Then try local store commands:
+Read it back:
 
 ```sh
-softadastra store put app/name Softadastra
-softadastra store get app/name
+softadastra store get profile/name
 ```
 
 Then inspect sync:
 
 ```sh
 softadastra sync status
+```
+
+And move sync forward:
+
+```sh
 softadastra sync tick
 ```
 
-Then inspect node and peers:
+## Errors
 
-```sh
-softadastra node info
-softadastra peers
+CLI errors should help you fix the command.
+
+For example, if a key is missing:
+
+```txt
+Key not found: settings/theme
 ```
 
-## CLI section structure
+If an argument is missing:
 
-This CLI documentation is organized as:
+```txt
+Missing key or value argument.
+```
 
-1. [Overview](/cli/)
-2. [Installation](/cli/installation)
-3. [Commands](/cli/commands)
-4. [Interactive Mode](/cli/interactive-mode)
-5. [Node](/cli/node)
-6. [Store](/cli/store)
-7. [Sync](/cli/sync)
-8. [Peers](/cli/peers)
-9. [Reference](/cli/reference)
+If a command is unknown:
 
-Read it in that order if you are new to the CLI.
+```txt
+Unknown store command: remove
+```
+
+When you see an error, check the command usage and the arguments first.
+
+## Recommended reading order
+
+Read the CLI docs in this order:
+
+1. [Installation](/installation)
+2. [Commands](./commands)
+3. [Interactive Mode](./interactive-mode)
+4. [Node](./node)
+5. [Store](./store)
+6. [Sync](./sync)
+7. [Peers](./peers)
+8. [Reference](./reference)
 
 ## Summary
 
-The Softadastra CLI is the terminal interface for local runtime interaction.
+The Softadastra CLI helps you work with the local runtime from the terminal.
 
-It helps you inspect runtime status, inspect node metadata, write and read local store values, inspect sync state, run manual sync ticks, inspect known peers, and debug local-first behavior.
-
-The CLI is the simplest way to observe Softadastra without writing application code.
+Use it to inspect status, check node information, write and read local values, inspect sync, run manual ticks, and list peers.
 
 ## Next step
 
-Install and run the CLI:
-
-[Go to CLI Installation](/cli/installation)
+Continue with [Installation](/installation).

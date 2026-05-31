@@ -1,117 +1,108 @@
-# Store Commands
+# Store
 
-Store commands let you read and write local key-value data from the Softadastra CLI.
-
-The store is local-first. That means a store command should work locally without requiring a remote server, an active peer, discovery, or transport.
-
-The main command group is:
+Store commands let you write and read local key/value data from the terminal.
+The command group is:
 
 ```sh
-softadastra store <subcommand>
+softadastra store
 ```
 
-## Why store commands exist
-
-Softadastra is built around local work first.
-
-Store commands let you test that model directly from the terminal:
-
-```sh
-softadastra store put app/name Softadastra
-softadastra store get app/name
-softadastra store remove app/name
-```
-
-The goal is simple: write locally, read locally, sync later.
-
-## Command overview
-
-```txt
-softadastra store put <key> <value>     -> write a local value
-softadastra store get <key>             -> read a local value
-softadastra store remove <key>          -> remove a local value
-softadastra store list                  -> list local values, if supported
-```
-
-The first stable commands should be `put`, `get`, and `remove`. `list` can be added when the CLI implementation supports it reliably.
-
-## Store mental model
-
-The store provides current local state.
-
-```txt
-key
-  ↓
-value
-```
-
-Example:
-
-```txt
-app/name -> Softadastra
-```
-
-At a higher level, a store write can also be tracked by sync:
-
-```txt
-store put
-  ↓
-local write
-  ↓
-WAL, if enabled
-  ↓
-store apply
-  ↓
-sync tracking
-```
-
-The CLI should hide the internal wiring and expose a simple command interface.
-
-## `softadastra store put`
-
-Writes a local value.
+## Commands
 
 ```sh
 softadastra store put <key> <value>
+softadastra store get <key>
 ```
 
-Example:
+## Show store help
+
+Run:
+
+```sh
+softadastra store
+```
+
+Output:
+
+```txt
+Softadastra store
+
+Usage
+  softadastra store put <key> <value>
+  softadastra store get <key>
+
+Commands
+  put      Write a key/value pair
+  get      Read one key
+```
+
+## Write a value
+
+Use `store put` to write a local value.
 
 ```sh
 softadastra store put app/name Softadastra
 ```
 
-Expected output style:
+When the write succeeds, the CLI prints the key, version, and mutation status.
+
+Example output:
 
 ```txt
-Stored value
+✓ Stored value.
 
-  key     : app/name
-  value   : Softadastra
-  created : yes
+Field    Value
+key      app/name
+version  1
+status   created
 ```
 
-If the key already exists, the command can update it:
+If the key already exists, the status can be `updated`.
 
 ```sh
 softadastra store put app/name "Softadastra Runtime"
 ```
 
-Expected output style:
+Example output:
 
 ```txt
-Stored value
+✓ Stored value.
 
-  key     : app/name
-  value   : Softadastra Runtime
-  created : no
+Field    Value
+key      app/name
+version  2
+status   updated
 ```
 
-### Keys
+If the value did not change, the status can be `unchanged`.
+
+## Read a value
+
+Use `store get` to read one local value.
+
+```sh
+softadastra store get app/name
+```
+
+Example output:
+
+```txt
+Store entry
+
+Field      Value
+key        app/name
+value      Softadastra
+version    1
+timestamp  1760000000000
+```
+
+The exact version and timestamp depend on your local runtime.
+
+## Keys
 
 A key identifies a local value.
 
-Examples:
+Good examples:
 
 ```txt
 app/name
@@ -121,9 +112,14 @@ message/1
 cache/session
 ```
 
-Recommended key style: `domain/name` or `domain/id/field`.
+Use stable and readable keys. A good pattern is:
 
-Good examples:
+```txt
+domain/name
+domain/id/field
+```
+
+Examples:
 
 ```txt
 profile/name
@@ -131,20 +127,19 @@ settings/theme
 files/docs/readme.txt
 ```
 
-Avoid empty keys. This should fail with a clear error:
+An empty key is invalid.
 
 ```sh
 softadastra store put "" value
 ```
 
-Expected output style:
+Expected error:
 
 ```txt
-error: invalid key
-reason: key must not be empty
+Key cannot be empty.
 ```
 
-### Values
+## Values
 
 A value is the data stored under a key.
 
@@ -162,213 +157,40 @@ When a value contains spaces, quote it:
 softadastra store put app/title "Softadastra Runtime"
 ```
 
-The parser should treat the quoted string as one value: `Softadastra Runtime`.
-
-## `softadastra store get`
-
-Reads a local value.
-
-```sh
-softadastra store get <key>
-```
-
-Example:
-
-```sh
-softadastra store get app/name
-```
-
-Expected output style:
-
-```txt
-Value
-
-  key   : app/name
-  value : Softadastra
-```
-
-If the key is missing:
-
-```txt
-error: key not found
-key: app/name
-```
-
-A missing key is not a runtime crash. It is a normal store error.
-
-## `softadastra store remove`
-
-Removes a local value.
-
-```sh
-softadastra store remove <key>
-```
-
-Example:
-
-```sh
-softadastra store remove app/name
-```
-
-Expected output style:
-
-```txt
-Removed value
-
-  key     : app/name
-  removed : yes
-```
-
-After removal:
-
-```sh
-softadastra store get app/name
-```
-
-Expected output style:
-
-```txt
-error: key not found
-key: app/name
-```
-
-Remove should be safe and clear. If the key does not exist, the CLI should explain that nothing was removed.
-
-Example:
-
-```txt
-Removed value
-
-  key     : app/name
-  removed : no
-  reason  : key not found
-```
-
-## `softadastra store list`
-
-Lists local values if supported.
-
-```sh
-softadastra store list
-```
-
-Example output style:
-
-```txt
-Store
-
-Key             Value
-app/name        Softadastra
-settings/theme  dark
-message/1       hello
-```
-
-If the store is empty:
-
-```txt
-Store
-
-  no values found
-```
-
-If `list` is not implemented yet, do not include it in the stable CLI reference.
-
 ## Local-first behavior
 
-Store commands should be local-first.
-
-This command should not require network access:
+Store commands work locally.
+This command does not need a remote server:
 
 ```sh
 softadastra store put draft/1 hello
 ```
 
-It should not require a server, a connected peer, transport, discovery, or cloud availability.
-
-The write is local work. Synchronization is a separate step.
-
-## Store and WAL
-
-If WAL is enabled, a store write can be persisted before or during local application.
-
-Conceptually:
-
-```txt
-store put
-  ↓
-operation created
-  ↓
-WAL append
-  ↓
-store apply
-```
-
-The WAL is the durable history. The store is the current local state.
-
-```txt
-WAL   -> what happened
-Store -> current value
-```
-
-From the CLI perspective, the command stays simple:
+And this command reads from the local store:
 
 ```sh
-softadastra store put settings/theme dark
+softadastra store get draft/1
 ```
 
-The runtime decides whether WAL is enabled.
+Peers, discovery, and transport are not required for local store commands.
+That is the main idea: local work should be useful before the network is available.
 
 ## Store and sync
 
-A store write can also create sync work.
-
-```txt
-store put
-  ↓
-local state updated
-  ↓
-sync operation created
-  ↓
-outbox entry added
-```
-
-After writing a value, inspect sync state:
+A store write can create local work that sync can later process.
+A simple flow is:
 
 ```sh
+softadastra store put app/name Softadastra
 softadastra sync status
-```
-
-Then move sync forward:
-
-```sh
 softadastra sync tick
 ```
 
-This keeps local writes separate from synchronization.
+`store put` writes locally.
 
-## Store and transport
+`sync status` shows what the sync pipeline is tracking.
 
-Transport is not required for store commands.
-
-If transport is stopped, this should still work:
-
-```sh
-softadastra store put local/key value
-```
-
-Transport is only needed when the sync layer wants to send operations to peers.
-
-## Store and discovery
-
-Discovery is not required for store commands.
-
-If no peer is discovered, this should still work:
-
-```sh
-softadastra store get app/name
-```
-
-Discovery helps find peers later. It does not decide whether local state can be read or written.
+`sync tick` moves the sync pipeline forward once.
 
 ## Example workflow
 
@@ -378,31 +200,25 @@ Write a value:
 softadastra store put app/name Softadastra
 ```
 
-Read the value:
+Read it back:
 
 ```sh
 softadastra store get app/name
 ```
 
-Inspect sync state:
+Check sync:
 
 ```sh
 softadastra sync status
 ```
 
-Run one tick:
+Run one sync tick:
 
 ```sh
 softadastra sync tick
 ```
 
-Remove the value:
-
-```sh
-softadastra store remove app/name
-```
-
-Verify it is gone:
+Read the value again:
 
 ```sh
 softadastra store get app/name
@@ -410,202 +226,127 @@ softadastra store get app/name
 
 ## Interactive mode
 
-Inside interactive mode, use the same store commands without the binary name.
+Inside interactive mode, do not repeat `softadastra`.
+
+Start the CLI:
+
+```sh
+softadastra
+```
+
+Then run:
 
 ```txt
 softadastra> store put app/name Softadastra
 softadastra> store get app/name
-softadastra> store remove app/name
+softadastra> sync status
+softadastra> sync tick
+softadastra> exit
 ```
 
-Do not write:
+## Common errors
 
-```txt
-softadastra> softadastra store get app/name
-```
+### Missing key or value
 
-Inside interactive mode, the prompt already represents the CLI.
-
-## Error handling
-
-Store errors should be clear.
-
-### Missing key
-
-```txt
-error: key not found
-key: settings/theme
-```
-
-### Missing value
-
-Command:
+This happens when `store put` does not receive both arguments.
 
 ```sh
 softadastra store put app/name
 ```
 
-Expected output:
+Output:
 
 ```txt
-error: missing value
-usage: softadastra store put <key> <value>
+Missing key or value argument.
+Usage: store-put <key> <value>
 ```
 
-### Missing key argument
+Fix:
 
-Command:
+```sh
+softadastra store put app/name Softadastra
+```
+
+### Missing key
+
+This happens when `store get` does not receive a key.
 
 ```sh
 softadastra store get
 ```
 
-Expected output:
+Output:
 
 ```txt
-error: missing key
-usage: softadastra store get <key>
+Missing key argument.
+Usage: store-get <key>
 ```
 
-### Invalid key
+Fix:
 
-Command:
+```sh
+softadastra store get app/name
+```
+
+### Empty key
+
+This happens when the key is empty.
 
 ```sh
 softadastra store put "" value
 ```
 
-Expected output:
+Output:
 
 ```txt
-error: invalid key
-reason: key must not be empty
+Key cannot be empty.
 ```
 
-### Runtime unavailable
-
-Expected output style:
-
-```txt
-error: store unavailable
-reason: runtime is not initialized
-```
-
-The user should know what failed and why.
-
-## Output style
-
-Prefer readable grouped output.
-
-For `put`:
-
-```txt
-Stored value
-
-  key     : app/name
-  value   : Softadastra
-  created : yes
-```
-
-For `get`:
-
-```txt
-Value
-
-  key   : app/name
-  value : Softadastra
-```
-
-For `remove`:
-
-```txt
-Removed value
-
-  key     : app/name
-  removed : yes
-```
-
-For scripts, stable output matters. Avoid unnecessary changes to labels and structure.
-
-## Store command principles
-
-Store commands should follow these principles:
-
-- local-first
-- explicit errors
-- stable output
-- safe key validation
-- quoted values supported
-- network not required
-- sync separate from store
-
-## How store commands map to the SDK
-
-The CLI store commands map closely to SDK methods.
-
-CLI:
+Use a non-empty key:
 
 ```sh
-softadastra store put app/name Softadastra
-softadastra store get app/name
+softadastra store put app/name value
+```
+
+### Key not found
+
+This happens when the key does not exist in the local store.
+
+```sh
+softadastra store get missing/key
+```
+
+Output:
+
+```txt
+Key not found: missing/key
+```
+
+This is not a crash. It only means the local store does not have that key.
+
+### Unknown store command
+
+If you run an unsupported store command:
+
+```sh
 softadastra store remove app/name
 ```
 
-C++ SDK:
+The CLI returns:
 
-```cpp
-client.put("app/name", "Softadastra");
-client.get("app/name");
-client.remove("app/name");
+```txt
+Unknown store command: remove
+Usage: store <put|get>
 ```
 
-JavaScript SDK:
-
-```js
-await client.put("app/name", "Softadastra");
-await client.get("app/name");
-await client.remove("app/name");
-```
-
-The model is the same across CLI, C++ SDK, and JavaScript SDK.
-
-## Common mistakes
-
-### Expecting store commands to sync immediately
-
-A store write is local first. Synchronization is separate:
+For now, use:
 
 ```sh
-softadastra sync tick
+softadastra store put <key> <value>
+softadastra store get <key>
 ```
 
-### Expecting a peer to be required
-
-Store commands do not need a peer. Peers are needed for remote synchronization, not local writes.
-
-### Forgetting quotes around values with spaces
-
-Wrong:
-
-```sh
-softadastra store put app/title Softadastra Runtime
-```
-
-Better:
-
-```sh
-softadastra store put app/title "Softadastra Runtime"
-```
-
-### Treating missing key as a crash
-
-A missing key is a normal store result. The CLI should show a clear not-found error.
-
-### Treating the store as the WAL
-
-The store is current state. The WAL is operation history. They are related, but not the same.
-
-## Recommended first store test
+## Good first test
 
 Run:
 
@@ -614,22 +355,26 @@ softadastra store put app/name Softadastra
 softadastra store get app/name
 softadastra sync status
 softadastra sync tick
-softadastra store remove app/name
-softadastra store get app/name
 ```
 
-This tests local write, local read, sync tracking, manual sync tick, local remove, and missing key behavior.
+This tests local write, local read, sync inspection, and one manual sync step.
 
 ## Summary
 
-Store commands let you interact with Softadastra local state from the terminal.
+Use:
 
-They provide `put`, `get`, `remove`, and optionally `list`.
+```sh
+softadastra store put <key> <value>
+```
 
-The key idea is: store commands are local-first. A local write should be useful before the network, before peers, and before synchronization.
+to write a local value.
 
-## Next step
+Use:
 
-Continue with sync commands:
+```sh
+softadastra store get <key>
+```
 
-[Go to Sync Commands](/cli/sync)
+to read a local value.
+Store commands are local-first. They do not need peers, discovery, transport, or a remote server to be useful.
+Next, continue with [Sync](./sync).

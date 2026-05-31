@@ -1,520 +1,624 @@
-# Peers
+# Commands
 
-The `peers` command lists peers known to the local Softadastra runtime.
+This page gives you the main Softadastra CLI commands.
 
-Peers are other nodes that the local node may be able to connect to, synchronize with, or inspect.
+The CLI is built around a simple workflow:
 
-The command is:
+```txt
+check status
+inspect node
+write local data
+read local data
+inspect sync
+run one sync tick
+inspect peers
+```
+
+The command shape is:
+
+```sh
+softadastra <command> [subcommand] [arguments]
+```
+
+Examples:
+
+```sh
+softadastra status
+softadastra node info
+softadastra store put app/name Softadastra
+softadastra store get app/name
+softadastra sync status
+softadastra sync tick
+softadastra peers
+```
+
+## Main commands
+
+Softadastra CLI commands are grouped by what you want to do.
+
+| Command                               | Purpose                                         |
+| ------------------------------------- | ----------------------------------------------- |
+| `softadastra status`                  | Show the current local runtime status           |
+| `softadastra node info`               | Show local node information                     |
+| `softadastra node start`              | Start node services for the current CLI session |
+| `softadastra store put <key> <value>` | Write a local value                             |
+| `softadastra store get <key>`         | Read a local value                              |
+| `softadastra sync status`             | Show sync state                                 |
+| `softadastra sync tick`               | Run one manual sync cycle                       |
+| `softadastra peers`                   | List discovery and transport peers              |
+
+## Status
+
+Use `status` when you want a quick view of the local runtime.
+
+```sh
+softadastra status
+```
+
+It shows the main parts of the runtime:
+
+- node
+- store
+- sync
+- transport
+- discovery
+- metadata
+
+Example output:
+
+```txt
+Softadastra status
+
+Component   Metric        Value
+node        id            node-1
+node        running       no
+store       entries       0
+sync        outbox        0
+sync        queued        0
+sync        in_flight     0
+sync        acknowledged  0
+sync        failed        0
+transport   running       no
+transport   peers         0
+discovery   running       no
+discovery   peers         0
+metadata    running       no
+```
+
+Use this command first when you want to know what the local runtime looks like.
+
+## Node
+
+Node commands let you inspect the local node or start node services for the current CLI session.
+
+```sh
+softadastra node
+```
+
+This shows the node command help:
+
+```txt
+Softadastra node
+
+Usage
+  softadastra node info
+  softadastra node start
+
+Commands
+  info     Show local node information
+  start    Start local node services for this CLI session
+```
+
+## Node info
+
+Use `node info` to inspect the local node.
+
+```sh
+softadastra node info
+```
+
+It can show:
+
+- node id
+- display name
+- hostname
+- operating system
+- version
+- start time
+- uptime
+- capabilities
+- whether node services are running
+
+Example output:
+
+```txt
+Softadastra node
+
+Field          Value
+node_id        node-1
+display_name   Softadastra Node
+hostname       local-machine
+os             linux
+version        0.1.0
+started_at     1760000000000
+uptime_ms      1250
+capabilities   6
+node_running   no
+```
+
+If metadata is not available yet, the CLI can still show basic information:
+
+```txt
+Softadastra node
+
+Field          Value
+node_id        node-1
+node_running   no
+metadata       unavailable
+```
+
+## Node start
+
+Use `node start` to start local node services for the current CLI session.
+
+```sh
+softadastra node start
+```
+
+When it succeeds, it shows which services are running.
+
+Example output:
+
+```txt
+Starting Softadastra node
+
+✓ Softadastra node services started for this CLI session.
+node_id    node-1
+transport  running
+discovery  running
+metadata   running
+```
+
+This starts:
+
+- transport
+- discovery
+- metadata
+
+It does not turn the CLI into a permanent background daemon.
+
+For a long-running node, use the Softadastra node app.
+
+## Store
+
+Store commands let you write and read local key/value data.
+
+```sh
+softadastra store
+```
+
+This shows the store command help:
+
+```txt
+Softadastra store
+
+Usage
+  softadastra store put <key> <value>
+  softadastra store get <key>
+
+Commands
+  put      Write a key/value pair
+  get      Read one key
+```
+
+## Store put
+
+Use `store put` to write a local value.
+
+```sh
+softadastra store put <key> <value>
+```
+
+Example:
+
+```sh
+softadastra store put app/name Softadastra
+```
+
+Example output:
+
+```txt
+✓ Stored value.
+
+Field    Value
+key      app/name
+version  1
+status   created
+```
+
+If the key already exists, the status can be `updated`.
+
+```sh
+softadastra store put app/name "Softadastra Runtime"
+```
+
+Example output:
+
+```txt
+✓ Stored value.
+
+Field    Value
+key      app/name
+version  2
+status   updated
+```
+
+## Store get
+
+Use `store get` to read one local value.
+
+```sh
+softadastra store get <key>
+```
+
+Example:
+
+```sh
+softadastra store get app/name
+```
+
+Example output:
+
+```txt
+Store entry
+
+Field      Value
+key        app/name
+value      Softadastra
+version    1
+timestamp  1760000000000
+```
+
+If the key does not exist:
+
+```txt
+Key not found: app/name
+```
+
+## Sync
+
+Sync commands let you inspect and move the local sync pipeline.
+
+```sh
+softadastra sync
+```
+
+This shows the sync command help:
+
+```txt
+Softadastra sync
+
+Usage
+  softadastra sync status
+  softadastra sync tick
+
+Commands
+  status   Show sync engine state
+  tick     Run one manual sync cycle
+```
+
+## Sync status
+
+Use `sync status` to inspect sync state.
+
+```sh
+softadastra sync status
+```
+
+Example output:
+
+```txt
+Softadastra sync status
+
+Metric                       Value
+node_id                      node-1
+outbox_size                  1
+queued_count                 1
+in_flight_count              0
+acknowledged_count           0
+failed_count                 0
+last_submitted_version       1
+last_applied_remote_version  0
+total_retries                0
+```
+
+This tells you whether there is pending sync work, failed work, or retry activity.
+
+## Sync tick
+
+Use `sync tick` to run one manual sync cycle.
+
+```sh
+softadastra sync tick
+```
+
+Example output:
+
+```txt
+Softadastra sync tick
+
+Metric           Value
+retried_count    0
+batch_size       1
+connected_peers  0
+sent_count       0
+pruned_count     0
+
+No connected transport peers available.
+```
+
+A tick can retry expired work, produce a batch, and try to send that batch to connected transport peers.
+
+If no peer is connected, local data is still safe locally.
+
+## Peers
+
+Use `peers` to list known discovery and transport peers.
 
 ```sh
 softadastra peers
 ```
 
-## Why peers matter
-
-Softadastra is local-first, but it can also synchronize with other nodes.
-
-To synchronize with another node, the local runtime needs to know which peers exist, where they are reachable, whether they are available, and whether transport can connect to them.
-
-The peers command makes that visible.
-
-## Peer discovery model
-
-Softadastra separates peer discovery from transport and sync.
+Example output when no peers are known:
 
 ```txt
-Discovery  -> finds peers
-Transport  -> connects peers
-Sync       -> sends operations
+Softadastra peers
+
+discovery  no
+transport  no
+
+Discovery peers
+No discovery peers found.
+
+Transport peers
+No transport peers found.
 ```
 
-This separation is important.
+If peers exist, the CLI can show discovery peers:
 
-- **Discovery** only answers: which peers are known?
-- **Transport** answers: can I connect to this peer?
-- **Sync** answers: what operations should I send?
+```txt
+Discovery peers
 
-## Basic usage
+Node     Host        Port   Last seen
+node-2   127.0.0.1   9500   1760000000000
+```
 
-Run:
+and transport peers:
+
+```txt
+Transport peers
+
+Node     Host        Port   State       Connected   Last seen       Errors
+node-2   127.0.0.1   9500   Connected   yes         1760000000000   0
+```
+
+No peers is a valid state. Local store commands can still work.
+
+## Interactive mode
+
+Run the CLI without a command:
 
 ```sh
+softadastra
+```
+
+Then type commands without repeating `softadastra`.
+
+Example session:
+
+```txt
+softadastra> status
+softadastra> node info
+softadastra> node start
+softadastra> store put app/name Softadastra
+softadastra> store get app/name
+softadastra> sync status
+softadastra> sync tick
+softadastra> peers
+softadastra> exit
+```
+
+Inside interactive mode, this is correct:
+
+```txt
+softadastra> status
+```
+
+This is wrong:
+
+```txt
+softadastra> softadastra status
+```
+
+## Recommended first workflow
+
+After installation, start with:
+
+```sh
+softadastra status
+softadastra node info
+```
+
+Then test local store:
+
+```sh
+softadastra store put app/name Softadastra
+softadastra store get app/name
+```
+
+Then inspect sync:
+
+```sh
+softadastra sync status
+softadastra sync tick
+softadastra sync status
+```
+
+Then inspect node services and peers:
+
+```sh
+softadastra node start
 softadastra peers
+softadastra status
 ```
 
-Example output style:
+## Local-first behavior
 
-```txt
-Peers
+Local store commands do not need peers.
 
-Node ID        Host        Port    State
-node-b         127.0.0.1   4042    available
-node-c         127.0.0.1   4043    stale
-```
-
-If no peers are known:
-
-```txt
-Peers
-
-  no peers found
-```
-
-This is not necessarily an error. A local Softadastra node can still write and read local data without peers.
-
-## What a peer represents
-
-A peer usually contains node id, host, port, state, last seen time, and capabilities when available.
-
-A minimal peer can be:
-
-```txt
-node-b 127.0.0.1:4042
-```
-
-At SDK level, a peer maps to a public structure like:
-
-```cpp
-Peer peer{
-    "node-b",
-    "127.0.0.1",
-    4042};
-```
-
-In JavaScript:
-
-```js
-const peer = new Peer("node-b", "127.0.0.1", 4042);
-```
-
-## Peer states
-
-A peer can have different states depending on discovery and transport.
-
-Common states: `available`, `connected`, `stale`, `expired`, `faulted`, `unknown`.
-
-### `available`
-
-The peer is known and may be reachable.
-
-```txt
-node-b 127.0.0.1:4042 available
-```
-
-This usually means discovery or configuration knows about the peer.
-
-### `connected`
-
-The local transport has an active connection to the peer.
-
-```txt
-node-b 127.0.0.1:4042 connected
-```
-
-This means the peer is a candidate for synchronization.
-
-### `stale`
-
-The peer was seen before, but has not been refreshed recently.
-
-```txt
-node-b 127.0.0.1:4042 stale
-```
-
-This does not always mean the peer is offline. It means the local node has not seen a fresh announcement or confirmation recently.
-
-### `expired`
-
-The peer has passed its time-to-live and should no longer be considered available.
-
-```txt
-node-b 127.0.0.1:4042 expired
-```
-
-Expired peers can be pruned by the discovery layer.
-
-### `faulted`
-
-The peer is known, but transport reported an error.
-
-```txt
-node-b 127.0.0.1:4042 faulted
-```
-
-This can happen when the connection was refused, a timeout occurred, the socket closed, an invalid frame was received, or the peer stopped responding.
-
-A faulted peer may become available again later.
-
-## Peers and local-first behavior
-
-Peers are not required for local work.
-
-This should work even when `softadastra peers` returns no peers:
+This should work even when transport is stopped, discovery is stopped, and no peer is available:
 
 ```sh
 softadastra store put draft/1 hello
 softadastra store get draft/1
 ```
 
-A local write should not depend on a peer, transport, discovery, or cloud availability.
+Sync and peers matter when the local node needs to exchange data with another node.
 
-Peers only matter when local work needs to be synchronized with other nodes.
+They are not required for local reads and writes.
 
-## Peers and discovery
+## Common errors
 
-Discovery is one way to find peers.
+### Unknown store command
 
-The discovery layer can announce the local node and listen for other nodes.
-
-Conceptually:
-
-```txt
-node A announces itself
-node B receives announcement
-node B adds node A to peer registry
-```
-
-Then `softadastra peers` can show discovered peers.
-
-## Peers and transport
-
-Transport connects to peers.
-
-The flow is:
-
-```txt
-peer known
-  ↓
-transport connect
-  ↓
-peer connected
-  ↓
-sync can send operations
-```
-
-If transport fails, the peer may be marked faulted or unavailable. This should not remove local data.
-
-## Peers and sync
-
-Sync uses peers as possible delivery targets.
-
-```txt
-sync outbox
-  ↓
-next batch
-  ↓
-transport
-  ↓
-peer
-```
-
-If no peer is available, sync work can remain pending.
-
-```txt
-local operation
-  ↓
-outbox
-  ↓
-no peer available
-  ↓
-retry later
-```
-
-That is normal in offline-first systems.
-
-## Example: no peers yet
-
-Run:
+If you run a store command that does not exist:
 
 ```sh
-softadastra peers
+softadastra store remove app/name
 ```
 
-Output:
+The CLI returns:
 
 ```txt
-Peers
-
-  no peers found
+Unknown store command: remove
+Usage: store <put|get>
 ```
 
-This means the runtime currently has no known peer.
+Use:
 
-You can still run:
+```sh
+softadastra store put <key> <value>
+softadastra store get <key>
+```
+
+### Unknown sync command
+
+If you run an unsupported sync command:
+
+```sh
+softadastra sync prune
+```
+
+The CLI returns:
+
+```txt
+Unknown sync command: prune
+Usage: sync <status|tick>
+```
+
+Use:
+
+```sh
+softadastra sync status
+softadastra sync tick
+```
+
+### Missing store value
+
+If you run:
+
+```sh
+softadastra store put app/name
+```
+
+The CLI returns:
+
+```txt
+Missing key or value argument.
+Usage: store-put <key> <value>
+```
+
+Fix it:
 
 ```sh
 softadastra store put app/name Softadastra
+```
+
+### Missing store key
+
+If you run:
+
+```sh
+softadastra store get
+```
+
+The CLI returns:
+
+```txt
+Missing key argument.
+Usage: store-get <key>
+```
+
+Fix it:
+
+```sh
 softadastra store get app/name
-softadastra sync status
 ```
 
-The sync state may show pending local work, but delivery to another node is delayed.
+### Key not found
 
-## Example: peer available
-
-Output:
-
-```txt
-Peers
-
-Node ID        Host        Port    State
-node-b         127.0.0.1   4042    available
-```
-
-This means the local runtime knows about `node-b`.
-
-It does not automatically guarantee that sync has completed. Check sync state:
+If the key does not exist:
 
 ```sh
-softadastra sync status
+softadastra store get missing/key
 ```
 
-Then move the sync pipeline:
-
-```sh
-softadastra sync tick
-```
-
-## Example: peer faulted
-
-Output:
+The CLI returns:
 
 ```txt
-Peers
-
-Node ID        Host        Port    State
-node-b         127.0.0.1   4042    faulted
+Key not found: missing/key
 ```
 
-This usually means transport could not connect or the connection failed.
-
-The correct behavior is: peer delivery failed, sync work remains tracked, and local data remains valid.
-
-You can inspect sync:
-
-```sh
-softadastra sync status
-```
-
-## Interactive mode
-
-Inside interactive mode:
-
-```txt
-softadastra> peers
-softadastra> sync status
-softadastra> sync tick
-```
-
-Do not repeat the binary name:
-
-```txt
-softadastra> softadastra peers
-```
-
-Use only:
-
-```txt
-softadastra> peers
-```
-
-## Recommended peer workflow
-
-A useful workflow is:
-
-```sh
-softadastra status
-softadastra node info
-softadastra peers
-softadastra sync status
-```
-
-If peers are available:
-
-```sh
-softadastra sync tick
-softadastra sync status
-```
-
-If no peers are available:
-
-```sh
-softadastra store put draft/1 hello
-softadastra sync status
-```
-
-This verifies that local-first behavior still works without peer availability.
-
-## Output style
-
-Peer output should be readable and stable.
-
-Recommended table style:
-
-```txt
-Peers
-
-Node ID        Host        Port    State
-node-b         127.0.0.1   4042    available
-node-c         127.0.0.1   4043    stale
-```
-
-For no peers:
-
-```txt
-Peers
-
-  no peers found
-```
-
-For errors:
-
-```txt
-error: failed to read peers
-reason: discovery service is not running
-```
-
-## Error handling
-
-Peer errors should clearly explain whether the issue is with discovery, transport, or runtime state.
-
-### Discovery unavailable
-
-```txt
-error: failed to read peers
-reason: discovery is not enabled
-```
-
-This should not imply the local store is broken.
-
-### Runtime unavailable
-
-```txt
-error: failed to read peers
-reason: runtime is not initialized
-```
-
-### Invalid peer data
-
-```txt
-error: invalid peer entry
-reason: missing node id
-```
-
-## Common mistakes
-
-### Expecting peers to be required for local writes
-
-Peers are not required for local writes. Local store commands should continue working.
-
-### Assuming peers means connected
-
-A listed peer may be available, stale, or known from discovery. It is not always actively connected.
-
-### Assuming no peers is an error
-
-No peers is a valid state in local development.
-
-### Assuming sync completed because a peer exists
-
-A peer being known does not mean all sync work has been delivered. Check:
-
-```sh
-softadastra sync status
-```
-
-### Confusing discovery with transport
-
-Discovery finds peers. Transport connects to peers. They are related, but not the same.
-
-## How peers map to the SDK
-
-CLI:
-
-```sh
-softadastra peers
-```
-
-C++ SDK:
-
-```cpp
-auto peers = client.peers();
-
-if (peers.is_ok())
-{
-    for (const auto &peer : peers.value())
-    {
-        std::cout << peer.node_id << " "
-                  << peer.host << ":"
-                  << peer.port << "\n";
-    }
-}
-```
-
-JavaScript SDK:
-
-```js
-const peers = await client.peers();
-
-if (peers.isOk()) {
-  for (const peer of peers.value()) {
-    console.log(`${peer.nodeId} ${peer.host}:${peer.port}`);
-  }
-}
-```
-
-The model is the same across CLI, C++ SDK, and JavaScript SDK.
-
-## How peers map to the engine
-
-```txt
-peers command
-  -> discovery registry
-  -> transport peer registry
-  -> peer state
-```
-
-Discovery can provide available peers. Transport can provide connected or faulted peers. Metadata can later enrich peer information with capabilities and version.
-
-## Peers in the full flow
-
-A complete flow can look like this:
-
-1. Local node starts
-2. Discovery announces local node
-3. Discovery receives announcement from another node
-4. Peer is added to registry
-5. `softadastra peers` lists the peer
-6. Transport connects to the peer
-7. Sync tick produces a batch
-8. Transport sends the batch
-9. Remote node applies operation
-10. ACK returns
-11. Sync state updates
-
-If the peer disappears:
-
-```txt
-transport marks peer faulted
-sync work remains tracked
-retry can happen later
-```
+This is a normal store result, not a runtime crash.
+
+## Command reference
+
+| Command                               | Purpose                                         |
+| ------------------------------------- | ----------------------------------------------- |
+| `softadastra status`                  | Show local runtime status                       |
+| `softadastra node`                    | Show node command help                          |
+| `softadastra node info`               | Show local node information                     |
+| `softadastra node start`              | Start node services for the current CLI session |
+| `softadastra store`                   | Show store command help                         |
+| `softadastra store put <key> <value>` | Write a local value                             |
+| `softadastra store get <key>`         | Read a local value                              |
+| `softadastra sync`                    | Show sync command help                          |
+| `softadastra sync status`             | Show sync state                                 |
+| `softadastra sync tick`               | Run one manual sync cycle                       |
+| `softadastra peers`                   | List discovery and transport peers              |
 
 ## Summary
 
-The peers command shows which nodes the local runtime currently knows about.
+Softadastra CLI commands are organized around the local runtime:
 
-Peers are important for synchronization, but they are not required for local work.
+```txt
+status  -> inspect runtime
+node    -> inspect or start local node services
+store   -> write and read local data
+sync    -> inspect and move sync
+peers   -> inspect known peers
+```
 
-The key model is:
+The CLI is the fastest way to observe and test Softadastra from the terminal.
 
-- Discovery finds peers.
-- Transport connects peers.
-- Sync sends operations.
-- Store remains local-first.
-
-## Next step
-
-Continue with the CLI reference:
-
-[Go to CLI Reference](/cli/reference)
+Next, continue with [Interactive Mode](./interactive-mode).

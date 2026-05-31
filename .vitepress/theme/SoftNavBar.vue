@@ -15,7 +15,7 @@ const links = [
   },
   {
     text: "SDKs",
-    href: "/sdk-cpp/",
+    href: "/sdks/",
   },
 ];
 
