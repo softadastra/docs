@@ -70,16 +70,21 @@ const engineLayers = [
   <section class="sd-docs-home">
     <div class="sd-hero">
       <div class="sd-hero__copy">
-        <h1>Softadastra Documentation</h1>
+        <h1>Softadastra Engine Documentation</h1>
 
         <p>
-          Softadastra helps applications keep working in places where internet
-          access is slow, unstable, expensive, or sometimes unavailable.
+          Softadastra Engine helps C++ applications keep working when internet
+          access is slow, unstable, expensive, or temporarily unavailable.
         </p>
 
         <p>
-          It gives teams a way to save work locally, continue operating, and
-          update everything when the connection comes back.
+          It provides an offline-first foundation for local state, write-ahead
+          logging, sync, retry, delivery, and network transport.
+        </p>
+
+        <p>
+          Softadastra Engine is the offline-first runtime layer inside the
+          Softadastra C++ tooling ecosystem.
         </p>
 
         <div class="sd-hero__actions">

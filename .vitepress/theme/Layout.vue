@@ -34,7 +34,7 @@ const social = [
       <footer class="sfb" role="contentinfo">
         <div class="sfb-inner">
           <a class="sfb-brand" href="/" aria-label="Softadastra Documentation">
-            <span class="sfb-name">Softadastra</span>
+            <span class="sfb-name">Softadastra Engine</span>
           </a>
 
           <nav class="sfb-nav" aria-label="Footer navigation">
