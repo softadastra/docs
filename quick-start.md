@@ -1,18 +1,16 @@
 # Quick Start
 
-This page gives you the fastest way to try Softadastra.
+This page gives you the fastest way to try Softadastra Engine.
 
 You will:
 
-- check the local runtime
+- check the local engine status
 - write a local value
 - read it back
 - inspect sync state
 - run one sync tick
-- start node services
-- inspect peers
 
-## 1. Check Softadastra
+## 1. Check Softadastra Engine
 
 Run:
 
@@ -20,7 +18,7 @@ Run:
 softadastra status
 ```
 
-You should see the local runtime status.
+You should see the local engine status.
 
 Example:
 
@@ -28,22 +26,14 @@ Example:
 Softadastra status
 
 Component   Metric        Value
-node        id            node-1
-node        running       no
 store       entries       0
-sync        outbox        0
 sync        queued        0
 sync        in_flight     0
 sync        acknowledged  0
 sync        failed        0
-transport   running       no
-transport   peers         0
-discovery   running       no
-discovery   peers         0
-metadata    running       no
 ```
 
-If this command works, Softadastra is installed and the CLI is available.
+If this command works, Softadastra Engine is installed and the CLI is available.
 
 ## 2. Write a local value
 
@@ -67,9 +57,7 @@ status   created
 This writes a value locally.
 
 No server is required.
-
 No peer is required.
-
 No network is required.
 
 ## 3. Read the value
@@ -89,12 +77,11 @@ Field      Value
 key        app/name
 value      Softadastra
 version    1
-timestamp  1760000000000
 ```
 
-You have now written and read local data with Softadastra.
+You have now written and read local data with Softadastra Engine.
 
-## 4. Inspect sync
+## 4. Inspect sync state
 
 Run:
 
@@ -107,23 +94,20 @@ Example output:
 ```txt
 Softadastra sync status
 
-Metric                       Value
-node_id                      node-1
-outbox_size                  1
-queued_count                 1
-in_flight_count              0
-acknowledged_count           0
-failed_count                 0
-last_submitted_version       1
-last_applied_remote_version  0
-total_retries                0
+Metric                  Value
+queued_count            1
+in_flight_count         0
+acknowledged_count      0
+failed_count            0
+total_retries           0
 ```
 
-This shows what Softadastra is tracking for synchronization.
+This shows what the engine is tracking for synchronization.
 
-A local write can create sync work.
+A local write can create sync work, but the value is already available locally.
 
-That does not mean the data is lost or waiting for the network to be useful. The value is already local.
+Sync is for delivery later.
+Local usefulness comes first.
 
 ## 5. Run one sync tick
 
@@ -141,96 +125,17 @@ Softadastra sync tick
 Metric           Value
 retried_count    0
 batch_size       1
-connected_peers  0
 sent_count       0
 pruned_count     0
 
 No connected transport peers available.
 ```
 
-This is normal if no peer is connected.
+This is normal if no peer or transport is connected.
 
-Softadastra can keep local work and move sync forward later when peers are available.
+The important point is that the local value is still safe and readable.
 
-## 6. Start node services
-
-Run:
-
-```sh
-softadastra node start
-```
-
-Example output:
-
-```txt
-Starting Softadastra node
-
-✓ Softadastra node services started for this CLI session.
-node_id    node-1
-transport  running
-discovery  running
-metadata   running
-```
-
-This starts transport, discovery, and metadata for the current CLI session.
-
-For a long-running node, use the Softadastra node app.
-
-## 7. Inspect the local node
-
-Run:
-
-```sh
-softadastra node info
-```
-
-Example output:
-
-```txt
-Softadastra node
-
-Field          Value
-node_id        node-1
-display_name   Softadastra Node
-hostname       local-machine
-os             linux
-version        0.1.0
-started_at     1760000000000
-uptime_ms      1250
-capabilities   6
-node_running   yes
-```
-
-The exact values depend on your machine.
-
-## 8. Check peers
-
-Run:
-
-```sh
-softadastra peers
-```
-
-If no other node is available, you may see:
-
-```txt
-Softadastra peers
-
-discovery  yes
-transport  yes
-
-Discovery peers
-No discovery peers found.
-
-Transport peers
-No transport peers found.
-```
-
-No peers is not an error.
-
-Local reads and writes still work.
-
-## The full first flow
+## Full first flow
 
 You can copy this whole flow:
 
@@ -243,16 +148,12 @@ softadastra store get app/name
 softadastra sync status
 softadastra sync tick
 
-softadastra node start
-softadastra node info
-softadastra peers
-
 softadastra status
 ```
 
 ## Interactive mode
 
-You can also run the same flow inside one session:
+You can also run commands inside one interactive session:
 
 ```sh
 softadastra
@@ -266,9 +167,6 @@ softadastra> store put app/name Softadastra
 softadastra> store get app/name
 softadastra> sync status
 softadastra> sync tick
-softadastra> node start
-softadastra> node info
-softadastra> peers
 softadastra> status
 softadastra> exit
 ```
@@ -289,25 +187,26 @@ softadastra> softadastra status
 
 ## What you just learned
 
-You used Softadastra to:
+You used Softadastra Engine to:
 
+- check local engine status
 - write data locally
 - read data locally
 - inspect sync state
 - run one sync tick
-- start node services
-- inspect the local node
-- check peers
 
-The important idea is simple:
+The core idea is simple:
 
 ```txt
-local work comes first
-network synchronization can happen later
+write locally
+persist safely
+recover after failure
+retry when needed
+sync when possible
 ```
 
 ## Next step
 
-Continue with [CLI](./cli/) to learn the command line interface.
+Continue with [CLI](./cli/) to learn the command-line interface.
 
-Or continue with [SDKs](./sdks) if you want to use Softadastra inside your own application.
+Or continue with [SDKs](./sdks) if you want to use Softadastra Engine inside a C++ application.

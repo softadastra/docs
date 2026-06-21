@@ -1,16 +1,18 @@
 # Welcome
 
-Welcome to the Softadastra documentation.
+Welcome to the Softadastra Engine documentation.
 
-This documentation helps you understand what Softadastra is, install it, use the CLI, and integrate it into applications through the C++ SDK or the JavaScript SDK.
+Softadastra Engine is the offline-first runtime layer inside the Softadastra C++ tooling ecosystem.
+
+This documentation helps you understand the engine, install it, use the CLI, integrate it into C++ applications, and understand the internal runtime model.
 
 ## Start here
 
-New to Softadastra?
+New to Softadastra Engine?
 
 Start with:
 
-[What is Softadastra?](/what-is-softadastra)
+[What is Softadastra Engine?](/what-is-softadastra)
 
 Then continue with:
 
@@ -24,21 +26,21 @@ And then:
 
 ### Use the CLI
 
-Use the CLI section if you want to install Softadastra, inspect local status, manage local data, check sync state, or work with peers from the terminal.
+Use the CLI section if you want to install Softadastra Engine, inspect local status, manage local state, check runtime behavior, or debug the engine from the terminal.
 
 [CLI Overview](/cli/)
 
 ### Use the C++ SDK
 
-Use the C++ SDK section if you want to integrate Softadastra into a native C++ application.
+Use the C++ SDK section if you want to integrate Softadastra Engine into a native C++ application.
 
 [C++ SDK Overview](/sdk-cpp/)
 
-### Use the JavaScript SDK
+### Understand the engine
 
-Use the JavaScript SDK section if you want to use Softadastra from JavaScript or TypeScript.
+Use the engine section if you want to understand the internal runtime architecture, WAL, store, retry, sync, transport, and recovery model.
 
-[JavaScript SDK Overview](/sdk-js/)
+[Engine Overview](/engine/)
 
 ### Follow practical guides
 
@@ -48,27 +50,28 @@ Use the guides section when you want step-by-step workflows.
 
 ### Read the API reference
 
-Use the reference section when you need API details, configuration, or error information.
+Use the reference section when you need API details, configuration, commands, errors, or runtime behavior.
 
 [Reference](/reference/)
 
-### Understand the internal engine
-
-Use the engine section if you want to understand the internal runtime architecture and modules.
-
-[Engine Overview](/engine/)
-
 ## Main entry points
 
-- Runtime and CLI: [github.com/softadastra/softadastra](https://github.com/softadastra/softadastra)
+- Runtime and engine: [github.com/softadastra/softadastra](https://github.com/softadastra/softadastra)
 - C++ SDK: [github.com/softadastra/sdk](https://github.com/softadastra/sdk)
-- JavaScript SDK: [npmjs.com/package/@softadastra/sdk](https://www.npmjs.com/package/@softadastra/sdk)
 - Website: [softadastra.com](https://softadastra.com)
+- Vix.cpp: [vixcpp.com](https://vixcpp.com)
+- Cnerium: [github.com/softadastra/cnerium](https://github.com/softadastra/cnerium)
+- Kordex: [github.com/softadastra/kordex](https://github.com/softadastra/kordex)
 
 ## Recommended order
 
-1. [What is Softadastra?](/what-is-softadastra)
+1. [What is Softadastra Engine?](/what-is-softadastra)
 2. [Installation](/installation)
 3. [Quick Start](/quick-start)
 4. [CLI Overview](/cli/)
-5. [C++ SDK Overview](/sdk-cpp/) or [JavaScript SDK Overview](/sdk-js/)
+5. [C++ SDK Overview](/sdk-cpp/)
+6. [Engine Overview](/engine/)
+
+## In one sentence
+
+Softadastra Engine helps C++ applications write locally, persist safely, recover after failure, retry when needed, and synchronize when communication becomes available.

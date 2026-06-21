@@ -1,114 +1,63 @@
 # SDKs
 
-Softadastra SDKs let you use Softadastra inside your own applications.
+Softadastra Engine SDKs let applications use the engine directly from application code.
 
-Each SDK is designed to give your application a simple way to work locally first, keep important data after restart, and synchronize when networking is available.
+The goal is to give developers a simple API for local state, durable writes, recovery, retry, and synchronization foundations.
 
-The goal is simple: your app should keep working even when the network is slow, unstable, or unavailable.
-
-## Available SDKs
+## Available SDK
 
 ## C++ SDK
 
-The C++ SDK is the first official Softadastra SDK.
+The C++ SDK is the official SDK for Softadastra Engine.
 
-Use it when you want to embed Softadastra directly inside a C++ application.
+Use it when you want to integrate Softadastra Engine into a native C++ application.
 
-It gives your app:
+It gives your application access to:
 
 - local writes
 - local reads
+- durable storage
 - WAL-backed persistence
 - restart recovery
-- sync state inspection
-- manual sync ticks
-- optional transport
-- optional discovery
-- node metadata
+- engine state inspection
+- retry foundations
+- sync foundations
 
 Start here:
 
 [C++ SDK documentation](./sdk-cpp/)
 
-## JavaScript SDK
+## Why C++ first?
 
-The JavaScript SDK is planned for JavaScript and TypeScript applications.
+Softadastra is a C++ tooling company.
 
-It will bring Softadastra to apps built with JavaScript runtimes, frontend tooling, backend services, and local-first application layers.
+The engine is built for applications that need native control, durability, predictable runtime behavior, and local-first foundations.
 
-Status:
+The C++ SDK is therefore the main SDK and the recommended entry point.
 
-```txt
-planned
-```
+## JavaScript and TypeScript
 
-Start here:
+JavaScript and TypeScript support belongs to **Kordex**.
 
-[JavaScript SDK documentation](./sdk-js/)
+Kordex is a JavaScript and TypeScript runtime built on Vix.cpp. It can connect JavaScript code to Softadastra Engine through explicit runtime permissions and native modules.
 
-## Python SDK
+Use Kordex when you want local-first JavaScript on top of the native C++ foundation.
 
-The Python SDK is planned.
+Repository:
 
-It will be useful for tools, automation, backend services, data workflows, and scripts that need reliable local data.
-
-Status:
-
-```txt
-planned
-```
-
-## Go SDK
-
-The Go SDK is planned.
-
-It will be useful for services, agents, infrastructure tools, and distributed systems written in Go.
-
-Status:
-
-```txt
-planned
-```
-
-## Future SDKs
-
-Softadastra is designed to grow across languages.
-
-Future SDKs may include:
-
-- Rust
-- Java
-- C#
-- Swift
-- Kotlin
-
-Each SDK should follow the same direction:
-
-- simple API
-- local-first data
-- durable writes
-- restart recovery
-- clear errors
-- visible sync state
-- optional networking
-
-## Which SDK should I use?
-
-Use the C++ SDK today if you want the most complete SDK.
-
-Use the JavaScript SDK when it becomes available for JavaScript or TypeScript applications.
-
-Use the Python SDK when you need Softadastra inside automation, scripts, services, or data tools.
-
-Use the Go SDK when you need Softadastra inside services, agents, or infrastructure tools.
+[github.com/softadastra/kordex](https://github.com/softadastra/kordex)
 
 ## Recommended path
 
-New to Softadastra?
+New to Softadastra Engine?
 
-Start with the C++ SDK:
+Start here:
 
 1. [C++ SDK Overview](./sdk-cpp/)
 2. [C++ SDK Installation](./sdk-cpp/installation)
 3. [C++ SDK Quick Start](./sdk-cpp/quick-start)
 4. [C++ SDK Examples](./sdk-cpp/examples)
+
+## In one sentence
+
+Use the C++ SDK when you want to embed Softadastra Engine into a native application and keep local data durable, recoverable, and ready to synchronize.

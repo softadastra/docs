@@ -1,39 +1,38 @@
-# Softadastra Documentation
+# Softadastra Engine Documentation
 
-This repository contains the documentation for Softadastra.
+This repository contains the documentation for **Softadastra Engine**.
 
-Softadastra is a local-first and offline-first runtime foundation for building applications that keep working under real-world failure conditions.
+Softadastra Engine is the offline-first runtime layer inside the Softadastra C++ tooling ecosystem.
 
-The core idea is:
+It helps C++ applications keep useful work local, durable, recoverable, and ready to synchronize when the network is slow, unstable, expensive, or unavailable.
+
+The core model is:
 
 ```txt
 write locally
-persist locally
-track operation
-sync when possible
+persist safely
+recover after failure
 retry when needed
-converge later
+sync when possible
 ```
 
-Softadastra is designed around one principle:
+Softadastra Company is focused on one clear direction:
 
 ```txt
-The network is an optimization.
-Local correctness comes first.
+The C++ Tooling Company
 ```
+
+This documentation is for the engine layer, not for a broad SaaS product or cloud platform.
 
 ## What this documentation covers
 
-The documentation explains Softadastra from several levels:
-
 ```txt
-concepts  -> why Softadastra exists
-CLI       -> how to use Softadastra from the terminal
-SDK C++   -> how to use Softadastra from C++
-SDK JS    -> how to use Softadastra from JavaScript
-engine    -> how Softadastra works internally
-guides    -> how to use Softadastra in practical workflows
-reference -> quick lookup for APIs, commands, config, and errors
+concepts  -> why the engine exists
+CLI       -> how to inspect and control the engine locally
+SDK C++   -> how to use the engine from C++
+engine    -> how the runtime works internally
+guides    -> practical workflows
+reference -> commands, APIs, configuration, and errors
 releases  -> changelog and build notes
 ```
 
@@ -41,7 +40,7 @@ releases  -> changelog and build notes
 
 ### Concepts
 
-The concepts section explains the mental model behind Softadastra.
+The concepts section explains the mental model behind Softadastra Engine.
 
 It covers:
 
@@ -49,31 +48,30 @@ It covers:
 - local-first
 - failure model
 - WAL
-- outbox
-- sync engine
-- convergence
+- durable store
+- retry
+- sync
+- recovery
 
-Start here if you want to understand the principles before using the runtime.
+Start here if you want to understand the system before using it.
 
 ### CLI
 
-The CLI section explains how to use Softadastra from the terminal.
+The CLI section explains how to use Softadastra Engine from the terminal.
 
 It covers:
 
 - `softadastra status`
-- `softadastra node info`
+- `softadastra version`
 - `softadastra store put`
 - `softadastra store get`
 - `softadastra store remove`
-- `softadastra sync status`
-- `softadastra sync tick`
-- `softadastra peers`
-- interactive mode
+- runtime inspection
+- local diagnostics
 
-Use this section when you want to inspect and test Softadastra locally.
+Use this section when you want to inspect and test the engine locally.
 
-### SDK C++
+### C++ SDK
 
 The C++ SDK section explains the public C++ API.
 
@@ -83,34 +81,13 @@ It covers:
 - `ClientOptions`
 - local store
 - persistent store
-- sync
-- transport
-- discovery
-- metadata
+- durable writes
+- reads
+- recovery
 - errors
 - examples
 
-Use this section when building C++ applications with Softadastra.
-
-### SDK JS
-
-The JavaScript SDK section explains the public JavaScript API.
-
-It covers:
-
-- `Client`
-- `ClientOptions`
-- local store
-- persistent store
-- `syncStateInfo`
-- `tick`
-- transport
-- discovery
-- metadata
-- errors
-- examples
-
-Use this section when building JavaScript or Node.js applications with Softadastra.
+Use this section when building C++ applications with Softadastra Engine.
 
 ### Engine
 
@@ -119,16 +96,15 @@ The engine section explains the internal runtime architecture.
 It covers:
 
 - core
-- fs
-- wal
+- WAL
 - store
+- retry
 - sync
 - transport
-- discovery
 - metadata
-- cli
+- CLI integration
 
-Use this section when contributing to Softadastra internals or understanding how the runtime is built.
+Use this section when contributing to internals or understanding how the engine is built.
 
 ### Guides
 
@@ -136,13 +112,12 @@ The guides section gives practical workflows.
 
 It covers:
 
-- build an offline-first app
-- run a local node
+- build an offline-first C++ app
 - persist data locally
-- sync between nodes
+- recover after restart
+- inspect local state
 - use the C++ SDK with the engine
-- use the JavaScript SDK with the engine
-- prepare for production
+- prepare for release
 
 Use this section when you want to build something end to end.
 
@@ -154,9 +129,8 @@ It covers:
 
 - CLI reference
 - C++ API reference
-- JavaScript API reference
 - configuration reference
-- errors reference
+- error reference
 
 Use this section when you already understand the model and need exact names quickly.
 
@@ -173,49 +147,71 @@ It covers:
 
 Use this section when preparing or checking a release.
 
+## JavaScript and TypeScript
+
+JavaScript and TypeScript runtime work belongs to **Kordex**.
+
+Kordex is a JavaScript and TypeScript runtime built on Vix.cpp for reliable local-first applications.
+
+Softadastra Engine can be exposed to JavaScript through Kordex native modules, but this documentation keeps the main SDK path focused on C++.
+
+## Ecosystem role
+
+```txt
+Vix.cpp
+  -> C++ runtime and developer tooling foundation
+
+Softadastra Engine
+  -> offline-first runtime layer
+
+Cnerium
+  -> retry-safe backend reliability for Vix applications
+
+Kordex
+  -> JavaScript and TypeScript runtime built on Vix.cpp
+
+Pico
+  -> validation application proving Vix.cpp in a real backend
+```
+
 ## Recommended reading path
 
 For new users:
 
-1. What is Softadastra?
-2. Quick Start
-3. Concepts
-4. Build an Offline-first App
-5. Run a Local Node
-6. Persist Data Locally
-7. Sync Between Nodes
+1. What is Softadastra Engine?
+2. Installation
+3. Quick Start
+4. Concepts
+5. C++ SDK Overview
+6. Engine Overview
 
-For SDK users:
+For C++ SDK users:
 
-1. SDK C++
-2. SDK JS
-3. Configuration Reference
-4. Errors Reference
+1. C++ SDK Overview
+2. C++ SDK Installation
+3. C++ SDK Quick Start
+4. C++ SDK Examples
+5. Errors Reference
 
 For engine contributors:
 
-1. Engine
+1. Engine Overview
 2. Architecture
 3. Runtime Flow
 4. Modules
-
-For release work:
-
-1. Releases
-2. Changelog
-3. Builds
+5. Releases
 
 ## Install dependencies
 
-From the documentation project root, install dependencies:
+From the documentation project root:
 
 ```bash
 npm install
 ```
 
-## Run the documentation locally
+## Run locally
 
-Start the local documentation server:
+Start the documentation server:
 
 ```bash
 npm run dev
@@ -223,9 +219,7 @@ npm run dev
 
 Then open the local URL printed by VitePress.
 
-If the project uses the default VitePress command, this usually serves the docs locally with hot reload.
-
-## Build the documentation
+## Build
 
 Build the static documentation site:
 
@@ -233,21 +227,19 @@ Build the static documentation site:
 npm run build
 ```
 
-For VitePress, the generated output should be:
+For VitePress, the generated output is usually:
 
 ```txt
 .vitepress/dist
 ```
 
-## Preview the production build
+## Preview
 
 After building:
 
 ```bash
 npm run preview
 ```
-
-This serves the generated production output locally.
 
 ## Expected package scripts
 
@@ -263,44 +255,26 @@ A typical `package.json` can expose:
 }
 ```
 
-If your project uses another layout, adapt the commands to the directory that contains `.vitepress/`.
-
-## Common issue: missing package.json
-
-If you run `npm run dev` from the wrong directory, you may see:
-
-```txt
-Could not read package.json
-```
-
-Fix:
-
-```bash
-cd /path/to/softadastra/docs
-ls package.json
-npm install
-npm run dev
-```
-
-If `package.json` does not exist yet, create one for the VitePress docs project.
+If the project uses another layout, adapt the commands to the directory that contains `.vitepress/`.
 
 ## Documentation style
 
-Each documentation page should be clear, practical, and consistent.
+Each page should stay clear, practical, and focused.
 
 Recommended structure:
 
-- definition
-- core rule
-- why it exists
-- usage
-- examples
-- expected output
-- common mistakes
-- summary
-- next step
+```txt
+definition
+why it exists
+core model
+usage
+example
+expected output
+common mistakes
+next step
+```
 
-The writing should stay focused on one idea per section.
+Write for developers who need to understand how the engine works and how to use it inside real C++ applications.
 
 ## Core writing rules
 
@@ -308,23 +282,21 @@ Use clear sentences.
 
 Prefer concrete examples.
 
-Keep local-first behavior visible.
-
-Separate responsibilities clearly:
+Keep responsibilities separate:
 
 ```txt
-store      -> current local state
-WAL        -> durable operation history
-sync       -> propagation tracking
-transport  -> peer delivery
-discovery  -> peer finding
-metadata   -> node identity
-CLI        -> terminal interface
-SDK        -> application API
-engine     -> internal runtime modules
+store     -> current local state
+WAL       -> durable operation history
+retry     -> failed work tracking
+sync      -> propagation foundation
+transport -> delivery layer
+metadata  -> node and runtime information
+CLI       -> terminal interface
+SDK       -> application API
+engine    -> internal runtime modules
 ```
 
-Do not present unstable behavior as stable.
+Do not present experimental behavior as stable.
 
 If a command, option, API, or output format is experimental, say so or keep it out of the stable reference.
 
@@ -366,26 +338,11 @@ A WAL path should be:
 - inside an existing directory
 - writable
 - stable across restarts
-- unique per node
-
-## Sync rule
-
-Sync is propagation tracking.
-
-```txt
-Store      -> current local state
-Sync       -> tracks work that should be propagated
-Transport  -> sends messages to peers
-Discovery  -> finds peers
-```
-
-A successful local write does not mean remote delivery completed.
-
-A sync failure does not mean local data disappeared.
+- unique per node or application store
 
 ## Error rule
 
-Softadastra APIs should make errors explicit.
+Softadastra Engine APIs should make errors explicit.
 
 C++:
 
@@ -399,19 +356,6 @@ if (result.is_err())
 }
 
 std::cout << result.value().to_string() << "\n";
-```
-
-JavaScript:
-
-```js
-const result = await client.get("app/name");
-
-if (result.isErr()) {
-  console.error(result.error().message);
-  process.exit(1);
-}
-
-console.log(result.value().toString());
 ```
 
 CLI:
@@ -440,6 +384,7 @@ Then verify that important sections exist:
 
 ```txt
 /
+welcome
 what-is-softadastra
 installation
 quick-start
@@ -447,7 +392,6 @@ quick-start
 /concepts/
 /cli/
 /sdk-cpp/
-/sdk-js/
 /engine/
 /guides/
 /reference/
@@ -463,10 +407,8 @@ When adding a new page:
 1. Create the markdown file.
 2. Add it to `.vitepress/config.mjs`.
 3. Link it from the relevant section index.
-4. Add a next step link if it belongs to a learning path.
+4. Add a next-step link if it belongs to a learning path.
 5. Run the docs build.
-
-Example:
 
 ```bash
 npm run build
@@ -474,20 +416,16 @@ npm run build
 
 Fix broken links before publishing.
 
-## Repository relationship
-
-This documentation is part of the broader Softadastra ecosystem.
-
-Related repositories can include:
+## Related repositories
 
 ```txt
-softadastra/softadastra      -> engine
-softadastra/sdk-cpp          -> C++ SDK
-softadastra/sdk-js           -> JavaScript SDK
-softadastra/docs             -> documentation
+softadastra/softadastra  -> Softadastra Engine
+softadastra/sdk          -> C++ SDK
+softadastra/docs         -> documentation
+softadastra/cnerium      -> backend reliability layer for Vix
+softadastra/kordex       -> JS/TS runtime built on Vix.cpp
+vixcpp/vix               -> C++ runtime and developer tooling foundation
 ```
-
-The exact repository names may evolve, but the documentation should keep the same conceptual structure.
 
 ## License
 
@@ -497,19 +435,18 @@ If the repository contains a `LICENSE` file, that file is the source of truth.
 
 ## Summary
 
-This documentation explains Softadastra from the first concept to production-oriented usage.
+Softadastra Engine documentation explains the offline-first engine from first concepts to C++ integration.
 
 The core model remains:
 
 ```txt
 write locally
-persist locally
-track operation
-sync when possible
+persist safely
+recover after failure
 retry when needed
-converge later
+sync when possible
 ```
 
-Softadastra starts with local correctness.
+Softadastra Engine starts with local durability.
 
 The network comes later.

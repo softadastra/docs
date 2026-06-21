@@ -1,130 +1,163 @@
-# What is Softadastra?
+# What is Softadastra Engine?
 
-Softadastra is a reliability foundation for applications that must continue working outside perfect network conditions.
+Softadastra Engine is an offline-first runtime foundation for C++ applications.
 
-It provides the base system needed to keep application data usable locally, recover after interruption, and synchronize changes when communication becomes available.
+It helps applications keep useful work local, durable, recoverable, and ready to synchronize when the network is slow, unstable, expensive, or unavailable.
 
-Softadastra is not only a library, a database, or a command-line tool. It is a runtime foundation for building software that remains useful when the network is slow, unstable, expensive, or unavailable.
+Softadastra Engine is part of the Softadastra C++ tooling ecosystem.
+Softadastra Company is focused on building and maintaining open tooling for modern C++ development.
 
 ## Definition
 
-Softadastra is a local-first runtime and synchronization foundation.
-That means an application built with Softadastra can treat the local device as a real working environment, not just a temporary cache waiting for a server.
-The application can keep data locally, continue operating, and synchronize later with other nodes or services.
+Softadastra Engine is a local-first runtime layer.
+
+That means an application can treat the local machine as a real working environment, not only as a temporary cache waiting for a remote server.
+
+The application can:
+
+- save data locally
+- persist important operations
+- recover after interruption
+- retry failed work
+- synchronize when communication becomes available
 
 ## Why it exists
 
-Many applications are built with one central assumption:
-The server must be reachable.
-When that assumption fails, the application often becomes unusable.
-Softadastra exists for systems where this is not acceptable:
+Many applications depend too much on a perfect network.
 
-- public services
-- government platforms
-- schools and universities
-- hospitals and health systems
-- logistics and field operations
-- local businesses
-- remote teams
-- edge environments
+When the connection is weak, slow, expensive, or unavailable, the application may stop completely, lose work, duplicate actions, or fail to recover cleanly.
 
-In these contexts, software must not stop completely just because the network is weak or unavailable.
+Softadastra Engine exists to give applications a stronger local foundation.
 
-## The Softadastra model
+The network should be a delivery layer, not the only place where useful work can happen.
 
-Softadastra is built around a simple operating model:
+## The Softadastra Engine model
 
-1. Work can be accepted locally.
-2. Data is kept on the device.
-3. The application remains usable.
-4. Changes can be synchronized later.
+Softadastra Engine is built around a simple model:
+
+1. Work is accepted locally.
+2. Important operations are persisted.
+3. Local state remains usable.
+4. Failed delivery can be retried.
 5. The system can recover after interruption.
+6. Synchronization can happen when communication is available.
 
-This model makes local work a first-class part of the application.
+```txt
+write locally
+persist safely
+recover after failure
+retry when needed
+sync when possible
+```
 
-## What Softadastra provides
+## What Softadastra Engine provides
 
-Softadastra provides several building blocks for reliable applications:
+Softadastra Engine provides foundations for:
 
-- a local runtime
-- a command-line interface
-- local data storage
-- recovery support
-- synchronization support
-- peer communication foundations
-- node metadata
-- SDKs for application developers
+- local state
+- write-ahead logging
+- durable storage
+- operation tracking
+- retry queues
+- synchronization foundations
+- transport foundations
+- recovery after interruption
+- local diagnostics and inspection
 
-These pieces work together to help applications remain reliable in real-world environments.
+These pieces help applications remain useful even when the network is not reliable.
 
-## Main parts of Softadastra
+## Main parts
 
 ### Runtime
 
-The runtime is the local foundation of Softadastra.
-It manages local state, runtime behavior, and the internal flow needed to keep work recoverable and ready for synchronization.
+The runtime manages local engine behavior, operation flow, and recovery rules.
 
-### CLI
+### WAL
 
-The `softadastra` command-line tool is used to run, inspect, and control Softadastra locally.
-It is useful for developers, operators, testing, diagnostics, and local runtime visibility.
+The write-ahead log records important operations before they are considered durable.
 
-### Node
+### Store
 
-A Softadastra node is a local runtime instance.
-A node can operate independently and later communicate with other nodes when connectivity becomes available.
+The store keeps local state available while the application is offline or online.
 
-### C++ SDK
+### Retry
 
-The C++ SDK is the developer-facing API for native C++ applications.
+The retry layer tracks operations that could not be delivered and prepares them for later execution.
+
+### Sync
+
+The sync layer provides the foundation for moving local changes toward another node, service, or remote system.
+
+### Transport
+
+The transport layer is responsible for moving operations when communication is available.
+
+### SDK
+
+The SDK gives C++ applications a developer-facing API for using Softadastra Engine.
 
 Repository:
 
 [github.com/softadastra/sdk](https://github.com/softadastra/sdk)
 
-### JavaScript SDK
+## Ecosystem role
 
-The JavaScript SDK is the developer-facing API for JavaScript and TypeScript applications.
+Softadastra Engine is one layer inside a larger C++ tooling ecosystem.
 
-Package:
+```txt
+Vix.cpp
+  -> C++ runtime and developer tooling foundation
 
-[npmjs.com/package/@softadastra/sdk](https://www.npmjs.com/package/@softadastra/sdk)
+Softadastra Engine
+  -> offline-first runtime layer
 
-## How Softadastra is different
+Cnerium
+  -> retry-safe backend reliability for Vix applications
 
-Softadastra does not start from the idea that the cloud is always available.
+Kordex
+  -> JavaScript and TypeScript runtime built on Vix.cpp
+
+Pico
+  -> validation application proving Vix.cpp in a real backend
+```
+
+## How Softadastra Engine is different
+
+Softadastra Engine does not start from the idea that the cloud is always available.
+
 It starts from the reality that applications may need to continue locally first.
-This makes it different from systems that depend entirely on a server before work can be accepted.
 
-Softadastra focuses on:
+It focuses on:
 
 - continuity of work
-- local reliability
+- local durability
 - recovery after interruption
+- retry-safe delivery
 - synchronization when possible
 - visibility into local state
 
-## What Softadastra is not
+## What Softadastra Engine is not
 
-Softadastra is not:
+Softadastra Engine is not:
 
-- a Dropbox clone
-- a Google Drive clone
+- the whole Softadastra company
+- a SaaS product
+- a cloud platform
 - a file sharing product
 - only a database
 - only a CLI tool
 - a replacement for application-specific business logic
+- a replacement for Vix.cpp
 
-Softadastra is the foundation underneath applications that need reliable local operation and later synchronization.
+It is a focused offline-first runtime layer for C++ applications.
 
 ## Entry points
 
-- Runtime and CLI: [github.com/softadastra/softadastra](https://github.com/softadastra/softadastra)
+- Runtime and engine: [github.com/softadastra/softadastra](https://github.com/softadastra/softadastra)
 - C++ SDK: [github.com/softadastra/sdk](https://github.com/softadastra/sdk)
-- JavaScript SDK: [npmjs.com/package/@softadastra/sdk](https://www.npmjs.com/package/@softadastra/sdk)
 - Website: [softadastra.com](https://softadastra.com)
-- Documentation: [docs.softadastra.com](https://docs.softadastra.com)
+- Vix.cpp: [vixcpp.com](https://vixcpp.com)
 
 ## In one sentence
 
-Softadastra is a local-first reliability foundation for applications that need to keep working, recover safely, and synchronize when communication becomes available.
+Softadastra Engine is an offline-first runtime foundation for C++ applications that need to write locally, recover safely, retry work, and synchronize when communication becomes available.

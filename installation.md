@@ -1,14 +1,15 @@
 # Installation
 
-This is the official installation page for Softadastra.
+This page explains how to install Softadastra Engine.
 
 By default, the installer installs:
 
-- the Softadastra CLI
+- the Softadastra Engine CLI
 - the Softadastra C++ SDK
 
 The CLI gives you the `softadastra` command in your terminal.
-The C++ SDK lets C++ applications use Softadastra with:
+
+The C++ SDK lets C++ applications use Softadastra Engine with:
 
 ```cpp
 #include <softadastra/sdk.hpp>
@@ -16,17 +17,17 @@ The C++ SDK lets C++ applications use Softadastra with:
 
 ## Linux and macOS
 
-Install Softadastra with:
+Install Softadastra Engine with:
 
 ```sh
-curl -fsSL https://softadastra.com/install.sh | sh
+curl -fsSL https://softadastra.com/install.sh | bash
 ```
 
 This installs the CLI and the C++ SDK.
 
 After installation, open a new terminal if `softadastra` is not found immediately.
 
-Then verify:
+Verify the installation:
 
 ```sh
 softadastra version
@@ -35,7 +36,7 @@ softadastra status
 
 ## Windows
 
-Install Softadastra from PowerShell:
+Install Softadastra Engine from PowerShell:
 
 ```powershell
 irm https://softadastra.com/install.ps1 | iex
@@ -45,7 +46,7 @@ This installs the CLI and the C++ SDK.
 
 After installation, open a new PowerShell window if `softadastra` is not found immediately.
 
-Then verify:
+Verify the installation:
 
 ```powershell
 softadastra version
@@ -55,6 +56,7 @@ softadastra status
 ## What gets installed
 
 The default installation installs both the CLI and the C++ SDK.
+
 On Linux and macOS, the default locations are:
 
 ```txt
@@ -76,10 +78,11 @@ The installer also updates your user environment so the `softadastra` command ca
 ## Install only the CLI
 
 Use this when you only want the terminal command.
+
 Linux and macOS:
 
 ```sh
-curl -fsSL https://softadastra.com/install.sh | sh -s -- --cli-only
+curl -fsSL https://softadastra.com/install.sh | bash -s -- --cli-only
 ```
 
 Windows PowerShell:
@@ -103,7 +106,7 @@ Use this when you only want the C++ SDK files.
 Linux and macOS:
 
 ```sh
-curl -fsSL https://softadastra.com/install.sh | sh -s -- --sdk-only
+curl -fsSL https://softadastra.com/install.sh | bash -s -- --sdk-only
 ```
 
 Windows PowerShell:
@@ -136,7 +139,7 @@ To install a specific version on Linux or macOS:
 ```sh
 SOFTADASTRA_VERSION=v0.1.0 \
 SOFTADASTRA_SDK_VERSION=v0.1.0 \
-curl -fsSL https://softadastra.com/install.sh | sh
+curl -fsSL https://softadastra.com/install.sh | bash
 ```
 
 On Windows PowerShell:
@@ -157,7 +160,7 @@ Linux and macOS:
 SOFTADASTRA_HOME="$HOME/.softadastra" \
 SOFTADASTRA_BIN_DIR="$HOME/.local/bin" \
 SOFTADASTRA_SDK_DIR="$HOME/.softadastra/sdk" \
-curl -fsSL https://softadastra.com/install.sh | sh
+curl -fsSL https://softadastra.com/install.sh | bash
 ```
 
 Windows PowerShell:
@@ -192,7 +195,7 @@ cmake -S . -B build \
   -DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
 ```
 
-With Vix:
+With Vix.cpp:
 
 ```sh
 vix build -- -DCMAKE_PREFIX_PATH="$HOME/.softadastra/sdk"
@@ -247,8 +250,11 @@ If the project builds, the SDK is ready.
 ## Security checks
 
 The installer downloads release archives from the official Softadastra GitHub releases.
+
 It verifies the SHA256 checksum before installing.
-If `minisign` is available on your machine, the installer also verifies the release signature.
+
+If `minisign` is available on your machine, the installer can also verify the release signature.
+
 If checksum verification fails, installation stops.
 
 ## Common issues
@@ -256,7 +262,8 @@ If checksum verification fails, installation stops.
 ## `softadastra` command not found
 
 Open a new terminal first.
-If it still does not work, check that the binary directory is in your PATH.
+
+If it still does not work, check that the binary directory is in your `PATH`.
 
 Linux and macOS:
 
@@ -275,10 +282,11 @@ Test-Path "$env:LOCALAPPDATA\Softadastra\bin\softadastra.exe"
 ## Latest version cannot be resolved
 
 Set the version explicitly.
+
 Linux and macOS:
 
 ```sh
-SOFTADASTRA_VERSION=v0.1.0 curl -fsSL https://softadastra.com/install.sh | sh
+SOFTADASTRA_VERSION=v0.1.0 curl -fsSL https://softadastra.com/install.sh | bash
 ```
 
 Windows PowerShell:
@@ -291,6 +299,7 @@ irm https://softadastra.com/install.ps1 | iex
 ## CMake cannot find the SDK
 
 Pass the SDK path with `CMAKE_PREFIX_PATH`.
+
 Linux and macOS:
 
 ```sh
